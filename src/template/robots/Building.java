@@ -1,6 +1,6 @@
-package template;
+package template.robots;
 
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 public abstract class Building extends Robot {
 
@@ -9,5 +9,5 @@ public abstract class Building extends Robot {
 	}
 
 	@Override
-	abstract void mainloop();
+	public abstract void runTurn() throws GameActionException;
 }

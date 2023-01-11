@@ -1,6 +1,6 @@
-package template;
+package template.robots;
 
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 public class Carrier extends Unit {
 
@@ -10,7 +10,7 @@ public class Carrier extends Unit {
 	}
 
 	@Override
-	public void mainloop() {
+	public void runTurn() {
 		// TODO Write this!
 	}
 }

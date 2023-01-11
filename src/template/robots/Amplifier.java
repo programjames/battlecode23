@@ -1,6 +1,6 @@
-package template;
+package template.robots;
 
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 public class Amplifier extends Unit {
 
@@ -10,8 +10,8 @@ public class Amplifier extends Unit {
 	}
 
 	@Override
-	public void mainloop() {
+	public void runTurn() throws GameActionException {
 		// TODO Write this!
-	}
 
+	}
 }

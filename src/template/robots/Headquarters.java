@@ -1,6 +1,6 @@
-package template;
+package template.robots;
 
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 public class Headquarters extends Building {
 
@@ -8,9 +8,9 @@ public class Headquarters extends Building {
 		super(rc);
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	@Override
-	public void mainloop() {
+	public void runTurn() throws GameActionException {
 		// TODO Write this!
 	}
 }

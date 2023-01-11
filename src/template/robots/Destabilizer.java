@@ -1,6 +1,6 @@
-package template;
+package template.robots;
 
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 public class Destabilizer extends Unit {
 
@@ -10,7 +10,8 @@ public class Destabilizer extends Unit {
 	}
 
 	@Override
-	public void mainloop() {
+	public void runTurn() throws GameActionException {
 		// TODO Write this!
+
 	}
 }

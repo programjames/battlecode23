@@ -1,13 +1,12 @@
 package template;
 
-import battlecode.common.GameActionException;
-import battlecode.common.RobotController;
+import battlecode.common.*;
+import template.robots.*;
 
 public strictfp class RobotPlayer {
-	@SuppressWarnings("unused")
 	public static void run(RobotController rc) throws GameActionException {
 		Robot robot;
-		switch(rc.getType()) {
+		switch (rc.getType()) {
 		case AMPLIFIER:
 			robot = new Amplifier(rc);
 			break;
@@ -29,7 +28,7 @@ public strictfp class RobotPlayer {
 		default:
 			throw new IllegalArgumentException("The robot controller has an unknown type!");
 		}
-		
+
 		robot.run();
 	}
 }
