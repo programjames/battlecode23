@@ -15,6 +15,7 @@ public class Carrier extends Unit {
 	CarrierNavigator navigator;
 
 	Job job;
+	Mode mode;
 
 	public Carrier(RobotController rc) {
 		super(rc);
@@ -23,8 +24,9 @@ public class Carrier extends Unit {
 	@Override
 	public void setup() {
 		super.setup();
-
-
+		job = Job.GATHER_RESOURCES;
+		mode = Mode.FIND_RESOURCES;
+		navigator = new CarrierNavigator(this, rc);
 	}
 
 	@Override
@@ -50,11 +52,11 @@ public class Carrier extends Unit {
 		 */
 
 		/*
-		 * GATHER RESOURCES & DEPOSIT THEM
-		 * Every turn, the carrier should try to pick up and deposite resources if it
-		 * can. We're going to do this before and after moving (because it might move to
-		 * a spot where it can pick up resources or deposit and we can shave off an
-		 * otherwise wasted turn). See end of round for same command
+		 * GATHER RESOURCES & DEPOSIT THEM Every turn, the carrier should try to pick up
+		 * and deposite resources if it can. We're going to do this before and after
+		 * moving (because it might move to a spot where it can pick up resources or
+		 * deposit and we can shave off an otherwise wasted turn). See end of round for
+		 * same command
 		 * 
 		 * TODO: Take it into account that we DO NOT want to deposite resources or
 		 * gather them if we're under attack
@@ -62,12 +64,21 @@ public class Carrier extends Unit {
 		while (depositToNearbyHQ() | pickupFromNearbyWell())
 			; // single | is intentional so both are attempted
 
-		switch(job) {
-			case GATHER_RESOURCES:
-			break;
-			case TRANSFER_RESOURCES_TO_HQ:
-			break;
+		switch (job) {
+		case GATHER_RESOURCES:
+			switch (mode) {
+			case FIND_RESOURCES:
+			case GOTO_RESOURCES:
+				navigator.navigateToWell();
+				break;
+			case GOTO_HQ:
+				navigator.navigateToHQ();
+				break;
 			default:
+				break;
+			}
+			break;
+		default:
 			break;
 		}
 
@@ -93,10 +104,8 @@ public class Carrier extends Unit {
 
 		/*
 		 * Determine the best well to extract from. The ranking right now is the
-		 * following:
-		 * 1. Upgraded adamantium or mana well
-		 * 2. Elixir well
-		 * 3. Normal adamantium or mana well
+		 * following: 1. Upgraded adamantium or mana well 2. Elixir well 3. Normal
+		 * adamantium or mana well
 		 */
 
 		WellInfo bestWell = nearbyWells[0];
@@ -157,17 +166,17 @@ public class Carrier extends Unit {
 
 		MapLocation hqLocation = bestHQ.location;
 		switch (bestType) {
-			case ADAMANTIUM:
-				rc.transferResource(hqLocation, bestType, ad);
-				return true;
-			case ELIXIR:
-				rc.transferResource(hqLocation, bestType, ex);
-				return true;
-			case MANA:
-				rc.transferResource(hqLocation, bestType, mn);
-				return true;
-			default:
-				return false;
+		case ADAMANTIUM:
+			rc.transferResource(hqLocation, bestType, ad);
+			return true;
+		case ELIXIR:
+			rc.transferResource(hqLocation, bestType, ex);
+			return true;
+		case MANA:
+			rc.transferResource(hqLocation, bestType, mn);
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -186,26 +195,23 @@ public class Carrier extends Unit {
 		 */
 
 		switch (job) {
-			case GATHER_RESOURCES:
-				if (totalCarryWeight >= 40) {
-					// We can't carry any more, so return to the HQ
-					job = Job.TRANSFER_RESOURCES_TO_HQ;
-				}
+		case GATHER_RESOURCES:
+		default:
+			if (totalCarryWeight >= 40) {
+				// We can't carry any more, so return to the HQ
+				mode = Mode.GOTO_HQ;
 				break;
-			case TRANSFER_RESOURCES_TO_HQ:
-				if (totalCarryWeight <= 0) {
-					// We've transferred everything we have, so go out and
-					// gather more resources!
-					job = Job.GATHER_RESOURCES;
-				}
-				break;
-			default:
-				if (totalCarryWeight < 40) {
-					job = Job.GATHER_RESOURCES;
+			}
+			if (totalCarryWeight <= 0) {
+				// We've transferred everything we have, so go out and
+				// gather more resources!
+				if (navigator != null && navigator.myWellLocation != null) {
+					mode = Mode.GOTO_RESOURCES;
 				} else {
-					job = Job.TRANSFER_RESOURCES_TO_HQ;
+					mode = Mode.FIND_RESOURCES;
 				}
-				break;
+			}
+			break;
 		}
 	}
 }

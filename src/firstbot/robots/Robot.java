@@ -1,19 +1,27 @@
 package firstbot.robots;
 
 import battlecode.common.*;
+import firstbot.coordination.*;
+
 import java.util.Random;
 
 public abstract class Robot {
 	public RobotController rc;
 	public RobotType type;
-	public Team myTeam;
+	public Team myTeam, enemyTeam;
 	public MapLocation pos;
 	public Random rng;
+	public Minimap minimap;
+	public RobotInfo[] enemies;
+	public int mapWidth, mapHeight;
 
 	public Robot(RobotController rc) {
 		this.rc = rc;
-		this.type = rc.getType();
-		this.myTeam = rc.getTeam();
+		type = rc.getType();
+		myTeam = rc.getTeam();
+		enemyTeam = myTeam.opponent();
+		mapWidth = rc.getMapWidth();
+		mapHeight = rc.getMapHeight();
 	}
 
 	public void setup() {
@@ -26,24 +34,35 @@ public abstract class Robot {
 		 */
 		pos = rc.getLocation();
 		rng = new Random(rc.getID() ^ 12353);
-		
+		minimap = new Minimap(rc);
 	}
 
-	public void beginTurn() {
+	public void beginTurn() throws GameActionException {
 		/*
 		 * Actions to take before you start moving and attacking, like sensing and
 		 * processing messages
 		 */
+		// Sense enemies
+		enemies = rc.senseNearbyRobots(-1, enemyTeam);
+		
+		minimap.pull();
+		// Update the minimap with enemies & visible squares
+		if (enemies.length == 0) {
+			minimap.markClear(pos);
+		} else {
+			for (RobotInfo enemy : enemies) {
+				minimap.markEnemy(enemy);
+			}
+		}
 	}
 
 	public abstract void runTurn() throws GameActionException; // Actions to take like moving and attacking
 
 	public void useFreeComputation() {
 		/*
-		 * Use the remaining free computation we have to help other robots calculate
-		 * things!
+		 * Use the remaining free computation we have to help other robots out!
 		 * 
-		 * Example: Distributed BFS would be neat.
+		 * Example: Distributed BFS
 		 */
 	}
 

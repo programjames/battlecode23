@@ -27,10 +27,6 @@ public class Navigator {
 		 * Move towards the destination
 		 */
 		Direction directionToMove = getFuzzyMoveDirection();
-		if (directionToMove == lastMoveDirection.opposite()) {
-			// We shouldn't just move opposite what we just did!
-			directionToMove = lastMoveDirection;
-		}
 		if (directionToMove != Direction.CENTER && rc.canMove(directionToMove)) {
 			rc.move(directionToMove);
 			lastMoveDirection = directionToMove;
@@ -39,8 +35,8 @@ public class Navigator {
 
 	private Direction getFuzzyMoveDirection() {
 		/*
-		 * Return the direction that points closest to
-		 * our destination that we can legally move to.
+		 * Return the direction that points closest to our destination that we can
+		 * legally move to.
 		 */
 		Direction bestDirection = robot.pos.directionTo(destination);
 		if (rc.canMove(bestDirection)) {
@@ -55,12 +51,20 @@ public class Navigator {
 			return left;
 		}
 		Direction rightRight = right.rotateRight();
-		if (rc.canMove(rightRight)) {
-			return rightRight;
-		}
 		Direction leftLeft = left.rotateLeft();
+		if (rc.canMove(rightRight)) {
+			if (rightRight != lastMoveDirection.opposite()) {
+				return rightRight;
+			} else {
+				return leftLeft;
+			}
+		}
 		if (rc.canMove(leftLeft)) {
-			return leftLeft;
+			if (leftLeft != lastMoveDirection.opposite()) {
+				return leftLeft;
+			} else {
+				return rightRight;
+			}
 		}
 		return Direction.CENTER; // all other directions would only get us farther from our goal
 	}
