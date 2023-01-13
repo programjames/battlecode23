@@ -58,12 +58,21 @@ public abstract class Robot {
 
 	public abstract void runTurn() throws GameActionException; // Actions to take like moving and attacking
 
-	public void useFreeComputation() {
-		/*
-		 * Use the remaining free computation we have to help other robots out!
-		 * 
-		 * Example: Distributed BFS
-		 */
+	public void endTurn() throws GameActionException {
+		// Look for nearby wells to update our minimap
+		// This isn't critical, and probably most relevant at the end of the turn so we put it in endTurn
+		WellInfo[] nearbyWells = rc.senseNearbyWells();
+		for (WellInfo well : nearbyWells) {
+			minimap.markWell(well);
+		}
+		
+		if (rc.canWriteSharedArray(0, 0)) {
+			// If we can write, then push our updates to the shared array
+			minimap.push();
+			//rc.setIndicatorString("Just pushed to minimap!");
+		}// else {
+		//	rc.setIndicatorString("Can't push to minimap!");
+		//}
 	}
 
 	public void run() {
@@ -73,7 +82,7 @@ public abstract class Robot {
 			try {
 				beginTurn();
 				runTurn();
-				useFreeComputation();
+				endTurn();
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {

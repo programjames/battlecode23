@@ -30,7 +30,7 @@ public class Carrier extends Unit {
 	}
 
 	@Override
-	public void beginTurn() {
+	public void beginTurn() throws GameActionException {
 		super.beginTurn();
 
 		ad = rc.getResourceAmount(ResourceType.ADAMANTIUM);

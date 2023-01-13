@@ -8,7 +8,7 @@ public abstract class Unit extends Robot {
 	}
 	
 	@Override
-	public void beginTurn() {
+	public void beginTurn() throws GameActionException {
 		pos = rc.getLocation();
 	}
 	

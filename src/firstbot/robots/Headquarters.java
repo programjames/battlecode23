@@ -19,22 +19,23 @@ public class Headquarters extends Building {
 		}
 
 		// Draw the minimap
-		for (int x = 2; x < mapWidth; x += 5) {
-			for (int y = 2; y < mapHeight; y += 5) {
-				int chunk = minimap.getChunk(minimap.getChunkIndex(new MapLocation(x, y)));
-				if ((chunk & 0b0001) != 0) {
-					rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y - 2), 255, 0, 0);
-					rc.setIndicatorLine(new MapLocation(x + 2, y - 2), new MapLocation(x + 2, y + 2), 255, 0, 0);
-					rc.setIndicatorLine(new MapLocation(x + 2, y + 2), new MapLocation(x - 2, y + 2), 255, 0, 0);
-					rc.setIndicatorLine(new MapLocation(x - 2, y + 2), new MapLocation(x - 2, y - 2), 255, 0, 0);
-				}
-				if ((chunk & 0b0010) != 0) {
-					rc.setIndicatorLine(new MapLocation(x - 1, y - 1), new MapLocation(x + 1, y - 1), 0, 0, 255);
-					rc.setIndicatorLine(new MapLocation(x + 1, y - 1), new MapLocation(x + 1, y + 1), 0, 0, 255);
-					rc.setIndicatorLine(new MapLocation(x + 1, y + 1), new MapLocation(x - 1, y + 1), 0, 0, 255);
-					rc.setIndicatorLine(new MapLocation(x - 1, y + 1), new MapLocation(x - 1, y - 1), 0, 0, 255);
-				}
-			}
-		}
+		//for (int x = 2; x < mapWidth; x += 5) {
+		//	for (int y = 2; y < mapHeight; y += 5) {
+		//		int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
+		//		if ((chunk & Minimap.ENEMY_BIT) != 0) {
+		//			rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y - 2), 255, 0, 0);
+		//			rc.setIndicatorLine(new MapLocation(x + 2, y - 2), new MapLocation(x + 2, y + 2), 255, 0, 0);
+		//			rc.setIndicatorLine(new MapLocation(x + 2, y + 2), new MapLocation(x - 2, y + 2), 255, 0, 0);
+		//			rc.setIndicatorLine(new MapLocation(x - 2, y + 2), new MapLocation(x - 2, y - 2), 255, 0, 0);
+		//		}
+		//		if ((chunk & Minimap.WELL_BIT) != 0) {
+		//			System.out.println("Marking well");
+		//			rc.setIndicatorLine(new MapLocation(x - 1, y - 1), new MapLocation(x + 1, y - 1), 0, 0, 255);
+		//			rc.setIndicatorLine(new MapLocation(x + 1, y - 1), new MapLocation(x + 1, y + 1), 0, 0, 255);
+		//			rc.setIndicatorLine(new MapLocation(x + 1, y + 1), new MapLocation(x - 1, y + 1), 0, 0, 255);
+		//			rc.setIndicatorLine(new MapLocation(x - 1, y + 1), new MapLocation(x - 1, y - 1), 0, 0, 255);
+		//		}
+		//	}
+		//}
 	}
 }
