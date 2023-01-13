@@ -1,88 +1,72 @@
-// This is the version of Pather.java before bytecode optimizing and unrolling.
-
 package pathing;
 
 import battlecode.common.*;
 
-public final class PatherTemplate {
-
-    // TODO: Replace these with integers.
-    public static final int RADIUS_SQUARED = 20;
-    public static final int RADIUS = 5; // furthest (not squared) radius you can see + 1
-    public static final int BOX_SIZE = 2 * RADIUS + 1;
-    public static final int NUM_LOCATIONS = BOX_SIZE * BOX_SIZE;
-    public static final int[][] VISION_DIFFS = { { -4, -1 }, { -4, 0 }, { -4, 1 }, { -3, -3 }, { -3, -2 }, { -3, -1 },
-            { -3, 0 }, { -3, 1 }, { -3, 2 }, { -3, 3 }, { -2, -3 }, { -2, -2 }, { -2, -1 }, { -2, 0 }, { -2, 1 },
-            { -2, 2 }, { -2, 3 }, { -1, -4 }, { -1, -3 }, { -1, -2 }, { -1, -1 }, { -1, 0 }, { -1, 1 }, { -1, 2 },
-            { -1, 3 }, { -1, 4 }, { 0, -4 }, { 0, -3 }, { 0, -2 }, { 0, -1 }, { 0, 0 }, { 0, 1 }, { 0, 2 }, { 0, 3 },
-            { 0, 4 }, { 1, -4 }, { 1, -3 }, { 1, -2 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 1, 4 },
-            { 2, -3 }, { 2, -2 }, { 2, -1 }, { 2, 0 }, { 2, 1 }, { 2, 2 }, { 2, 3 }, { 3, -3 }, { 3, -2 }, { 3, -1 },
-            { 3, 0 }, { 3, 1 }, { 3, 2 }, { 3, 3 }, { 4, -1 }, { 4, 0 }, { 4, 1 } };
+public class PatherTemplate {
 
     // Pathfinding variables
-    public static int[] costs = new int[NUM_LOCATIONS];
-    public static int[] cooldowns = new int[NUM_LOCATIONS]; // how much added cooldown on this location?
-    public static boolean[] checked = new boolean[NUM_LOCATIONS]; // have we checked this location in our Dijkstra?
-    public static Direction[] currents = new Direction[NUM_LOCATIONS]; // current directions
-    public static Direction[] currented = new Direction[NUM_LOCATIONS]; // if it got pushed here by a current, what was
-                                                                        // the direction moved before that?
-    public static boolean[] dest = new boolean[NUM_LOCATIONS]; // is this place a destination?
-    public static Direction[] dirs = new Direction[NUM_LOCATIONS]; // direction we moved to get here.
-    public static boolean[] wait = new boolean[NUM_LOCATIONS]; // did it need a wait to get here?
+
+    public static int[] costs = new int[121];
+    public static int[] cooldowns = new int[121]; // how much added cooldown on this location?
+    public static boolean[] toCheck = new boolean[121]; // have we toCheck this location in our Dijkstra?
+    public static Direction[] currents = new Direction[121]; // current directions
+    public static Direction[] currented = new Direction[121]; // if it got pushed here by a current, what was
+                                                              // the direction moved before that?
+    public static boolean[] dest = new boolean[121]; // is this place a destination?
+    public static Direction[] dirs = new Direction[121]; // direction we moved to get here.
+    public static boolean[] wait = new boolean[121]; // did it need a wait to get here?
 
     // Queue variables
-    public static int[] queue = new int[NUM_LOCATIONS];
+    public static int[] queue = new int[121];
     public static int endOfQueue = 1;
 
     // Debugging variables
     public static int color;
 
-    static {
-        for (int dy = -RADIUS; dy < 1 + RADIUS; dy++) {
-            for (int dx = -RADIUS; dx < 1 + RADIUS; dx++) {
-                costs[encodeEntry(dx, dy)] = 0;
-            }
-        }
-    }
-
     public static int encodeEntry(int x, int y) {
-        return BOX_SIZE * y + x + RADIUS * BOX_SIZE + RADIUS;
+        return 11 * y + x + 60;
     }
 
     public static int[] decodeEntry(int encodedValue) {
-        return new int[] { (encodedValue % BOX_SIZE) - RADIUS,
-                (encodedValue / BOX_SIZE) - RADIUS };
+        return new int[] { (encodedValue % 11) - 5,
+                (encodedValue / 11) - 5 };
     }
 
     public static int actualCooldown(RobotController rc) {
         RobotType type = rc.getType();
-        if(type == RobotType.CARRIER) {
-            return (int) (GameConstants.CARRIER_MOVEMENT_INTERCEPT + GameConstants.CARRIER_MOVEMENT_SLOPE * rc.getWeight());
+        if (type == RobotType.CARRIER) {
+            return (int) (GameConstants.CARRIER_MOVEMENT_INTERCEPT
+                    + GameConstants.CARRIER_MOVEMENT_SLOPE * rc.getWeight());
         } else {
             return type.movementCooldown;
         }
     }
 
+    public static int cooldown;
     public static void reset(RobotController rc) throws GameActionException {
         color = 0;
 
-        checked = new boolean[NUM_LOCATIONS];
-        dest = new boolean[NUM_LOCATIONS];
-        currents = new Direction[NUM_LOCATIONS];
+        toCheck = new boolean[121];
+        dest = new boolean[121];
+        currents = new Direction[121];
 
         endOfQueue = 1;
 
         MapLocation startLocation = rc.getLocation();
         Team myTeam = rc.getTeam();
 
-        int cooldown = actualCooldown(rc);
+        cooldown = actualCooldown(rc);
+
+        MapLocation loc;
+        int encoded;
 
         for (MapInfo info : rc.senseNearbyMapInfos()) {
-            MapLocation loc = info.getMapLocation();
-            int encoded = encodeEntry(loc.x - startLocation.x, loc.y - startLocation.y);
+            loc = info.getMapLocation();
+            encoded = encodeEntry(loc.x - startLocation.x, loc.y - startLocation.y);
             if (info.isPassable()) {
                 cooldowns[encoded] = (int) (cooldown * info.getCooldownMuliplier(myTeam));
                 currents[encoded] = info.getCurrentDirection();
+                toCheck[encoded] = rc.senseRobotAtLocation(loc) == null;
             } else {
                 cooldowns[encoded] = 100000;
             }
@@ -98,17 +82,17 @@ public final class PatherTemplate {
             case WEST:
                 return -1;
             case SOUTH:
-                return -BOX_SIZE;
+                return -11;
             case NORTH:
-                return BOX_SIZE;
+                return 11;
             case SOUTHEAST:
-                return 1 - BOX_SIZE;   
+                return -10;
             case NORTHEAST:
-                return 1 + BOX_SIZE;
+                return 12;
             case SOUTHWEST:
-                return -1 - BOX_SIZE;
+                return -12;
             case NORTHWEST:
-                return -1 + BOX_SIZE;
+                return 10;
             default:
                 return 0;
         }
@@ -121,14 +105,78 @@ public final class PatherTemplate {
     }
 
     public static boolean canSenseEncoded(int encodedValue) {
-        int[] diff = decodeEntry(encodedValue);
-        return diff[0] * diff[0] + diff[1] * diff[1] <= RADIUS_SQUARED;
+        switch (encodedValue) {
+            case 15:
+            case 16:
+            case 17:
+            case 24:
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 29:
+            case 30:
+            case 35:
+            case 36:
+            case 37:
+            case 38:
+            case 39:
+            case 40:
+            case 41:
+            case 45:
+            case 46:
+            case 47:
+            case 48:
+            case 49:
+            case 50:
+            case 51:
+            case 52:
+            case 53:
+            case 56:
+            case 57:
+            case 58:
+            case 59:
+            case 60:
+            case 61:
+            case 62:
+            case 63:
+            case 64:
+            case 67:
+            case 68:
+            case 69:
+            case 70:
+            case 71:
+            case 72:
+            case 73:
+            case 74:
+            case 75:
+            case 79:
+            case 80:
+            case 81:
+            case 82:
+            case 83:
+            case 84:
+            case 85:
+            case 90:
+            case 91:
+            case 92:
+            case 93:
+            case 94:
+            case 95:
+            case 96:
+            case 103:
+            case 104:
+            case 105:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public static void debugPoint(int enc, RobotController rc) {
         int[] diff = decodeEntry(enc);
         rc.setIndicatorDot(rc.getLocation().translate(diff[0], diff[1]), color,
-        color, color);
+                color, color);
         color += 3;
     }
 
@@ -140,83 +188,90 @@ public final class PatherTemplate {
         rc.setIndicatorLine(a, b, 255, 0, 0);
     }
 
+    // Variables used in this loop
+    public static int newTile;
+    public static int currentTile;
+    public static int encoded;
+    public static int tileToCheck;
+    public static int cost;
+
     public static int dijkstra(RobotController rc) {
         /*
          * Returns an encoding of the found destination, which can be plugged into
          * reconstructPath.
          * If no destination found, returns Integer.MAX_VALUE.
          */
-        int cost = rc.getMovementCooldownTurns();
+        cost = rc.getMovementCooldownTurns();
         if (cost >= GameConstants.COOLDOWN_LIMIT) {
             return Integer.MAX_VALUE;
         }
 
         MapLocation startLocation = rc.getLocation();
 
-        int encoded = encodeEntry(0, 0);
+        encoded = encodeEntry(0, 0);
         costs[encoded] = cost;
         addToQueue(encoded);
-        checked[encoded] = true;
+        toCheck[encoded] = false;
 
-        int tileToCheck;
         do {
+            int b = Clock.getBytecodeNum();
             tileToCheck = popFromQueue();
-            int[] diff = decodeEntry(tileToCheck);
-            int dx = diff[0];
-            int dy = diff[1];
-            MapLocation diffLocation = startLocation.translate(dx, dy);
-            if (!rc.canSenseLocation(diffLocation))
-                continue;
-            if (dx != 0 && dy != 0 && rc.canSenseRobotAtLocation(diffLocation))
-                continue;
+            System.out.println(Clock.getBytecodeNum() - b);
 
             cost = costs[tileToCheck];
             for (Direction d : Direction.values()) {
-                int newTile = tileToCheck + d.dx + BOX_SIZE * d.dy;
-                if (canSenseEncoded(newTile) && !checked[newTile]) {
+                newTile = tileToCheck + d.dx + 11 * d.dy;
+                if (canSenseEncoded(newTile) && toCheck[newTile]) {
                     // Does it stop on a current?
+                    
                     if (currents[newTile] != Direction.CENTER
-                            && (cost % GameConstants.COOLDOWNS_PER_TURN) + cooldowns[newTile] >= GameConstants.COOLDOWNS_PER_TURN) {
-                        
+                            && (cost % 10) + cooldowns[newTile] >= 10) {
                         // Could we try waiting on the previous turn?
-                        if (0 < cost % GameConstants.COOLDOWNS_PER_TURN && cooldowns[newTile] < GameConstants.COOLDOWNS_PER_TURN && currents[tileToCheck] == Direction.CENTER) {
-                            costs[newTile] = cooldowns[newTile] + (cost + GameConstants.COOLDOWNS_PER_TURN - 1)
-                                    / GameConstants.COOLDOWNS_PER_TURN * GameConstants.COOLDOWNS_PER_TURN;
+                        if (cost % 10 > 0 && cooldowns[newTile] < 10 && currents[tileToCheck] == Direction.CENTER) {
+                            costs[newTile] = cooldowns[newTile] + (cost + 9) / 10 * 10;
                             dirs[newTile] = d;
                             wait[newTile] = true;
-                            checked[newTile] = true;
                             currented[newTile] = null;
-                            addToQueue(newTile);
+                            toCheck[newTile] = false;
 
                             // found a destination
                             if (dest[newTile]) {
                                 return newTile;
                             }
+
+                            addToQueue(newTile);
                         }
 
                         // Or we can ride the current
-                        int currentTile = newTile + encodeDirection(currents[newTile]);
-                        if (!canSenseEncoded(currentTile) || checked[currentTile]) {
+                        currentTile = newTile + encodeDirection(currents[newTile]);
+                        if (!canSenseEncoded(currentTile) || !toCheck[currentTile]) {
                             continue;
                         }
-
                         costs[currentTile] = cost + cooldowns[newTile];
                         dirs[currentTile] = currents[newTile];
                         currented[currentTile] = d;
-                        newTile = currentTile;
-                    } else { // it isn't stopping anyway...
+                        wait[currentTile] = false;
+                        toCheck[currentTile] = false;
+
+                        // found a destination?
+                        if (dest[currentTile]) {
+                            return currentTile;
+                        }
+
+                        addToQueue(currentTile);
+                    } else { // it isn't stopping on a current
                         costs[newTile] = cost + cooldowns[newTile];
                         dirs[newTile] = d;
                         currented[newTile] = null;
-                    }
+                        wait[newTile] = false;
+                        toCheck[newTile] = false;
 
-                    wait[newTile] = false;
-                    checked[newTile] = true;
-                    addToQueue(newTile);
+                        // found a destination?
+                        if (dest[newTile]) {
+                            return newTile;
+                        }
 
-                    // found a destination
-                    if (dest[newTile]) {
-                        return newTile;
+                        addToQueue(newTile);
                     }
                 }
             }
@@ -233,6 +288,7 @@ public final class PatherTemplate {
         Direction[] path = new Direction[100];
         int i = 0;
         while (dest != start) {
+            debugPoint(dest, rc);
             Direction dir = dirs[dest];
             int d = encodeDirection(dir);
             if (currented[dest] == null || currents[dest - d] == Direction.CENTER) {

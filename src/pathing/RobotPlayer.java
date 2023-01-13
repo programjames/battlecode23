@@ -168,6 +168,7 @@ public strictfp class RobotPlayer {
         for(MapInfo info : rc.senseNearbyMapInfos()) {
             dx = Integer.max(dx, info.getMapLocation().x - rc.getLocation().x);
         }
+        
         Pather.addDestinations(new int[][] { { dx, 0 } });
         int dest = Pather.dijkstra(rc);
         Direction[] path = Pather.reconstructPath(dest, rc);
