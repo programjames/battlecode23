@@ -149,7 +149,7 @@ def actual_cooldown(num):
     }"""
 
 def reset(num):
-    func = f"""public static void reset(RobotController rc) throws GameActionException{{
+    func = f"""public static void reset(RobotController rc, MapLocation goalLocation) throws GameActionException{{
         color = 0;
         MapLocation startLocation = rc.getLocation();
         int startLocationX = startLocation.x;
@@ -163,7 +163,7 @@ def reset(num):
         {checked_vars(num)}
         {cost_vars(num)}
 
-        MapInfo[] infos = rc.senseNearbyMapInfos();
+        MapInfo[] infos = rc.senseNearbyMapInfos(goalLocation, goalLocation.distanceSquaredTo(startLocation));
         MapInfo info;
         int encoded;
         switch(infos.length) {{
@@ -176,7 +176,7 @@ def reset(num):
         currents[encoded] = info.getCurrentDirection();
         setToCheck(encoded);
     }"""
-    for n in range(num, 1, -1):
+    for n in range(num, 0, -1):
         func += f"\ncase {n}:\ninfo = infos[{n-1}];" + s
     
     func +=f"""case 0:

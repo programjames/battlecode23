@@ -482,7 +482,7 @@ case 68: toCheck68 = false; break;default:}}public static int actualCooldown(Rob
         } else {
             return type.movementCooldown;
         }
-    }public static void reset(RobotController rc) throws GameActionException{
+    }public static void reset(RobotController rc, MapLocation goalLocation) throws GameActionException{
         color = 0;
         MapLocation startLocation = rc.getLocation();
         int startLocationX = startLocation.x;
@@ -633,7 +633,7 @@ costs[67] = 4400;
 costs[68] = 4400;
 costs[69] = Integer.MAX_VALUE;
 
-        MapInfo[] infos = rc.senseNearbyMapInfos();
+        MapInfo[] infos = rc.senseNearbyMapInfos(goalLocation, goalLocation.distanceSquaredTo(startLocation));
         MapInfo info;
         int encoded;
         switch(infos.length) {
@@ -1177,6 +1177,14 @@ info = infos[2];
     }
 case 2:
 info = infos[1];
+    if (info.isPassable() && rc.senseRobotAtLocation(info.getMapLocation()) == null) {
+        encoded = encode(info.getMapLocation().x - startLocationX, info.getMapLocation().y - startLocationY);
+        cooldowns[encoded] = (int) (cooldown * info.getCooldownMuliplier(myTeam));
+        currents[encoded] = info.getCurrentDirection();
+        setToCheck(encoded);
+    }
+case 1:
+info = infos[0];
     if (info.isPassable() && rc.senseRobotAtLocation(info.getMapLocation()) == null) {
         encoded = encode(info.getMapLocation().x - startLocationX, info.getMapLocation().y - startLocationY);
         cooldowns[encoded] = (int) (cooldown * info.getCooldownMuliplier(myTeam));
@@ -19953,16 +19961,16 @@ default: ret=-1;} if (ret >= 0) return ret; } return -1; }public static Directio
         Direction[] path = new Direction[100];
         int i = 0;
         while (dest != start) {
-            debugPoint(dest, rc);
-            Direction dir = dirs[dest].opposite();
-            if (currented[dest] == null || currents[translateDir(dest, dir)] == Direction.CENTER) {
+            //debugPoint(dest, rc);
+            Direction dir = dirs[dest];
+            if (currented[dest] == null || currents[translateDir(dest, dir.opposite())] == Direction.CENTER) {
                 path[i] = dir;
                 if (wait[dest]) {
                     i++;
                     path[i] = Direction.CENTER;
                 }
             } else {
-                path[i] = currented[dest].opposite();
+                path[i] = currented[dest];
                 if (wait[dest]) {
                     i++;
                     path[i] = Direction.CENTER;
@@ -19971,13 +19979,13 @@ default: ret=-1;} if (ret >= 0) return ret; } return -1; }public static Directio
             }
 
             i++;
-            dest = translateDir(dest, dir);
+            dest = translateDir(dest, dir.opposite());
         }
 
         // fix order of path
         Direction[] ordered = new Direction[i];
         for (int j = i; --j >= 0;) {
-            ordered[j] = path[i - j - 1].opposite();
+            ordered[j] = path[i - j - 1];
         }
         return ordered;
     }
