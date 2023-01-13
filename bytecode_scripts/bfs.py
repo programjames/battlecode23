@@ -158,6 +158,7 @@ def reset(num):
         int cooldown = actualCooldown(rc);
 
         dest = new boolean[121];
+        dest[encode(goalLocation.x-startLocationX, goalLocation.y-startLocationY)] = true;
         queueHead = 0;
 
         {checked_vars(num)}

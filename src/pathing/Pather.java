@@ -491,6 +491,7 @@ case 68: toCheck68 = false; break;default:}}public static int actualCooldown(Rob
         int cooldown = actualCooldown(rc);
 
         dest = new boolean[121];
+        dest[encode(goalLocation.x-startLocationX, goalLocation.y-startLocationY)] = true;
         queueHead = 0;
 
         toCheck0 = false;
@@ -19961,7 +19962,7 @@ default: ret=-1;} if (ret >= 0) return ret; } return -1; }public static Directio
         Direction[] path = new Direction[100];
         int i = 0;
         while (dest != start) {
-            //debugPoint(dest, rc);
+            debugPoint(dest, rc);
             Direction dir = dirs[dest];
             if (currented[dest] == null || currents[translateDir(dest, dir.opposite())] == Direction.CENTER) {
                 path[i] = dir;

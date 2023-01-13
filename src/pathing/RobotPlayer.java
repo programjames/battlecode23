@@ -166,7 +166,6 @@ public strictfp class RobotPlayer {
         int dx = 4;
 
         Pather.reset(rc, rc.getLocation().translate(dx, 0));
-        Pather.addDestinations(new int[][] { { dx, 0 } });
         int dest = Pather.dijkstra(rc);
         Direction[] path = Pather.reconstructPath(dest, rc);
 
