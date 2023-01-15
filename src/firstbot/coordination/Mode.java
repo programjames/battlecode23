@@ -8,5 +8,8 @@ public enum Mode {
 	 */
 
 	// Carrier specific modes
-	FIND_RESOURCES, GOTO_RESOURCES, GOTO_HQ;
+	FIND_RESOURCES, GOTO_RESOURCES, GOTO_HQ,
+
+	// Attacking modes
+	FIND_ENEMY, ATTACK, RETREAT;
 }

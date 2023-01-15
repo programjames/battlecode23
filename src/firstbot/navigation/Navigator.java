@@ -15,6 +15,7 @@ public class Navigator {
 
 	public Direction[] path;
 	public int pathIndex = 0;
+	public boolean needToPrepareMove = false;
 
 	public Navigator(Robot robot, RobotController rc) {
 		this.rc = rc;
@@ -37,6 +38,10 @@ public class Navigator {
 		 * Move towards the destination
 		 */
 
+		if(needToPrepareMove && destination != robot.pos) {
+			prepareMove();
+			needToPrepareMove = false;
+		}
 		Direction directionToMove;
 		if(path == null || pathIndex == path.length) {
 			directionToMove = getFuzzyMoveDirection();

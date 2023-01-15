@@ -14,9 +14,6 @@ public class Carrier extends Unit {
 
 	CarrierNavigator navigator;
 
-	Job job;
-	Mode mode;
-
 	public Carrier(RobotController rc) {
 		super(rc);
 	}
@@ -32,6 +29,7 @@ public class Carrier extends Unit {
 	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
+		navigator.needToPrepareMove = true;
 
 		ad = rc.getResourceAmount(ResourceType.ADAMANTIUM);
 		mn = rc.getResourceAmount(ResourceType.MANA);

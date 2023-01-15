@@ -561,7 +561,7 @@ def nearest_sub(x, id):
                 best.append((dx, dy))
         
         for dx, dy in best:
-            func += f"""dest[{numbers[(dx, dy)]}]=true;"""
+            func += f"""dest[{numbers[(dx, dy)]}]=true; toCheck{numbers[(dx, dy)]}=true;"""
         func += "break;"
     func += f"default:}}}}"
     return func
@@ -585,7 +585,7 @@ def nearest_sub_small(x, id):
             elif t == best_val:
                 best.append((dx, dy))
         for dx, dy in best:
-            func += f"""dest[{numbers[(dx, dy)]}]=true;"""
+            func += f"""dest[{numbers[(dx, dy)]}]=true; toCheck{numbers[(dx, dy)]}=true;"""
         func += "break;"
     func += f"default:}}}}"
     return func

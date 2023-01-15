@@ -106,7 +106,6 @@ public class CarrierNavigator extends Navigator {
 
 	@Override
 	public void move() throws GameActionException {
-		super.prepareMove();
 		super.move();
 		lookAround();
 		super.move();
