@@ -17,9 +17,6 @@ public class Carrier extends Unit {
 	public MapLocation myWellLocation = null; // MapLocation of the well this carrier frequents
 	public MapLocation myHQLocation = null; // MapLocation of the HQ this carrier frequents
 
-	Job job;
-	Mode mode;
-
 	public Carrier(RobotController rc) {
 		super(rc);
 	}
@@ -35,6 +32,7 @@ public class Carrier extends Unit {
 	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
+		navigator.needToPrepareMove = true;
 
 		ad = rc.getResourceAmount(ResourceType.ADAMANTIUM);
 		mn = rc.getResourceAmount(ResourceType.MANA);

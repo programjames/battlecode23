@@ -186,6 +186,10 @@ public class Minimap implements Module {
 		default: return null;}
 	}
 
+	public int[] getChunks() {
+		return chunks;
+	}
+
 	public int getChunkIndex(MapLocation location) {
 		/*
 		 * Get the chunk that a given location is in.
@@ -195,6 +199,10 @@ public class Minimap implements Module {
 
 	public int getChunkIndex(int x, int y) {
 		return (x / 5 * 17 + y / 5 * 60) % 144;
+	}
+
+	public boolean hasEnemy(int chunkIndex) {
+		return (chunks[chunkIndex] & ENEMY_BIT) == 1;
 	}
 
 	public int getChunk(int chunkIndex) {

@@ -8,6 +8,9 @@ def make_set_chunk():
     parts.append("default: return;}")
     return "\n".join(parts)
 
+def xy_to_chunk(x, y):
+    return (x // 5 * 17 + y // 5 * 60) % 144
+
 def make_get_center():
     parts = ["""
     switch (index) {
@@ -15,7 +18,7 @@ def make_get_center():
     centers = []
     for x in range(2, 60, 5):
         for y in range(2, 60, 5):
-            chunk = (x // 5 * 17 + y // 5 * 60) % 144
+            chunk = xy_to_chunk(x, y)
             centers.append("case " + str(chunk) + f": return new MapLocation({x}, {y});")
     centers.sort(key = lambda s: int(s.split()[1][:-1]))
     parts += centers
@@ -53,5 +56,5 @@ def make_pull():
         )
     return "\n".join(parts)
 
-    
-print(make_get_center())
+if __name__ == "__main__":
+    print(make_get_center())

@@ -14,6 +14,7 @@ public abstract class Robot {
 	public Minimap minimap;
 	public RobotInfo[] enemies;
 	public int mapWidth, mapHeight;
+	public int visionRadius;
 
 	public Robot(RobotController rc) {
 		this.rc = rc;
@@ -44,6 +45,7 @@ public abstract class Robot {
 		 */
 		// Sense enemies
 		enemies = rc.senseNearbyRobots(-1, enemyTeam);
+		visionRadius = rc.senseMapInfo(rc.getLocation()).hasCloud()? GameConstants.CLOUD_VISION_RADIUS_SQUARED : type.visionRadiusSquared;
 		
 		minimap.pull();
 		// Update the minimap with enemies & visible squares
