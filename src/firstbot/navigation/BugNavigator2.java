@@ -50,7 +50,7 @@ public class BugNavigator2 extends BugNavigator {
 			}
 			move();
 		}
-		rc.setIndicatorDot(destination, 0, 0, 255);
+		// rc.setIndicatorDot(destination, 0, 0, 255);
 	}
 
 	public void navigateToHQ() throws GameActionException {
@@ -75,7 +75,7 @@ public class BugNavigator2 extends BugNavigator {
 			}
 			move();
 		}
-		rc.setIndicatorDot(destination, 255, 255, 0);
+		// rc.setIndicatorDot(destination, 255, 255, 0);
 	}
 
 }

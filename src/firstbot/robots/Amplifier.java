@@ -26,8 +26,9 @@ public class Amplifier extends Unit {
 
 	@Override
 	public void runTurn() throws GameActionException {
-		MapLocation loc;
-		if (enemies.length == 0) {
+		if (enemies.length > 0) {
+			retreat(navigator);
+		} else {
 			int dx = 0;
 			int dy = 0;
 			for (RobotInfo robot : rc.senseNearbyRobots(-1, myTeam)) {
@@ -40,11 +41,8 @@ public class Amplifier extends Unit {
 					default:
 				}
 			}
-			loc = pos.translate(dx, dy);
-		} else {
-			loc = runAwayLocation();
+			MapLocation loc = pos.translate(dx, dy);
+			navigator.fuzzyMoveTo(loc, 4);
 		}
-
-		navigator.fuzzyMoveTo(loc, 4);
 	}
 }

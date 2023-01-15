@@ -25,7 +25,7 @@ public class Launcher extends Unit {
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
 		navigator.needToPrepareMove = true;
-
+		
 		if(enemies.length == 0) {
 			mode = Mode.FIND_ENEMY;
 			navigator.setDestination(enemyGoalLocation());
@@ -42,16 +42,16 @@ public class Launcher extends Unit {
 			case ATTACK_ENEMY:
 				switch (mode) {
 					case FIND_ENEMY: // move to our enemy goal location
-						navigator.move();
-						navigator.move();
+						navigator.move(enemyGoalLocation());
+						navigator.move(enemyGoalLocation());
 						break;
 
 					case ATTACK:
-						launcherAttack();
+						attack(navigator);
 						break;
 
 					case RETREAT:
-						launcherRetreat();
+						retreat(navigator);
 						break;
 
 					default:
@@ -62,47 +62,5 @@ public class Launcher extends Unit {
 				break;
 		}
 
-	}
-
-	private void launcherAttack() throws GameActionException {
-		RobotInfo enemy = null;
-		int dist = Integer.MAX_VALUE;
-		int health = Integer.MAX_VALUE;
-		for (RobotInfo r : enemies) {
-			if(r.type == RobotType.HEADQUARTERS) {
-				continue;
-			}
-			int d = r.location.distanceSquaredTo(pos);
-			if ((r.health < health && d <= type.actionRadiusSquared) || (d > type.actionRadiusSquared && d < dist) ) {
-				// Prey on the close, weak units.
-				dist = d;
-				health = r.health;
-				enemy = r;
-			}
-		}
-
-		if (enemy == null)
-			return;
-
-		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location)) {
-			// Move in for the kill mwahahaha
-			navigator.setDestination(enemy.location);
-			navigator.move();
-		}
-
-		while (rc.canAttack(enemy.location)) {
-			rc.attack(enemy.location);
-		}
-
-		// Run away so they don't hit us!
-		MapLocation loc = runAwayLocation();
-		navigator.fuzzyMoveTo(loc, 2);
-		navigator.fuzzyMoveTo(loc, 2);
-	}
-
-	private void launcherRetreat() throws GameActionException {
-		MapLocation loc = runAwayLocation();
-		navigator.fuzzyMoveTo(loc, 2);
-		navigator.fuzzyMoveTo(loc, 2);
 	}
 }

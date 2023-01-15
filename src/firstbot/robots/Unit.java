@@ -61,4 +61,45 @@ public abstract class Unit extends Robot {
 			return pos.translate(dx, dy);
 		}
 	}
+
+	public void attack(Navigator navigator) throws GameActionException {
+		RobotInfo enemy = null;
+		int dist = Integer.MAX_VALUE;
+		int health = Integer.MAX_VALUE;
+		for (RobotInfo r : enemies) {
+			if(r.type == RobotType.HEADQUARTERS) {
+				continue;
+			}
+			int d = r.location.distanceSquaredTo(pos);
+			if ((r.health < health && d <= type.actionRadiusSquared) || (d > type.actionRadiusSquared && d < dist) ) {
+				// Prey on the close, weak units.
+				dist = d;
+				health = r.health;
+				enemy = r;
+			}
+		}
+
+		if (enemy == null)
+			return;
+
+		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location)) {
+			// Move in for the kill mwahahaha
+			navigator.move(enemy.location);
+		}
+
+		while (rc.canAttack(enemy.location)) {
+			rc.attack(enemy.location);
+		}
+
+		// Run away so they don't hit us!
+		MapLocation loc = runAwayLocation();
+		navigator.fuzzyMoveTo(loc, 4);
+		navigator.fuzzyMoveTo(loc, 4);
+	}
+
+	public void retreat(Navigator navigator) throws GameActionException {
+		MapLocation loc = runAwayLocation();
+		navigator.fuzzyMoveTo(loc, 4);
+		navigator.fuzzyMoveTo(loc, 4);
+	}
 }

@@ -23,13 +23,13 @@ public class BugNavigator extends Navigator {
 	@Override
 	public boolean move() throws GameActionException {
 		if (rc.getMovementCooldownTurns() >= 10) {
-			rc.setIndicatorString("Too high cooldown to move");
+			//rc.setIndicatorString("Too high cooldown to move");
 			return false; // Can't move at all because of high cooldown
 		}
 
 		// Check if we should stop bugging
 		if (wallLocation != null) {
-			System.out.println("Wall is in direction " + wallDirection + " and in position " + wallLocation + ", rotateRight = " + rotateRight);
+			// System.out.println("Wall is in direction " + wallDirection + " and in position " + wallLocation + ", rotateRight = " + rotateRight);
 			if (robot.pos.distanceSquaredTo(destination) < wallLocation.distanceSquaredTo(destination)) {
 				if (wallIsTemporary) {
 					// We should stop bugging around temporary walls as soon as we get closer than
