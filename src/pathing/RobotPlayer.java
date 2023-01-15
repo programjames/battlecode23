@@ -158,23 +158,22 @@ public strictfp class RobotPlayer {
     static void runCarrier(RobotController rc) throws GameActionException {
         // Also try to move randomly.
 
-        if(rc.senseNearbyRobots().length > 1) {
+        if (rc.senseNearbyRobots().length > 1) {
             rc.disintegrate();
             return;
         }
 
-        int dx = 4;
-
-        Pather.reset(rc, rc.getLocation().translate(dx, 0));
+        Pather.reset(rc, new MapLocation(64, 64));
         int dest = Pather.dijkstra(rc);
         Direction[] path = Pather.reconstructPath(dest, rc);
 
         int i = 0;
         Direction dir = path[i];
-        while(rc.canMove(dir) && dir != Direction.CENTER) {
+        while (rc.canMove(dir) && dir != Direction.CENTER) {
             rc.move(dir);
             i++;
-            if(i == path.length) break;
+            if (i == path.length)
+                break;
             dir = path[i];
         }
     }

@@ -158,13 +158,26 @@ def reset(num):
         int cooldown = actualCooldown(rc);
 
         dest = new boolean[121];
-        dest[encode(goalLocation.x-startLocationX, goalLocation.y-startLocationY)] = true;
+
+        int dx = goalLocation.x - startLocationX;
+        int dy = goalLocation.y - startLocationY;
+        int[] diff;
+        if (rc.senseMapInfo(startLocation).hasCloud()) {{
+            addNearestSmall(dx, dy);
+            diff = nearestSmall(dx, dy);
+        }} else {{
+            addNearest(dx, dy);
+            diff = nearest(dx, dy);
+        }}
+        MapLocation nearLocation = startLocation.translate(diff[0], diff[1]);
+
         queueHead = 0;
 
         {checked_vars(num)}
         {cost_vars(num)}
 
-        MapInfo[] infos = rc.senseNearbyMapInfos(goalLocation, goalLocation.distanceSquaredTo(startLocation));
+        MapInfo[] infos = rc.senseNearbyMapInfos(nearLocation, 1+nearLocation.distanceSquaredTo(startLocation));
+
         MapInfo info;
         int encoded;
         switch(infos.length) {{
@@ -525,6 +538,156 @@ def queue_pop(num):
     func += pop_nest(0, num) + "return index;\n}"
     return func
 
+########################################
+### Nearest taxicab distance to goal ###
+########################################
+
+def nearest_sub(x, id):
+    func = f"""public static void addNearestSub{id}(int y) {{
+        switch (y) {{
+            """
+    for y in range(-64, 65):
+        func += f"""
+        case {y}:"""
+        best_val = 1000000
+        best = []
+        for dx, dy in locs:
+            t = taxicab(x - dx, y - dy)
+            if t < best_val:
+                best_val = t
+                best = [(dx, dy)]
+            elif t == best_val:
+                best.append((dx, dy))
+        
+        for dx, dy in best:
+            func += f"""dest[{numbers[(dx, dy)]}]=true;"""
+        func += "break;"
+    func += f"default:}}}}"
+    return func
+
+def nearest_sub_small(x, id):
+    func = f"""public static void addNearestSubSmall{id}(int y) {{
+        switch (y) {{
+            """
+    for y in range(-64, 65):
+        func += f"""
+        case {y}:"""
+        best_val = 1000000
+        best = []
+        for dx, dy in locs:
+            if dx**2 + dy**2 > 4:
+                continue
+            t = taxicab(x - dx, y - dy)
+            if t < best_val:
+                best_val = t
+                best = [(dx, dy)]
+            elif t == best_val:
+                best.append((dx, dy))
+        for dx, dy in best:
+            func += f"""dest[{numbers[(dx, dy)]}]=true;"""
+        func += "break;"
+    func += f"default:}}}}"
+    return func
+
+def nearest(num):
+    func = ""
+    for i, x in enumerate(range(-64, 65)):
+        func += nearest_sub(x, i)
+    func += f"""public static void addNearest(int x, int y) {{
+        switch(x) {{
+        """
+    for i, x in enumerate(range(-64, 65)):
+        func += f"""
+        case {x}: addNearestSub{i}(y); break;"""
+    func += f"default:}}}}"
+    return func
+
+def nearest_small(num):
+    func = ""
+    for i, x in enumerate(range(-64, 65)):
+        func += nearest_sub_small(x, i)
+    func += f"""public static void addNearestSmall(int x, int y) {{
+        switch(x) {{
+        """
+    for i, x in enumerate(range(-64, 65)):
+        func += f"""
+        case {x}: addNearestSubSmall{i}(y); break;"""
+    func += f"default:}}}}"
+    return func
+
+####################################
+### Nearest r^2 distance to goal ###
+####################################
+
+def radius_squared(x, y):
+    return x**2 + y**2
+
+def single_nearest_sub(x, id):
+    func = f"""public static int[] nearestSub{id}(int y) {{
+        switch (y) {{
+            """
+    for y in range(-64, 65):
+        func += f"""
+        case {y}:"""
+        best_val = 1000000
+        best = None
+        for dx, dy in locs:
+            t = radius_squared(x - dx, y - dy)
+            if t < best_val:
+                best_val = t
+                best = (dx, dy)
+        func += f"""return new int[] {{ {best[0]}, {best[1]} }};"""
+    func += f"\ndefault: return new int[] {{ 0, 0 }};}}}}"
+    return func
+
+def single_nearest_sub_small(x, id):
+    func = f"""public static int[] nearestSubSmall{id}(int y) {{
+        switch (y) {{
+            """
+    for y in range(-64, 65):
+        func += f"""
+        case {y}:"""
+        best_val = 1000000
+        best = None
+        for dx, dy in locs:
+            if radius_squared(dx, dy)>4:
+                continue
+            t = radius_squared(x - dx, y - dy)
+            if t < best_val:
+                best_val = t
+                best = (dx, dy)
+        func += f"""return new int[] {{ {best[0]}, {best[1]} }};"""
+    func += f"\ndefault: return new int[] {{ 0, 0 }};}}}}"
+    return func
+
+def single_nearest(num):
+    func = ""
+    for i, x in enumerate(range(-64, 65)):
+        func += single_nearest_sub(x, i)
+    func += f"""public static int[] nearest(int x, int y) {{
+        switch(x) {{
+        """
+    for i, x in enumerate(range(-64, 65)):
+        func += f"""
+        case {x}: return nearestSub{i}(y);"""
+    func += f"\ndefault: return new int[] {{ 0, 0 }};}}}}"
+    return func
+
+def single_nearest_small(num):
+    func = ""
+    for i, x in enumerate(range(-64, 65)):
+        func += single_nearest_sub_small(x, i)
+    func += f"""public static int[] nearestSmall(int x, int y) {{
+        switch(x) {{
+        """
+    for i, x in enumerate(range(-64, 65)):
+        func += f"""
+        case {x}: return nearestSubSmall{i}(y);"""
+    func += f"\ndefault: return new int[] {{ 0, 0 }};}}}}"
+    return func
+
+
+
 #### Debugging
 def debug_point(num):
     return """public static void debugPoint(int enc, RobotController rc) {
@@ -556,7 +719,7 @@ public class Pather {{
     {queue_vars(num, public_static=True)}
     """
 
-    for method in [encode, add_destinations, get_to_check, set_to_check, set_checked, actual_cooldown, reset, move_with_current, translate_dir, dijkstra, reconstruct_path, queue_add, queue_pop, decode, debug_point]:
+    for method in [encode, add_destinations, get_to_check, set_to_check, set_checked, actual_cooldown, nearest, nearest_small, single_nearest, single_nearest_small, reset, move_with_current, translate_dir, dijkstra, reconstruct_path, queue_add, queue_pop, decode, debug_point]:
         class_string += method(num)
     return class_string + "}"
 
