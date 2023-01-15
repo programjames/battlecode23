@@ -90,9 +90,9 @@ public class Launcher extends Unit {
 		}
 
 		// Run away so they don't hit us!
-		navigator.setDestination(runAwayLocation());
-		navigator.move();
-		navigator.move();
+		MapLocation loc = runAwayLocation();
+		navigator.fuzzyMoveTo(loc, 2);
+		navigator.fuzzyMoveTo(loc, 2);
 	}
 
 	public void launcherRetreat() throws GameActionException {

@@ -325,7 +325,9 @@ public class Minimap implements Module {
 				| (chunks[4 * index] << 12);
 		// System.out.println(out + ", " + chunks[4 * index] + ", " + chunks[4 * index +
 		// 1] + ", " + chunks[4 * index + 2] + ", " + chunks[4 * index + 3]);
-		// rc.writeSharedArray(18 + index, out);
+
+		rc.writeSharedArray(18 + index, out);
+		
 		// System.out.println("Wrote to the index " + (18 + index));
 		// MapLocation center1 = getChunkCenter(4 * index + 3);
 		// System.out.println("Updates to " + center1 + " now " + chunks[4 * index + 3]);

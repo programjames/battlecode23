@@ -45,8 +45,9 @@ public abstract class Robot {
 		 */
 		// Sense enemies
 		enemies = rc.senseNearbyRobots(-1, enemyTeam);
-		visionRadius = rc.senseMapInfo(rc.getLocation()).hasCloud()? GameConstants.CLOUD_VISION_RADIUS_SQUARED : type.visionRadiusSquared;
-		
+		visionRadius = rc.senseMapInfo(rc.getLocation()).hasCloud() ? GameConstants.CLOUD_VISION_RADIUS_SQUARED
+				: type.visionRadiusSquared;
+
 		minimap.pull();
 		// Update the minimap with enemies & visible squares
 		if (enemies.length == 0) {
@@ -62,19 +63,23 @@ public abstract class Robot {
 
 	public void endTurn() throws GameActionException {
 		// Look for nearby wells to update our minimap
-		// This isn't critical, and probably most relevant at the end of the turn so we put it in endTurn
-		WellInfo[] nearbyWells = rc.senseNearbyWells();
-		for (WellInfo well : nearbyWells) {
-			minimap.markWell(well);
+		// This isn't critical, and probably most relevant at the end of the turn so we
+		// put it in endTurn
+
+		if (Clock.getBytecodesLeft() > 1500) { // so we don't run out of bytecode
+			WellInfo[] nearbyWells = rc.senseNearbyWells();
+			for (WellInfo well : nearbyWells) {
+				minimap.markWell(well);
+			}
+
+			if (rc.canWriteSharedArray(0, 0)) {
+				// If we can write, then push our updates to the shared array
+				minimap.push();
+				// rc.setIndicatorString("Just pushed to minimap!");
+			} // else {
+				// rc.setIndicatorString("Can't push to minimap!");
+				// }
 		}
-		
-		if (rc.canWriteSharedArray(0, 0)) {
-			// If we can write, then push our updates to the shared array
-			minimap.push();
-			//rc.setIndicatorString("Just pushed to minimap!");
-		}// else {
-		//	rc.setIndicatorString("Can't push to minimap!");
-		//}
 	}
 
 	public void run() {

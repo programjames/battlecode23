@@ -40,9 +40,7 @@ public class Amplifier extends Unit {
 			}
 		}
 
-		MapLocation goalLocation = pos.translate(dx, dy);
-		navigator.setDestination(goalLocation);
-		navigator.move();
-		navigator.move(); // in case of boosting effects
+		MapLocation loc = pos.translate(dx, dy);
+		navigator.fuzzyMoveTo(loc, 4);
 	}
 }

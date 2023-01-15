@@ -65,7 +65,7 @@ public class Navigator {
 
 	public boolean fuzzyMoveTo(MapLocation movLoc, int fuzziness) throws GameActionException {
 		// Try to move to the moveLoc using a single fuzzy move.
-		Direction moveDir = getFuzzyMoveDirection(fuzziness);
+		Direction moveDir = getFuzzyMoveDirection(movLoc, fuzziness);
 		if (moveDir == Direction.CENTER || !rc.canMove(moveDir)) {
 			return false; // Couldn't move
 		}
@@ -79,11 +79,15 @@ public class Navigator {
 	}
 
 	public Direction getFuzzyMoveDirection(int fuzziness) {
+		return getFuzzyMoveDirection(destination, fuzziness);
+	}
+
+	public Direction getFuzzyMoveDirection(MapLocation movLoc, int fuzziness) {
 		/*
-		 * Return the direction that points closest to our destination that we can
+		 * Return the direction that points closest to movLoc that we can
 		 * legally move to.
 		 */
-		Direction direction = robot.pos.directionTo(destination);
+		Direction direction = robot.pos.directionTo(movLoc);
 		Direction dirRight = direction;
 		Direction dirLeft = direction;
 		switch (fuzziness) {
