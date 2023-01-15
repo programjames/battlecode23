@@ -26,15 +26,13 @@ public class Launcher extends Unit {
 		super.beginTurn();
 		navigator.needToPrepareMove = true;
 
-		if (mode == Mode.FIND_ENEMY) {
-			if (enemies.length > 0) { // Found an enemy!
-				mode = Mode.ATTACK;
-			} else {
-				navigator.setDestination(enemyGoalLocation());
-			}
-		} else if (enemies.length == 0) { // Need to go find more enemies.
+		if(enemies.length == 0) {
 			mode = Mode.FIND_ENEMY;
 			navigator.setDestination(enemyGoalLocation());
+		} else if (enemies.length > friends.length) {
+			mode = Mode.RETREAT;
+		} else {
+			mode = Mode.ATTACK;
 		}
 	}
 
@@ -66,12 +64,19 @@ public class Launcher extends Unit {
 
 	}
 
-	public void launcherAttack() throws GameActionException {
+	private void launcherAttack() throws GameActionException {
 		RobotInfo enemy = null;
 		int dist = Integer.MAX_VALUE;
+		int health = Integer.MAX_VALUE;
 		for (RobotInfo r : enemies) {
-			if (r.location.distanceSquaredTo(pos) < dist) {
-				dist = r.location.distanceSquaredTo(pos);
+			if(r.type == RobotType.HEADQUARTERS) {
+				continue;
+			}
+			int d = r.location.distanceSquaredTo(pos);
+			if ((r.health < health && d <= type.actionRadiusSquared) || (d > type.actionRadiusSquared && d < dist) ) {
+				// Prey on the close, weak units.
+				dist = d;
+				health = r.health;
 				enemy = r;
 			}
 		}
@@ -95,47 +100,9 @@ public class Launcher extends Unit {
 		navigator.fuzzyMoveTo(loc, 2);
 	}
 
-	public void launcherRetreat() throws GameActionException {
-		// Haha yeah right. We're no chickens.
-	}
-
-	public MapLocation runAwayLocation() throws GameActionException {
-		int dx = 0;
-		int dy = 0;
-		for (RobotInfo robot : enemies) {
-			switch (robot.type) {
-				case LAUNCHER:
-				case DESTABILIZER:
-					dx += pos.x - robot.location.x;
-					dy += pos.y - robot.location.y;
-					break;
-				default:
-			}
-		}
-		return pos.translate(dx, dy);
-	}
-
-	public MapLocation enemyGoalLocation() throws GameActionException {
-		// Moving towards this goal should bring you closer to the enemy.
-		int chunk = MinimapInfo.nearestEnemyChunk(minimap.getChunkIndex(pos), minimap.getChunks());
-		if (chunk != -1) {
-			// move to the nearest enemy chunk
-			return minimap.getChunkCenter(chunk);
-		} else {
-			// spread out
-			int dx = 0;
-			int dy = 0;
-			for (RobotInfo robot : rc.senseNearbyRobots(-1, myTeam)) {
-				switch (robot.type) {
-					case LAUNCHER:
-					case DESTABILIZER:
-						dx += pos.x - robot.location.x;
-						dy += pos.y - robot.location.y;
-						break;
-					default:
-				}
-			}
-			return pos.translate(dx, dy);
-		}
+	private void launcherRetreat() throws GameActionException {
+		MapLocation loc = runAwayLocation();
+		navigator.fuzzyMoveTo(loc, 2);
+		navigator.fuzzyMoveTo(loc, 2);
 	}
 }

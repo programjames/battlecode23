@@ -81,6 +81,9 @@ public class Carrier extends Unit {
 			case GIVE_HQ_RESOURCES:
 				giveHQResources();
 				break;
+			case IN_DANGER:
+				dangerLevels(); // only a true cognoscenti would understand.
+				break;
 			default:
 				break;
 			}
@@ -91,6 +94,44 @@ public class Carrier extends Unit {
 
 		while (depositToNearbyHQ() | pickupFromNearbyWell())
 			; // single | is intentional so both are attempted
+	}
+
+	private void dangerLevels() throws GameActionException {
+		if(totalCarryWeight > 0) {
+
+		}
+	}
+
+	private void launcherAttack() throws GameActionException {
+		RobotInfo enemy = null;
+		int health = Integer.MAX_VALUE;
+		for (RobotInfo r : enemies) {
+			if(r.type == RobotType.HEADQUARTERS) {
+				continue;
+			}
+			if (r.location.distanceSquaredTo(pos) <= type.actionRadiusSquared && r.health < health) { // Prey on the close, weak units.
+				health = r.health;
+				enemy = r;
+			}
+		}
+
+		if (enemy == null)
+			return;
+
+		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location)) {
+			// Move in for the kill mwahahaha
+			navigator.setDestination(enemy.location);
+			navigator.move();
+		}
+
+		while (rc.canAttack(enemy.location)) {
+			rc.attack(enemy.location);
+		}
+
+		// Run away so they don't hit us!
+		MapLocation loc = runAwayLocation();
+		navigator.fuzzyMoveTo(loc, 2);
+		navigator.fuzzyMoveTo(loc, 2);
 	}
 	
 	private void giveHQResources() throws GameActionException {
@@ -384,7 +425,17 @@ public class Carrier extends Unit {
 		default:
 			job = Job.GATHER_RESOURCES;
 		case GATHER_RESOURCES:
+			if (enemies.length > 0) {
+				mode = Mode.IN_DANGER;
+				break;
+			}
 			switch(mode) {
+			case IN_DANGER:
+				if(enemies.length == 0) {
+					mode = Mode.GOTO_RESOURCES;
+				} else {
+					break;
+				}
 			case GOTO_RESOURCES:
 			case DRAW_RESOURCES_FROM_WELL:
 				if (totalCarryWeight >= 40) {
