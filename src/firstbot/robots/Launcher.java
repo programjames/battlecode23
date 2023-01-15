@@ -29,12 +29,9 @@ public class Launcher extends Unit {
 		if (mode == Mode.FIND_ENEMY) {
 			if (enemies.length > 0) { // Found an enemy!
 				mode = Mode.ATTACK;
-			} else {
-				navigator.setDestination(enemyGoalLocation());
 			}
 		} else if (enemies.length == 0) { // Need to go find more enemies.
 			mode = Mode.FIND_ENEMY;
-			navigator.setDestination(enemyGoalLocation());
 		}
 	}
 
@@ -44,8 +41,8 @@ public class Launcher extends Unit {
 			case ATTACK_ENEMY:
 				switch (mode) {
 					case FIND_ENEMY: // move to our enemy goal location
-						navigator.move();
-						navigator.move();
+						navigator.move(enemyGoalLocation());
+						navigator.move(enemyGoalLocation());
 						break;
 
 					case ATTACK:
@@ -81,8 +78,7 @@ public class Launcher extends Unit {
 
 		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location)) {
 			// Move in for the kill mwahahaha
-			navigator.setDestination(enemy.location);
-			navigator.move();
+			navigator.move(enemy.location);
 		}
 
 		while (rc.canAttack(enemy.location)) {

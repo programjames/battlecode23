@@ -27,6 +27,7 @@ public class Headquarters extends Building {
 		}
 
 		// Draw the minimap
+		/*
 		for (int x = 2; x < mapWidth; x += 5) {
 			for (int y = 2; y < mapHeight; y += 5) {
 				int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
@@ -45,5 +46,6 @@ public class Headquarters extends Building {
 				}
 			}
 		}
+		*/
 	}
 }
