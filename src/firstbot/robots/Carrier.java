@@ -245,7 +245,7 @@ public class Carrier extends Unit {
 			case 8:
 				// All of these are a distance of 2 from the well
 				// Try to move as close as possible
-				
+
 				Direction directionToMove = pos.directionTo(myWellLocation);
 				if (rc.canMove(directionToMove)) {
 					rc.move(directionToMove);
@@ -416,6 +416,16 @@ public class Carrier extends Unit {
 			default:
 				job = Job.GATHER_RESOURCES;
 			case GATHER_RESOURCES:
+				// Decide if we should switch to mining from a new well!
+				switch (mode) {
+					case DRAW_RESOURCES_FROM_WELL:
+						if (rc.senseNearbyRobots(10, myTeam).length >= 20) {
+							switchWell();
+						}
+						break;
+					default:
+						break;
+				}
 				switch (mode) {
 					case GOTO_RESOURCES:
 					case DRAW_RESOURCES_FROM_WELL:
@@ -458,6 +468,18 @@ public class Carrier extends Unit {
 				}
 				break;
 		}
+	}
+
+	private void switchWell() {
+		switchWell(0.02);
+	}
+	
+	private void switchWell(double probability) {
+		/*
+		 * Switch what well we're mining from to some random other well (if available) with the given probability.
+		 */
+		int myChunk = minimap.getChunkIndex(pos);
+		MinimapInfo.nearestWellChunk(myChunk, null);
 	}
 
 }
