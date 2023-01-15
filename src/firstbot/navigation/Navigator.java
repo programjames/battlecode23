@@ -13,6 +13,9 @@ public class Navigator {
 	public MapLocation destination; // the current destination to navigate to
 	public Direction lastMoveDirection = Direction.CENTER;
 
+	public Direction[] path;
+	public int pathIndex = 0;
+
 	public Navigator(Robot robot, RobotController rc) {
 		this.rc = rc;
 		this.robot = robot;
@@ -22,11 +25,26 @@ public class Navigator {
 		this.destination = destination;
 	}
 
+	public void prepareMove() throws GameActionException {
+		Pather.reset(rc, destination);
+        int localDestination = Pather.dijkstra(rc);
+        path = Pather.reconstructPath(localDestination);
+		pathIndex = 0;
+	}
+
 	public void move() throws GameActionException {
 		/*
 		 * Move towards the destination
 		 */
-		Direction directionToMove = getFuzzyMoveDirection();
+
+		Direction directionToMove;
+		if(path == null || pathIndex == path.length) {
+			directionToMove = getFuzzyMoveDirection();
+		} else {
+			directionToMove = path[pathIndex];
+			pathIndex++;
+		}
+		
 		if (directionToMove != Direction.CENTER && rc.canMove(directionToMove)) {
 			rc.move(directionToMove);
 			lastMoveDirection = directionToMove;

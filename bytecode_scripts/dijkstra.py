@@ -100,7 +100,7 @@ public static void reset(RobotController rc) throws GameActionException {
         loc = info.getMapLocation();
         encoded = encodeEntry(loc.x - startLocation.x, loc.y - startLocation.y);
         if (info.isPassable()) {
-            cooldowns[encoded] = (int) (cooldown * info.getCooldownMuliplier(myTeam));
+            cooldowns[encoded] = (int) (cooldown * info.getCooldownMultiplier(myTeam));
             currents[encoded] = info.getCurrentDirection();
             toCheck[encoded] = rc.senseRobotAtLocation(loc) == null;
         } else {
@@ -186,7 +186,7 @@ def reset(num):
     s = """
     if (info.isPassable() && rc.senseRobotAtLocation(info.getMapLocation()) == null) {
         encoded = encode(info.getMapLocation().x - startLocationX, info.getMapLocation().y - startLocationY);
-        cooldowns[encoded] = (int) (cooldown * info.getCooldownMuliplier(myTeam));
+        cooldowns[encoded] = (int) (cooldown * info.getCooldownMultiplier(myTeam));
         currents[encoded] = info.getCurrentDirection();
         setToCheck(encoded);
     }"""
@@ -215,6 +215,7 @@ def move_with_current(num):
     for n in range(num):
         func += f"""
         case {n}:
+            if(currents[{n}] == null) {{return -1;}}
             switch(currents[{n}]) {{"""
         for (dx, dy), dir in dict_dirs.items():
             x = numbers[n][0] + dx
@@ -266,6 +267,7 @@ def dijkstra_sub(num, n_range, id):
 
                         addToQueue({m});
                     }}
+                    //debugPoint({m}, rc);
                     int currentTile = moveWithCurrent({m});
                     if (getToCheck(currentTile)) {{
                         costs[currentTile] = cost + cooldowns[{m}];
@@ -303,7 +305,7 @@ def dijkstra(num):
     func = f"""public static int dijkstra(RobotController rc) {{
         int cost = rc.getMovementCooldownTurns();
         if (cost >= 10) {{
-            return Integer.MAX_VALUE;
+            return -1;
         }}
 
         costs[{numbers[(0, 0)]}] = cost;
@@ -338,16 +340,15 @@ def dijkstra(num):
     return func
 
 def reconstruct_path(num):
-    return f"""public static Direction[] reconstructPath(int dest, RobotController rc) {{
+    return f"""public static Direction[] reconstructPath(int dest) {{
         if (dest == -1) {{
-            return new Direction[] {{ Direction.CENTER }};
+            return null;
         }}
 
         int start = {numbers[(0, 0)]};
         Direction[] path = new Direction[100];
         int i = 0;
         while (dest != start) {{
-            //debugPoint(dest, rc);
             Direction dir = dirs[dest];
             if (currented[dest] == null || currents[translateDir(dest, dir.opposite())] == Direction.CENTER) {{
                 path[i] = dir;
@@ -693,15 +694,15 @@ def debug_point(num):
     return """public static void debugPoint(int enc, RobotController rc) {
         int[] diff = decode(enc);
         rc.setIndicatorDot(rc.getLocation().translate(diff[0], diff[1]), color, color, color);
-        color += 5;
+        color += 10;
     }"""
 
 ###########################
 ### Putting it together ###
 ###########################
 
-def all_together(num):
-    class_string = f"""package pathing;
+def all_together(num, package_name):
+    class_string = f"""package {package_name};
 
 import battlecode.common.*;
 public class Pather {{
@@ -723,4 +724,4 @@ public class Pather {{
         class_string += method(num)
     return class_string + "}"
 
-print(all_together(len(locs)))
+print(all_together(len(locs), "firstbot.navigation"))
