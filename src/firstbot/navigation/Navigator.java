@@ -28,12 +28,12 @@ public class Navigator {
 
 	public void prepareMove() throws GameActionException {
 		Pather.reset(rc, destination);
-        int localDestination = Pather.dijkstra(rc);
-        path = Pather.reconstructPath(localDestination);
+		int localDestination = Pather.dijkstra(rc);
+		path = Pather.reconstructPath(localDestination);
 		pathIndex = 0;
 	}
 
-	public void move() throws GameActionException {
+	public boolean move() throws GameActionException {
 		/*
 		 * Move towards the destination
 		 */
@@ -43,53 +43,175 @@ public class Navigator {
 			needToPrepareMove = false;
 		}
 		Direction directionToMove;
-		if(path == null || pathIndex == path.length) {
+		if (path == null || pathIndex == path.length) {
 			directionToMove = getFuzzyMoveDirection();
 		} else {
 			directionToMove = path[pathIndex];
 			pathIndex++;
 		}
-		
+
 		if (directionToMove != Direction.CENTER && rc.canMove(directionToMove)) {
 			rc.move(directionToMove);
 			lastMoveDirection = directionToMove;
+			return true;
 		}
+		return false;
 	}
 
-	private Direction getFuzzyMoveDirection() {
+	public boolean fuzzyMoveTo(MapLocation movLoc) throws GameActionException {
+		// Try to move to the moveLoc using a single fuzzy move.
+		return fuzzyMoveTo(movLoc, 2);
+	}
+
+	public boolean fuzzyMoveTo(MapLocation movLoc, int fuzziness) throws GameActionException {
+		// Try to move to the moveLoc using a single fuzzy move.
+		Direction moveDir = getFuzzyMoveDirection(fuzziness);
+		if (moveDir == Direction.CENTER || !rc.canMove(moveDir)) {
+			return false; // Couldn't move
+		}
+		rc.move(moveDir);
+		robot.pos = rc.getLocation();
+		return true;
+	}
+
+	public Direction getFuzzyMoveDirection() {
+		return getFuzzyMoveDirection(2);
+	}
+
+	public Direction getFuzzyMoveDirection(int fuzziness) {
 		/*
 		 * Return the direction that points closest to our destination that we can
 		 * legally move to.
 		 */
-		Direction bestDirection = robot.pos.directionTo(destination);
-		if (rc.canMove(bestDirection)) {
-			return bestDirection;
-		}
-		Direction right = bestDirection.rotateRight();
-		if (rc.canMove(right)) {
-			return right;
-		}
-		Direction left = bestDirection.rotateLeft();
-		if (rc.canMove(left)) {
-			return left;
-		}
-		Direction rightRight = right.rotateRight();
-		Direction leftLeft = left.rotateLeft();
-		if (rc.canMove(rightRight)) {
-			if (rightRight != lastMoveDirection.opposite()) {
-				return rightRight;
-			} else {
-				return leftLeft;
+		Direction direction = robot.pos.directionTo(destination);
+		Direction dirRight = direction;
+		Direction dirLeft = direction;
+		switch (fuzziness) {
+		case 0:
+			if (rc.canMove(direction)) {
+				return direction;
 			}
-		}
-		if (rc.canMove(leftLeft)) {
-			if (leftLeft != lastMoveDirection.opposite()) {
-				return leftLeft;
-			} else {
-				return rightRight;
+			return Direction.CENTER;
+		case 1:
+			if (rc.canMove(direction)) {
+				return direction;
 			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				return dirLeft;
+			}
+			return Direction.CENTER;
+		case 2:
+			if (rc.canMove(direction)) {
+				return direction;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				return dirLeft;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				if (dirRight == lastMoveDirection.opposite()) {
+					return dirLeft.rotateLeft();
+				}
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				if (dirLeft == lastMoveDirection.opposite()) {
+					return dirRight;
+				}
+				return dirLeft;
+			}
+			return Direction.CENTER;
+		case 3:
+			if (rc.canMove(direction)) {
+				return direction;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				return dirLeft;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				if (dirRight == lastMoveDirection.opposite()) {
+					return dirLeft.rotateLeft();
+				}
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				if (dirLeft == lastMoveDirection.opposite()) {
+					return dirRight;
+				}
+				return dirLeft;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				return dirLeft;
+			}
+			return Direction.CENTER;
+		case 4:
+		default:
+			if (rc.canMove(direction)) {
+				return direction;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				return dirLeft;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				if (dirRight == lastMoveDirection.opposite()) {
+					return dirLeft.rotateLeft();
+				}
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				if (dirLeft == lastMoveDirection.opposite()) {
+					return dirRight;
+				}
+				return dirLeft;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				return dirLeft;
+			}
+			dirRight = dirRight.rotateRight();
+			if (rc.canMove(dirRight)) {
+				return dirRight;
+			}
+			dirLeft = dirLeft.rotateLeft();
+			if (rc.canMove(dirLeft)) {
+				return dirLeft;
+			}
+			return Direction.CENTER;
 		}
-		return Direction.CENTER; // all other directions would only get us farther from our goal
 	}
 
 }

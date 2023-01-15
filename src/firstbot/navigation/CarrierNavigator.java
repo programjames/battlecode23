@@ -14,8 +14,6 @@ public class CarrierNavigator extends Navigator {
 
 	Carrier carrier;
 
-	public MapLocation myWellLocation = null; // MapLocation of the well this carrier frequents
-	public MapLocation myHQLocation = null; // MapLocation of the HQ this carrier frequents
 	MapLocation randomGoal = null;
 
 	public CarrierNavigator(Carrier carrier, RobotController rc) {
@@ -23,43 +21,12 @@ public class CarrierNavigator extends Navigator {
 		this.carrier = carrier;
 	}
 
-	public void lookAround() throws GameActionException {
-		/*
-		 * Use your senses to detect a well or HQ
-		 */
-
-		if (myWellLocation == null) {
-			int closestDistance = Integer.MAX_VALUE;
-			for (WellInfo well : rc.senseNearbyWells()) {
-				MapLocation wellLocation = well.getMapLocation();
-				if (carrier.pos.distanceSquaredTo(wellLocation) < closestDistance) {
-					myWellLocation = wellLocation;
-					closestDistance = carrier.pos.distanceSquaredTo(wellLocation);
-				}
-			}
-		}
-
-		if (myHQLocation == null) {
-			int closestDistance = Integer.MAX_VALUE;
-			for (RobotInfo robot : rc.senseNearbyRobots(-1, carrier.myTeam)) {
-				if (robot.type != RobotType.HEADQUARTERS) {
-					continue;
-				}
-				MapLocation hqLocation = robot.location;
-				if (carrier.pos.distanceSquaredTo(hqLocation) < closestDistance) {
-					myHQLocation = hqLocation;
-					closestDistance = carrier.pos.distanceSquaredTo(hqLocation);
-				}
-			}
-		}
-	}
-
 	public void navigateToWell() throws GameActionException {
 		/*
 		 * Navigate to a well to collect resources
 		 */
-		lookAround();
-		if (myWellLocation == null) {
+		carrier.lookAround();
+		if (carrier.myWellLocation == null) {
 			if (randomGoal == null) {
 				randomGoal = new MapLocation(carrier.rng.nextInt(carrier.mapWidth),
 						carrier.rng.nextInt(carrier.mapHeight));
@@ -71,8 +38,8 @@ public class CarrierNavigator extends Navigator {
 			}
 			move();
 		} else {
-			if (destination != myWellLocation) {
-				setDestination(myWellLocation);
+			if (destination != carrier.myWellLocation) {
+				setDestination(carrier.myWellLocation);
 			}
 			move();
 		}
@@ -83,8 +50,8 @@ public class CarrierNavigator extends Navigator {
 		/*
 		 * Navigate to a headquarters to deposit resources
 		 */
-		lookAround();
-		if (myHQLocation == null) {
+		carrier.lookAround();
+		if (carrier.myHQLocation == null) {
 			if (randomGoal == null) {
 				randomGoal = new MapLocation(carrier.rng.nextInt(carrier.mapWidth),
 						carrier.rng.nextInt(carrier.mapHeight));
@@ -96,8 +63,8 @@ public class CarrierNavigator extends Navigator {
 			}
 			move();
 		} else {
-			if (destination != myHQLocation) {
-				setDestination(myHQLocation);
+			if (destination != carrier.myHQLocation) {
+				setDestination(carrier.myHQLocation);
 			}
 			move();
 		}
@@ -105,15 +72,47 @@ public class CarrierNavigator extends Navigator {
 	}
 
 	@Override
-	public void move() throws GameActionException {
-		super.move();
-		lookAround();
-		super.move();
-		lookAround();
-		super.move();
-		lookAround();
-		super.move();
-		lookAround();
+	public boolean move() throws GameActionException {
+		/*
+		 * Override to use our special moveSingle() and to look around after moving
+		 */
+		boolean moved = false;
+		moved |= moveSingle();
+		carrier.lookAround();
+		moved |= moveSingle();
+		carrier.lookAround();
+		moved |= moveSingle();
+		carrier.lookAround();
+		moved |= moveSingle();
+		carrier.lookAround();
+		return moved;
 	}
 
+	public boolean moveSingle() throws GameActionException {
+		/*
+		 * Basically the same as the super() except that if it can't move because the
+		 * location is occupied, it does a fuzzy move instead. This is to get around
+		 * blockages at mining locations.
+		 */
+		Direction directionToMove;
+		if (path == null || pathIndex == path.length) {
+			directionToMove = getFuzzyMoveDirection();
+		} else {
+			directionToMove = path[pathIndex];
+			pathIndex++;
+		}
+
+		if (directionToMove != Direction.CENTER) {
+			if (rc.canMove(directionToMove)) {
+				rc.move(directionToMove);
+				lastMoveDirection = directionToMove;
+				return true;
+			} else if (rc.isLocationOccupied(carrier.pos.add(directionToMove))) {
+				// Critical difference between this and super.move()
+				return fuzzyMoveTo(destination, 3); // Extra fuzziness when location blocked to especially avoid
+													// blockages
+			}
+		}
+		return false;
+	}
 }

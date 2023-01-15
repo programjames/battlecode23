@@ -13,6 +13,9 @@ public class Carrier extends Unit {
 	int totalCarryWeight; // total weight of everything we're carrying
 
 	CarrierNavigator navigator;
+	
+	public MapLocation myWellLocation = null; // MapLocation of the well this carrier frequents
+	public MapLocation myHQLocation = null; // MapLocation of the HQ this carrier frequents
 
 	public Carrier(RobotController rc) {
 		super(rc);
@@ -56,7 +59,7 @@ public class Carrier extends Unit {
 		 * deposit and we can shave off an otherwise wasted turn). See end of round for
 		 * same command
 		 * 
-		 * TODO: Take it into account that we DO NOT want to deposite resources or
+		 * TODO: Take it into account that we DO NOT want to deposit resources or
 		 * gather them if we're under attack
 		 */
 		while (depositToNearbyHQ() | pickupFromNearbyWell())
@@ -72,6 +75,12 @@ public class Carrier extends Unit {
 			case GOTO_HQ:
 				navigator.navigateToHQ();
 				break;
+			case DRAW_RESOURCES_FROM_WELL:
+				drawResourcesFromWell();
+				break;
+			case GIVE_HQ_RESOURCES:
+				giveHQResources();
+				break;
 			default:
 				break;
 			}
@@ -83,7 +92,185 @@ public class Carrier extends Unit {
 		while (depositToNearbyHQ() | pickupFromNearbyWell())
 			; // single | is intentional so both are attempted
 	}
+	
+	private void giveHQResources() throws GameActionException {
+		/*
+		 * This tries to dart in and out from around an HQ to draw the most possible resources from it.
+		 * This is very similar to drawResourcesFromWell, but it doesn't try to move onto the HQ
+		 * 
+		 * How it works:
+		 *   1. If we're on top of the well, never move--you might block another robot from moving into
+		 *   	the spot we just moved to!
+		 *   2. If we're next to the well and the top of the well is open, move to that top! This lets
+		 *   	a new robot take our place on the side.
+		 *   3. If we're by the side and we can move out and then back in on the next turn, do so. This
+		 *   	lets a new robot take our place in the interim. Maybe they can even move back out themselves!
+		 *   4. If we're two away from the well, try to move to move in. This will let us mine on our turn.
+		 *   5. If we're two away and can't move in, try to position ourselves so we can move in in the future.
+		 *   	If there are no empty spots, this means moving as close as possible--i.e. along the "sides" of
+		 *   	the 5x5 square. Doing so gives us the most options for moving inward in the future.
+		 */
+		
+		switch(pos.distanceSquaredTo(myHQLocation)) {
+		case 0:
+			// We're on top of the HQ, which should be impossible...
+			return;
+		case 1:
+		case 2:
+			// We're adjacent to the HQ
+			
+			// Try to dart back out
+			for (Direction direction : Constants.NONZERO_DIRECTIONS) {
+				MapLocation moveLoc = pos.add(direction);
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+					// We have enough movement cooldown to come back on the next turn, so let's dart out.
+					rc.move(direction);
+					return;
+				}
+			}
+			return;
+			
+		case 3:
+			// Shouldn't be possible, but whatever
+		case 4:
+		case 5:
+		case 6:
+			// Also shouldn't be possible
+		case 7:
+			// Also shouldn't be possible
+		case 8:
+			// All of these are a distance of 2 from the HQ
+			// Try to move as close as possible
+			navigator.fuzzyMoveTo(myHQLocation);
+		default:
+			// This should probably never be called, but just in case...
+			navigator.fuzzyMoveTo(myHQLocation);
+		}
+	}
 
+	private void drawResourcesFromWell() throws GameActionException {
+		/*
+		 * This tries to dart in and out from a well to draw the most possible resources from it
+		 * 
+		 * How it works:
+		 *   1. If we're on top of the well, never move--you might block another robot from moving into
+		 *   	the spot we just moved to!
+		 *   2. If we're next to the well and the top of the well is open, move to that top! This lets
+		 *   	a new robot take our place on the side.
+		 *   3. If we're by the side and we can move out and then back in on the next turn, do so. This
+		 *   	lets a new robot take our place in the interim. Maybe they can even move back out themselves!
+		 *   4. If we're two away from the well, try to move to move in. This will let us mine on our turn.
+		 *   5. If we're two away and can't move in, try to position ourselves so we can move in in the future.
+		 *   	If there are no empty spots, this means moving as close as possible--i.e. along the "sides" of
+		 *   	the 5x5 square. Doing so gives us the most options for moving inward in the future.
+		 */
+		
+		switch(pos.distanceSquaredTo(myWellLocation)) {
+		case 0:
+			// We're on top of the well
+			return;
+		case 1:
+		case 2:
+			// We're adjacent to the well
+			
+			// Check if well is open, and if so move onto it
+			if (!rc.isLocationOccupied(myWellLocation)) {
+				Direction moveDir = pos.directionTo(myWellLocation);
+				if (rc.canMove(moveDir)) {
+					rc.move(moveDir);
+					return;
+				}
+			}
+			
+			// Try to dart back out
+			Direction direction = myWellLocation.directionTo(pos);
+			MapLocation moveLoc = pos.add(direction);
+			if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+				// We have enough action to come back on the next turn, so let's dart out.
+				rc.move(direction);
+				return;
+			}
+
+			direction = direction.rotateRight();
+			moveLoc = pos.add(direction);
+			if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+				// We have enough action to come back on the next turn, so let's dart out.
+				rc.move(direction);
+				return;
+			}
+
+			direction = direction.rotateLeft().rotateLeft();
+			moveLoc = pos.add(direction);
+			if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+				// We have enough action to come back on the next turn, so let's dart out.
+				rc.move(direction);
+				return;
+			}
+			return;
+			
+		case 3:
+			// Shouldn't be possible, but whatever
+		case 4:
+		case 5:
+		case 6:
+			// Also shouldn't be possible
+		case 7:
+			// Also shouldn't be possible
+		case 8:
+			// All of these are a distance of 2 from the well
+			// Try to move as close as possible
+			navigator.fuzzyMoveTo(myWellLocation, 4);
+		default:
+			// This should probably never be called, but just in case...
+			navigator.fuzzyMoveTo(myWellLocation);
+		}
+	}
+
+	public void lookAround() throws GameActionException {
+		/*
+		 * Use your senses to detect a well or HQ
+		 */
+
+		if (myWellLocation == null) {
+			int closestDistance = Integer.MAX_VALUE;
+			for (WellInfo well : rc.senseNearbyWells()) {
+				MapLocation wellLocation = well.getMapLocation();
+				if (pos.distanceSquaredTo(wellLocation) < closestDistance) {
+					myWellLocation = wellLocation;
+					closestDistance = pos.distanceSquaredTo(wellLocation);
+				}
+			}
+		}
+
+		if (myHQLocation == null) {
+			int closestDistance = Integer.MAX_VALUE;
+			for (RobotInfo robot : rc.senseNearbyRobots(-1, myTeam)) {
+				if (robot.type != RobotType.HEADQUARTERS) {
+					continue;
+				}
+				MapLocation hqLocation = robot.location;
+				if (pos.distanceSquaredTo(hqLocation) < closestDistance) {
+					myHQLocation = hqLocation;
+					closestDistance = pos.distanceSquaredTo(hqLocation);
+				}
+			}
+		}
+	}
+	
+	public boolean nearMyHQ() {
+		/*
+		 * Are we within 8 units of our saved HQ position?
+		 */
+		return myHQLocation != null && myHQLocation.distanceSquaredTo(pos) <= 8;
+	}
+	
+	public boolean nearMyWell() {
+		/*
+		 * Are we within 8 units of our saved well position?
+		 */
+		return myHQLocation != null && myWellLocation.distanceSquaredTo(pos) <= 8;
+	}
+	
 	private boolean pickupFromNearbyWell() throws GameActionException {
 		/*
 		 * If possible, pick up resources from a nearby well
@@ -180,36 +367,64 @@ public class Carrier extends Unit {
 
 	private void findBestJob() {
 		/*
-		 * Determine what job we should be doing. Jobs can be things like scouting,
-		 * gathering resources, transferring resources to the headquarters, etc.
+		 * Determine what job/mode we should be doing. Jobs can be things like scouting,
+		 * gathering resources, deploying an anchor etc. Modes should be more specific,
+		 * like moving to resources, drawing resources from well, etc.
 		 * 
-		 * THIS SHOULD NOT CHANGE OFTEN. Think of jobs as high level things that take
+		 * JOBS SHOULD NOT CHANGE OFTEN. Think of jobs as high level things that take
 		 * >20 rounds to complete. It should be something like scouting out the enemy,
 		 * or gathering resources, etc. Jobs should not be something like "run away" or
-		 * "path to this location". Those are too low level and temporary. I think I'm
-		 * going to use the term *mode* to describe those kinds of things. Jobs should
-		 * also be relatively unit specific. You don't ask a Carrier to "support troops"
-		 * or a Booster to "deploy an anchor".
+		 * "path to this location". Those are too low level and temporary.
+		 * 
+		 * Jobs should also be relatively unit specific. You don't ask a Carrier to
+		 * "support troops" or a Booster to "deploy an anchor".
 		 */
 
 		switch (job) {
-		case GATHER_RESOURCES:
 		default:
-			if (totalCarryWeight >= 40) {
-				// We can't carry any more, so return to the HQ
-				mode = Mode.GOTO_HQ;
+			job = Job.GATHER_RESOURCES;
+		case GATHER_RESOURCES:
+			switch(mode) {
+			case GOTO_RESOURCES:
+			case DRAW_RESOURCES_FROM_WELL:
+				if (totalCarryWeight >= 40) {
+					mode = Mode.GOTO_HQ;
+				} else {
+					mode = nearMyWell() ? Mode.DRAW_RESOURCES_FROM_WELL : Mode.GOTO_RESOURCES;
+				}
 				break;
-			}
-			if (totalCarryWeight <= 0) {
-				// We've transferred everything we have, so go out and
-				// gather more resources!
-				if (navigator != null && navigator.myWellLocation != null) {
+			case GOTO_HQ:
+			case GIVE_HQ_RESOURCES:
+				if (totalCarryWeight <= 0) {
+					// We've transferred everything we have, so go out and
+					// gather more resources!
+					if (navigator != null && myWellLocation != null) {
+						mode = Mode.GOTO_RESOURCES;
+					} else {
+						mode = Mode.FIND_RESOURCES;
+					}
+				} else {
+					mode = nearMyHQ() ?  Mode.GIVE_HQ_RESOURCES : Mode.GOTO_HQ;
+				}
+				break;
+			default:
+				if (totalCarryWeight <= 0) {
+					if (navigator != null && myWellLocation != null) {
+						mode = Mode.GOTO_RESOURCES;
+					} else {
+						mode = Mode.FIND_RESOURCES;
+					}
+				} else if (myWellLocation == null) {
+					mode = Mode.GOTO_HQ;	
+				} else if (myHQLocation == null || myWellLocation.distanceSquaredTo(pos) < myHQLocation.distanceSquaredTo(pos)) {
 					mode = Mode.GOTO_RESOURCES;
 				} else {
-					mode = Mode.FIND_RESOURCES;
+					mode = Mode.GOTO_HQ;
 				}
+				break;
 			}
 			break;
 		}
 	}
+
 }
