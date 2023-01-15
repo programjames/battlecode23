@@ -94,17 +94,26 @@ public class CarrierNavigator extends Navigator {
 		 * location is occupied, it does a fuzzy move instead. This is to get around
 		 * blockages at mining locations.
 		 */
+		rc.setIndicatorDot(carrier.pos, 255, 255, 0);
 		Direction directionToMove;
 		if (path == null || pathIndex == path.length) {
 			directionToMove = getFuzzyMoveDirection();
+			System.out.println("Started at fuzzy");
 		} else {
 			directionToMove = path[pathIndex];
 			pathIndex++;
+			if (directionToMove == lastMoveDirection.opposite()) {
+				directionToMove = getFuzzyMoveDirection();
+				System.out.println("Switched to fuzzy");
+				pathIndex = path.length;
+			}
 		}
+		System.out.println(directionToMove);
 
 		if (directionToMove != Direction.CENTER) {
 			if (rc.canMove(directionToMove)) {
 				rc.move(directionToMove);
+				carrier.pos = rc.getLocation();
 				lastMoveDirection = directionToMove;
 				return true;
 			} else if (rc.isLocationOccupied(carrier.pos.add(directionToMove))) {

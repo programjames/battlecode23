@@ -8,6 +8,7 @@ def make_fuzzy():
 		Direction direction = robot.pos.directionTo(destination);
         Direction dirRight = direction;
         Direction dirLeft = direction;
+        Direction moveDir = Direction.CENTER;
 		switch(fuzziness) {"""
     ]
     for x in range(5):
@@ -15,40 +16,38 @@ def make_fuzzy():
         if x == 4:
             parts.append("default:")
         parts.append("""if (rc.canMove(direction)) {
-			return direction;
+			moveDir = direction;
+            break;
 		}""")
         if x == 0:
-            parts.append("return Direction.CENTER;")
+            parts.append("break;")
         if x > 0:
             for i in range(x):
                 parts.append("dirRight = dirRight.rotateRight();")
-                if i == 1:
-                    parts.append("""if (rc.canMove(dirRight)) {
-                        if (dirRight == lastMoveDirection.opposite()) {
-                            return dirLeft.rotateLeft();
-                        }
-                        return dirRight;
-                    }""")
-                else:
-                    parts.append("""if (rc.canMove(dirRight)) {
-                        return dirRight;
-                    }""")
-                if i < 4:
+                parts.append("""if (rc.canMove(dirRight)) {
+                    moveDir = dirRight;
+                    break;
+                }""")
+                if i < 3:
                     parts.append("dirLeft = dirLeft.rotateLeft();")
-                    
-                    if i == 1:
-                        parts.append("""if (rc.canMove(dirLeft)) {
-                            if (dirLeft == lastMoveDirection.opposite()) {
-                                return dirRight;
-                            }
-                            return dirLeft;
-                        }""")
-                    else:
-                        parts.append("""if (rc.canMove(dirLeft)) {
-                            return dirLeft;
-                        }""")
-            parts.append("return Direction.CENTER;")
+                    parts.append("""if (rc.canMove(dirLeft)) {
+                        moveDir = dirLeft;
+                        break;
+                    }""")
+            parts.append("break;")
     parts.append("}")
+    parts.append("""if (moveDir == lastMoveDirection.opposite()) {
+        direction = lastMoveDirection;
+        if (rc.canMove(direction)) return direction;
+        if (fuzziness >= 2) {
+        dirRight = direction.rotateRight();
+        if (rc.canMove(dirRight)) return dirRight;
+        dirLeft = direction.rotateLeft();
+        if (rc.canMove(dirLeft)) return dirLeft;
+        }
+        return Direction.CENTER; // Moving is probably counter-productive here
+        }""")
+    parts.append("return moveDir;")
     parts.append("}")
     return "\n".join(parts)
 
