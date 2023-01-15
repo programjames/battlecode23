@@ -81,9 +81,9 @@ public class Carrier extends Unit {
 					case GIVE_HQ_RESOURCES:
 						giveHQResources();
 						break;
-			case IN_DANGER:
-				dangerLevels(); // only a true cognoscenti would understand.
-				break;
+					case IN_DANGER:
+						dangerLevels(); // only a true cognoscenti would understand.
+						break;
 					default:
 						break;
 				}
@@ -97,13 +97,13 @@ public class Carrier extends Unit {
 	}
 
 	private void dangerLevels() throws GameActionException {
-		if(totalCarryWeight > 0) {
+		if (totalCarryWeight > 30) {
 			attack(navigator);
 		} else {
 			retreat(navigator);
 		}
 	}
-	
+
 	private void giveHQResources() throws GameActionException {
 		/*
 		 * This tries to dart in and out from around an HQ to draw the most possible
@@ -256,7 +256,7 @@ public class Carrier extends Unit {
 			case 8:
 				// All of these are a distance of 2 from the well
 				// Try to move as close as possible
-				
+
 				Direction directionToMove = pos.directionTo(myWellLocation);
 				if (rc.canMove(directionToMove)) {
 					rc.move(directionToMove);
@@ -427,17 +427,22 @@ public class Carrier extends Unit {
 			default:
 				job = Job.GATHER_RESOURCES;
 			case GATHER_RESOURCES:
-			if (enemies.length > 0) {
-				mode = Mode.IN_DANGER;
-				break;
-			}
-				switch (mode) {
-			case IN_DANGER:
-				if(enemies.length == 0) {
-					mode = Mode.GOTO_RESOURCES;
-				} else {
-					break;
+				enemyLoop: for (RobotInfo r : enemies) {
+					switch (r.type) {
+						case LAUNCHER:
+						case DESTABILIZER:
+							mode = Mode.IN_DANGER;
+							break enemyLoop;
+						default:
+					}
 				}
+				switch (mode) {
+					case IN_DANGER:
+						if (enemies.length == 0) {
+							mode = Mode.GOTO_RESOURCES;
+						} else {
+							break;
+						}
 					case GOTO_RESOURCES:
 					case DRAW_RESOURCES_FROM_WELL:
 						if (totalCarryWeight >= 40) {
