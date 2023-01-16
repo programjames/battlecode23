@@ -525,7 +525,7 @@ public class Carrier extends Unit {
 		wellToAvoid = myWellLocation;
 		myWellLocation = null;
 		int myChunk = minimap.getChunkIndex(pos);
-		int nearestWellChunk = MinimapInfo.nearestWellChunk(myChunk, minimap.getChunks());
+		int nearestWellChunk = MinimapInfo.nearestWellChunkOther(myChunk, minimap.getChunks());
 		if (nearestWellChunk != myChunk) {
 			navigator.randomGoal = minimap.getChunkCenter(nearestWellChunk);
 		} else {
