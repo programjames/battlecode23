@@ -36,6 +36,71 @@ public abstract class Unit extends Robot {
 		countUpNearbyStrengths();
 	}
 
+	@Override
+	public abstract void runTurn() throws GameActionException;
+
+	public MapLocation enemyGoalLocation() throws GameActionException {
+		// Moving towards this goal should bring you closer to the enemy.
+		int chunk = MinimapInfo.nearestEnemyChunk(minimap.getChunkIndex(pos), minimap.getChunks());
+		if (chunk != -1) {
+			// move to the nearest enemy chunk
+			return minimap.getChunkCenter(chunk);
+		} else {
+			return safeSpreadOutLocation();
+		}
+	}
+
+	public void attack(Navigator navigator) throws GameActionException {
+		RobotInfo enemy = null;
+		int dist = Integer.MAX_VALUE;
+		int health = Integer.MAX_VALUE;
+		for (RobotInfo r : enemies) {
+			if (r.type == RobotType.HEADQUARTERS) {
+				continue;
+			}
+			int d = r.location.distanceSquaredTo(pos);
+			if ((r.health < health && d <= type.actionRadiusSquared) || (d > type.actionRadiusSquared && d < dist)) {
+				// Prey on the close, weak units.
+				dist = d;
+				health = r.health;
+				enemy = r;
+			}
+		}
+
+		if (enemy == null)
+			return;
+
+		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location)
+				&& shouldCloseIn()) {
+			// Move in for the kill mwahahaha
+			navigator.move(enemy.location);
+		}
+
+		while (rc.canAttack(enemy.location)) {
+			rc.attack(enemy.location);
+		}
+
+		// Run away so they don't hit us!
+		MapLocation loc = runAwayLocation();
+		navigator.fuzzyMoveTo(loc, 4);
+		navigator.fuzzyMoveTo(loc, 4);
+	}
+
+	public void retreat(Navigator navigator) throws GameActionException {
+		MapLocation loc = runAwayLocation();
+		navigator.fuzzyMoveTo(loc, 4);
+		navigator.fuzzyMoveTo(loc, 4);
+	}
+
+	// Spreads out from friendly units while remaining near boosters and launchers.
+	public boolean shouldCloseIn() {
+		/*
+		 * If we're in attack mode, should we close in for the kill, or should we stay
+		 * still/run away?
+		 */
+		return true; // Should probably be overrided in subclasses
+	}
+
 	private void countUpNearbyStrengths() {
 		/*
 		 * This is a helper function for beginTurn(). It unrolls a few loops that are
@@ -5230,63 +5295,6 @@ public abstract class Unit extends Robot {
 		}
 	}
 
-	@Override
-	public abstract void runTurn() throws GameActionException;
-
-	public MapLocation enemyGoalLocation() throws GameActionException {
-		// Moving towards this goal should bring you closer to the enemy.
-		int chunk = MinimapInfo.nearestEnemyChunk(minimap.getChunkIndex(pos), minimap.getChunks());
-		if (chunk != -1) {
-			// move to the nearest enemy chunk
-			return minimap.getChunkCenter(chunk);
-		} else {
-			return safeSpreadOutLocation();
-		}
-	}
-
-	public void attack(Navigator navigator) throws GameActionException {
-		RobotInfo enemy = null;
-		int dist = Integer.MAX_VALUE;
-		int health = Integer.MAX_VALUE;
-		for (RobotInfo r : enemies) {
-			if (r.type == RobotType.HEADQUARTERS) {
-				continue;
-			}
-			int d = r.location.distanceSquaredTo(pos);
-			if ((r.health < health && d <= type.actionRadiusSquared) || (d > type.actionRadiusSquared && d < dist)) {
-				// Prey on the close, weak units.
-				dist = d;
-				health = r.health;
-				enemy = r;
-			}
-		}
-
-		if (enemy == null)
-			return;
-
-		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location)
-				&& shouldCloseIn()) {
-			// Move in for the kill mwahahaha
-			navigator.move(enemy.location);
-		}
-
-		while (rc.canAttack(enemy.location)) {
-			rc.attack(enemy.location);
-		}
-
-		// Run away so they don't hit us!
-		MapLocation loc = runAwayLocation();
-		navigator.fuzzyMoveTo(loc, 4);
-		navigator.fuzzyMoveTo(loc, 4);
-	}
-
-	public void retreat(Navigator navigator) throws GameActionException {
-		MapLocation loc = runAwayLocation();
-		navigator.fuzzyMoveTo(loc, 4);
-		navigator.fuzzyMoveTo(loc, 4);
-	}
-
-	// Spreads out from friendly units while remaining near boosters and launchers.
 	public MapLocation safeSpreadOutLocation() {
 		int dx = 0;
 		int dy = 0;
@@ -5986,7 +5994,7 @@ public abstract class Unit extends Robot {
 		}
 		return pos.translate(dx, dy);
 	}
-
+	
 	public MapLocation runAwayLocation() {
 		int dx = 0;
 		int dy = 0;
@@ -7105,11 +7113,4 @@ public abstract class Unit extends Robot {
 		return pos.translate(dx, dy);
 	}
 
-	public boolean shouldCloseIn() {
-		/*
-		 * If we're in attack mode, should we close in for the kill, or should we stay
-		 * still/run away?
-		 */
-		return true; // Should probably be overrided in subclasses
-	}
 }
