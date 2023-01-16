@@ -646,16 +646,19 @@ public class Carrier extends Unit {
 			case ADAMANTIUM:
 				rc.transferResource(hqLocation, bestType, ad);
 				totalResources -= ad;
+				totalCarryWeight -= ad;
 				ad = 0;
 				return true;
 			case ELIXIR:
 				rc.transferResource(hqLocation, bestType, ex);
 				totalResources -= ex;
+				totalCarryWeight -= ex;
 				ex = 0;
 				return true;
 			case MANA:
 				rc.transferResource(hqLocation, bestType, mn);
 				totalResources -= mn;
+				totalCarryWeight -= mn;
 				mn = 0;
 				return true;
 			default:
@@ -669,24 +672,34 @@ public class Carrier extends Unit {
 		 */
 		if (!rc.isActionReady())
 			return false; // can't take actions
-		if (mn <= 0)
-			return false; // No mana to deposit
+		if (mn + ex <= 0)
+			return false; // No mana or elixir to deposit
 
 		/*
 		 * Determine the best well to deposit to. Right now it's basically random.
 		 */
 		WellInfo[] nearbyWells = rc.senseNearbyWells(pos, 2);
 		WellInfo bestWell = null;
-		for (WellInfo well : nearbyWells) {
-			if (well.isUpgraded())
-				continue;
-			if (well.getResourceType() == ResourceType.ADAMANTIUM) {
-				bestWell = well;
-				break;
+		if (mn == 0) {
+			for (WellInfo well : nearbyWells) {
+				if (well.isUpgraded())
+					continue;
+				if (well.getResourceType() == ResourceType.ELIXIR) {
+					bestWell = well;
+					break;
+				}
 			}
-			bestWell = well;
+		} else {
+			for (WellInfo well : nearbyWells) {
+				if (well.isUpgraded())
+					continue;
+				if (well.getResourceType() == ResourceType.ADAMANTIUM) {
+					bestWell = well;
+					break;
+				}
+				bestWell = well;
+			}
 		}
-
 		if (bestWell == null)
 			return false; // No nearby wells
 
@@ -698,16 +711,28 @@ public class Carrier extends Unit {
 		MapLocation wellLocation = bestWell.getMapLocation();
 		int t;
 		switch (bestWell.getResourceType()) {
+			case ELIXIR:
+				t = Math.min(ex, GameConstants.UPGRADE_WELL_AMOUNT - bestWell.getResource(ResourceType.ELIXIR));
+				if (t <= 0) return false;
+				rc.transferResource(wellLocation, ResourceType.ELIXIR, t);
+				totalResources -= t;
+				totalCarryWeight -= t;
+				ex -= t;
+				return true;
 			case ADAMANTIUM:
 				t = Math.min(mn, GameConstants.UPGRADE_TO_ELIXIR - bestWell.getResource(ResourceType.MANA));
+				if (t <= 0) return false;
 				rc.transferResource(wellLocation, ResourceType.MANA, t);
 				totalResources -= t;
+				totalCarryWeight -= t;
 				mn -= t;
 				return true;
 			case MANA:
 				t = Math.min(mn, GameConstants.UPGRADE_WELL_AMOUNT - bestWell.getResource(ResourceType.MANA));
+				if (t <= 0) return false;
 				rc.transferResource(wellLocation, ResourceType.MANA, t);
 				totalResources -= t;
+				totalCarryWeight -= t;
 				mn -= t;
 				return true;
 			default:
