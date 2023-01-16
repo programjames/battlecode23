@@ -15,6 +15,7 @@ public class Carrier extends Unit {
 	CarrierNavigator navigator;
 
 	public MapLocation myWellLocation = null; // MapLocation of the well this carrier frequents
+	public MapLocation wellToAvoid = null;
 	public MapLocation myHQLocation = null; // MapLocation of the HQ this carrier frequents
 
 	public Carrier(RobotController rc) {
@@ -148,6 +149,7 @@ public class Carrier extends Unit {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
+						pos = rc.getLocation();
 						return;
 					}
 				}
@@ -167,6 +169,7 @@ public class Carrier extends Unit {
 				Direction directionToMove = pos.directionTo(myHQLocation);
 				if (rc.canMove(directionToMove)) {
 					rc.move(directionToMove);
+					pos = rc.getLocation();
 				} else {
 					navigator.navigateToHQ();
 				}
@@ -215,6 +218,7 @@ public class Carrier extends Unit {
 					Direction moveDir = pos.directionTo(myWellLocation);
 					if (rc.canMove(moveDir)) {
 						rc.move(moveDir);
+						pos = rc.getLocation();
 						return;
 					}
 				}
@@ -225,6 +229,7 @@ public class Carrier extends Unit {
 				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
+					pos = rc.getLocation();
 					return;
 				}
 
@@ -233,6 +238,7 @@ public class Carrier extends Unit {
 				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
+					pos = rc.getLocation();
 					return;
 				}
 
@@ -241,6 +247,7 @@ public class Carrier extends Unit {
 				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
+					pos = rc.getLocation();
 					return;
 				}
 				return;
@@ -260,6 +267,7 @@ public class Carrier extends Unit {
 				Direction directionToMove = pos.directionTo(myWellLocation);
 				if (rc.canMove(directionToMove)) {
 					rc.move(directionToMove);
+					pos = rc.getLocation();
 				} else {
 					navigator.navigateToWell();
 				}
@@ -273,11 +281,13 @@ public class Carrier extends Unit {
 		/*
 		 * Use your senses to detect a well or HQ
 		 */
-
 		if (myWellLocation == null) {
 			int closestDistance = Integer.MAX_VALUE;
 			for (WellInfo well : rc.senseNearbyWells()) {
 				MapLocation wellLocation = well.getMapLocation();
+				if (wellLocation == wellToAvoid) {
+					continue;
+				}
 				if (pos.distanceSquaredTo(wellLocation) < closestDistance) {
 					myWellLocation = wellLocation;
 					closestDistance = pos.distanceSquaredTo(wellLocation);
@@ -311,7 +321,7 @@ public class Carrier extends Unit {
 		/*
 		 * Are we within 8 units of our saved well position?
 		 */
-		return myHQLocation != null && myWellLocation.distanceSquaredTo(pos) <= 8;
+		return myWellLocation != null && myWellLocation.distanceSquaredTo(pos) <= 8;
 	}
 
 	private boolean pickupFromNearbyWell() throws GameActionException {
@@ -408,7 +418,7 @@ public class Carrier extends Unit {
 		}
 	}
 
-	private void findBestJob() {
+	private void findBestJob() throws GameActionException {
 		/*
 		 * Determine what job/mode we should be doing. Jobs can be things like scouting,
 		 * gathering resources, deploying an anchor etc. Modes should be more specific,
@@ -427,16 +437,6 @@ public class Carrier extends Unit {
 			default:
 				job = Job.GATHER_RESOURCES;
 			case GATHER_RESOURCES:
-				// Decide if we should switch to mining from a new well!
-				switch (mode) {
-					case DRAW_RESOURCES_FROM_WELL:
-						if (rc.senseNearbyRobots(10, myTeam).length >= 20) {
-							switchWell();
-						}
-						break;
-					default:
-						break;
-				}
 				enemyLoop: for (RobotInfo r : enemies) {
 					switch (r.type) {
 						case LAUNCHER:
@@ -457,6 +457,15 @@ public class Carrier extends Unit {
 					case DRAW_RESOURCES_FROM_WELL:
 						if (totalCarryWeight >= 40) {
 							mode = Mode.GOTO_HQ;
+							RobotInfo[] robots = rc.senseNearbyRobots(10, myTeam);
+							int nearbyCarriers = 0;
+							for (RobotInfo r : robots) {
+								if (r.type == RobotType.CARRIER) nearbyCarriers++;
+							}
+							if (nearbyCarriers >= 12) {
+								// Our current well is crowded. Next time, go to a new well (maybe)
+								switchWell();
+							}
 						} else {
 							mode = nearMyWell() ? Mode.DRAW_RESOURCES_FROM_WELL : Mode.GOTO_RESOURCES;
 						}
@@ -497,15 +506,24 @@ public class Carrier extends Unit {
 	}
 
 	private void switchWell() {
-		switchWell(0.02);
+		switchWell(0.2);
 	}
 	
 	private void switchWell(double probability) {
 		/*
 		 * Switch what well we're mining from to some random other well (if available) with the given probability.
 		 */
+		if (rng.nextDouble() >= probability) return; // randomness failed
+		
+		wellToAvoid = myWellLocation;
+		myWellLocation = null;
 		int myChunk = minimap.getChunkIndex(pos);
-		MinimapInfo.nearestWellChunk(myChunk, null);
+		int nearestWellChunk = MinimapInfo.nearestWellChunk(myChunk, minimap.getChunks());
+		if (nearestWellChunk != myChunk) {
+			navigator.randomGoal = minimap.getChunkCenter(nearestWellChunk);
+		} else {
+			navigator.randomGoal = null;
+		}
 	}
 
 }

@@ -38,6 +38,7 @@ public class Navigator {
 	}
 
 	public void prepareMove(MapLocation destination) throws GameActionException {
+		robot.pos = rc.getLocation();
 		Pather.reset(rc, destination);
 		int localDestination = Pather.dijkstra(rc);
 		path = Pather.reconstructPath(localDestination);
@@ -91,6 +92,7 @@ public class Navigator {
 
 		if (directionToMove != Direction.CENTER && rc.canMove(directionToMove)) {
 			rc.move(directionToMove);
+			robot.pos = rc.getLocation();
 			lastMoveDirection = directionToMove;
 			return true;
 		}
@@ -124,6 +126,7 @@ public class Navigator {
 
 		if (directionToMove != Direction.CENTER && rc.canMove(directionToMove)) {
 			rc.move(directionToMove);
+			robot.pos = rc.getLocation();
 			lastMoveDirection = directionToMove;
 			return true;
 		}

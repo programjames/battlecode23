@@ -14,7 +14,7 @@ public class CarrierNavigator extends Navigator {
 
 	Carrier carrier;
 
-	MapLocation randomGoal = null;
+	public MapLocation randomGoal = null;
 
 	public CarrierNavigator(Carrier carrier, RobotController rc) {
 		super(carrier, rc);
