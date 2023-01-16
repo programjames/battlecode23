@@ -116,13 +116,13 @@ public class Carrier extends Unit {
 						}
 						break;
 					default:
-					if (totalCarryWeight >= 40) {
-						while (pickupFromNearbyWell() | depositToNearbyHQ())
-							;
-					} else {
-						while (pickupFromNearbyWell() |depositToNearbyHQ())
-							; // single | is intentional so both are attempted
-					}
+						if (totalCarryWeight >= 40) {
+							while (pickupFromNearbyWell() | depositToNearbyHQ())
+								;
+						} else {
+							while (pickupFromNearbyWell() | depositToNearbyHQ())
+								; // single | is intentional so both are attempted
+						}
 				}
 				break;
 		}
@@ -178,13 +178,13 @@ public class Carrier extends Unit {
 						}
 						break;
 					default:
-					if (totalCarryWeight >= 40) {
-						while (pickupFromNearbyWell() | depositToNearbyHQ())
-							;
-					} else {
-						while (pickupFromNearbyWell() |depositToNearbyHQ())
-							; // single | is intentional so both are attempted
-					}
+						if (totalCarryWeight >= 40) {
+							while (pickupFromNearbyWell() | depositToNearbyHQ())
+								;
+						} else {
+							while (pickupFromNearbyWell() | depositToNearbyHQ())
+								; // single | is intentional so both are attempted
+						}
 				}
 				break;
 		}
@@ -223,7 +223,26 @@ public class Carrier extends Unit {
 				navigator.setDestination(minimap.getChunkCenter(chunk));
 				navigator.move();
 			} else {
-				navigator.move(safeSpreadOutLocation());
+				if (rc.canSenseLocation(navigator.destination)) {
+					MapLocation corner;
+					switch (rng.nextInt(4)) {
+						case 0:
+							corner = new MapLocation(0, 0);
+							break;
+						case 1:
+							corner = new MapLocation(mapWidth - 1, 0);
+							break;
+						case 2:
+							corner = new MapLocation(mapWidth - 1, mapHeight - 1);
+							break;
+						default:
+							corner = new MapLocation(0, mapHeight - 1);
+							break;
+					}
+					navigator.setDestination(corner);
+				}
+
+				navigator.move();
 			}
 		}
 	}
@@ -798,9 +817,9 @@ public class Carrier extends Unit {
 				}
 				break;
 			case UPGRADE_WELL:
-			//System.out.println("Upgrade well selection");
-				//rc.setIndicatorDot(myWellLocation, 0, 0, 0);
-				//rc.setIndicatorDot(wellToUpgrade, 255, 255, 0);
+				// System.out.println("Upgrade well selection");
+				// rc.setIndicatorDot(myWellLocation, 0, 0, 0);
+				// rc.setIndicatorDot(wellToUpgrade, 255, 255, 0);
 				if (threatLevel > 0) {
 					mode = Mode.IN_DANGER;
 				}
@@ -905,12 +924,13 @@ public class Carrier extends Unit {
 		MapLocation nearbyCenter = minimap.getChunkCenter(nearestWellChunk);
 		return nearbyCenter;
 	}
-	
+
 	public MapLocation getRandomWellOther() {
 		/*
-		 * Like switchWell, it tries to return a well other than the one we currently are at
+		 * Like switchWell, it tries to return a well other than the one we currently
+		 * are at
 		 */
-		
+
 		int chunk = minimap.getChunkIndex(pos);
 		int nearestWellChunk = MinimapInfo.nearestWellChunkOther(chunk, minimap.getChunks());
 		if (nearestWellChunk == -1) {
