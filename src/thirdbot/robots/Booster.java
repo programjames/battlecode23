@@ -10,7 +10,6 @@ public class Booster extends Unit {
 
 	public Booster(RobotController rc) {
 		super(rc);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
