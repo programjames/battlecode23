@@ -30,7 +30,7 @@ public class Launcher extends Unit {
 			mode = Mode.FIND_ENEMY;
 			if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
 				int myChunk = minimap.getChunkIndex(pos);
-				chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+				chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
 			}
 			if (chunk == -1) {
 				navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
