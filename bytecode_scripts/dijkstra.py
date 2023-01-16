@@ -161,6 +161,10 @@ def reset(num):
 
         int dx = goalLocation.x - startLocationX;
         int dy = goalLocation.y - startLocationY;
+        while(dx > 64 || dx < -64 || dy > 64 || dy < -64) {{
+            dx /= 2;
+            dy /= 2;
+        }}
         int[] diff;
         if (rc.senseMapInfo(startLocation).hasCloud()) {{
             addNearestSmall(dx, dy);
