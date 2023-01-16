@@ -46,6 +46,7 @@ public class Carrier extends Unit {
 		totalCarryWeight = totalResources + (anchor == null ? 0 : 40);
 
 		// Determine what job we should be doing. NOTE: THIS SHOULDN'T CHANGE OFTEN.
+		tryTakeAnchor();
 		findBestJob();
 	}
 
@@ -76,6 +77,9 @@ public class Carrier extends Unit {
 		}
 
 		switch (job) {
+			case DEPLOY_ANCHOR:
+			deployAnchor();
+			break;
 			case GATHER_RESOURCES:
 				switch (mode) {
 					case FIND_RESOURCES:
@@ -92,7 +96,7 @@ public class Carrier extends Unit {
 						giveHQResources();
 						break;
 					case IN_DANGER:
-						dangerLevels(); // only a true cognoscenti would understand.
+						dangerLevels();
 						break;
 					default:
 						break;
@@ -110,6 +114,57 @@ public class Carrier extends Unit {
 			default:
 				while (depositToNearbyHQ() | pickupFromNearbyWell())
 					; // single | is intentional so both are attempted
+		}
+	}
+
+	private void deployAnchor() throws GameActionException {
+		if(rc.canPlaceAnchor()) {
+			rc.placeAnchor();
+			return;
+		}
+
+		// Find nearest unoccupied island location.
+		int[] nearbyIslands = rc.senseNearbyIslands();
+		MapLocation placeLocation = null;
+		int dist = Integer.MAX_VALUE;
+		if (nearbyIslands.length != 0) {
+			for(int island : nearbyIslands) {
+				if(rc.senseAnchor(island) == null) {
+					MapLocation[] locs = rc.senseNearbyIslandLocations(island);
+					for(MapLocation loc : locs) {
+						if(loc.distanceSquaredTo(pos) < dist) {
+							dist = loc.distanceSquaredTo(pos);
+							placeLocation = loc;
+						}
+					}
+				}
+			}
+		}
+
+		if(placeLocation != null) {
+			navigator.move(placeLocation);
+		} else {
+			int myChunk = minimap.getChunkIndex(pos);
+			int chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+			if (chunk != -1) {
+				navigator.setDestination(minimap.getChunkCenter(chunk));
+				navigator.move();
+			} else {
+				navigator.move(safeSpreadOutLocation());
+			}
+		}
+	}
+
+	private void tryTakeAnchor() throws GameActionException {
+		if(myHQLocation == null) return;
+
+		if (rc.canTakeAnchor(myHQLocation, Anchor.ACCELERATING)) {
+			rc.takeAnchor(myHQLocation, Anchor.ACCELERATING);
+			anchor = Anchor.ACCELERATING;
+		}
+		if (rc.canTakeAnchor(myHQLocation, Anchor.STANDARD)) {
+			rc.takeAnchor(myHQLocation, Anchor.STANDARD);
+			anchor = Anchor.STANDARD;
 		}
 	}
 
@@ -449,9 +504,17 @@ public class Carrier extends Unit {
 		 * "support troops" or a Booster to "deploy an anchor".
 		 */
 
+		if(rc.getAnchor() != null) {
+			job = Job.DEPLOY_ANCHOR;
+		} else {
+			job = Job.GATHER_RESOURCES;
+		}
+
 		switch (job) {
 			default:
 				job = Job.GATHER_RESOURCES;
+			case DEPLOY_ANCHOR:
+				break;
 			case GATHER_RESOURCES:
 				if (threatLevel > 0) {
 					mode = Mode.IN_DANGER;

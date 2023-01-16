@@ -30,6 +30,9 @@ public class Navigator {
 	}
 
 	public void setDestination(MapLocation destination) {
+		// We're already moving there
+		if (destination == this.destination) return;
+
 		this.destination = destination;
 		wallDirection = null;
 		wallLocation = null;

@@ -13,6 +13,7 @@ public class Headquarters extends Building {
 	RobotType nextManaBuild = RobotType.LAUNCHER;
 	RobotType nextAdamBuild = RobotType.CARRIER;
 	RobotType nextElixBuild = RobotType.BOOSTER;
+	boolean buildAnchor = false;
 
 	@Override
 	public void runTurn() throws GameActionException {
@@ -20,7 +21,13 @@ public class Headquarters extends Building {
 			rc.resign();
 		}
 
-		while(tryBuildRobot());
+		if(buildAnchor) {
+			tryBuildAnchor();
+		}
+		// (very rarely could build an anchor and still be able to build a robot)
+		if(!buildAnchor) {
+			while(tryBuildRobot());
+		}
 
 		// Draw the minimap
 		/*
@@ -53,6 +60,20 @@ public class Headquarters extends Building {
 		 */
 	}
 
+	private boolean tryBuildAnchor() throws GameActionException{
+		if(rc.canBuildAnchor(Anchor.ACCELERATING)) {
+			rc.buildAnchor(Anchor.ACCELERATING);
+			buildAnchor = false;
+			return true;
+		}
+		if(rc.canBuildAnchor(Anchor.STANDARD)) {
+			rc.buildAnchor(Anchor.STANDARD);
+			buildAnchor = false;
+			return true;
+		}
+		return false;
+	}
+
 	private boolean tryBuildRobot() throws GameActionException{
 		RobotType buildType;
 		int mana = rc.getResourceAmount(ResourceType.MANA);
@@ -63,8 +84,15 @@ public class Headquarters extends Building {
 			buildType = nextManaBuild;
 		} else if (adam >= nextAdamBuild.buildCostAdamantium && mana >= nextAdamBuild.buildCostMana) {
 			buildType = nextAdamBuild;
-		} else {
+		} else if (elix >= nextElixBuild.buildCostElixir) {
 			buildType = nextElixBuild;
+		} else if (mana >= nextAdamBuild.buildCostMana + RobotType.LAUNCHER.buildCostMana) {
+			buildType = RobotType.LAUNCHER;
+		} else if (adam >= nextManaBuild.buildCostAdamantium + RobotType.CARRIER.buildCostAdamantium) {
+			buildType = RobotType.CARRIER;
+		} else {
+			// nothing to build
+			return false;
 		}
 
 		for (Direction direction : Direction.allDirections()) {
@@ -79,6 +107,9 @@ public class Headquarters extends Building {
 	}
 
 	private void updateBuildOrder(RobotType buildType) {
+		if (rng.nextInt(50) == 0) {
+			buildAnchor = true;
+		}
 		if (buildType == nextManaBuild) {
 			int r = rng.nextInt(10);
 			switch(r) {

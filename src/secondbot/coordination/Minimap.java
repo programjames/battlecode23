@@ -23,6 +23,7 @@ public class Minimap implements Module {
 
 	public static final int WELL_BIT = 0b0010;
 	public static final int ENEMY_BIT = 0b0001;
+	public static final int ISLAND_BITS = 0b1100; // 00 = no island, 01 = unoccupied, 10 = my island, 11 = enemy island
 
 	int[] chunks = new int[144];
 	int[] updateTimes = new int[36]; // When were the groups of chunks last updated?
@@ -237,6 +238,26 @@ public class Minimap implements Module {
 		int index = getChunkIndex(well.getMapLocation());
 		if ((chunks[index] & WELL_BIT) == 0) {
 			chunks[index] |= WELL_BIT;
+			updateTimes[index / 4] = rc.getRoundNum() / 8;
+		}
+	}
+
+	public void markIsland(MapLocation loc, Team team, Team myTeam) {
+		/*
+		 * Mark an island on the minimap
+		 */
+		int index = getChunkIndex(loc);
+		int updateBits;
+		if(team == null) {
+			updateBits = 0b0100;
+		} else if(team == myTeam) {
+			updateBits = 0b1000;
+		} else {
+			updateBits = 0b1100;
+		}
+		if ((chunks[index] & ISLAND_BITS) != updateBits) {
+			chunks[index] &= 0b0011;
+			chunks[index] |= updateBits;
 			updateTimes[index / 4] = rc.getRoundNum() / 8;
 		}
 	}

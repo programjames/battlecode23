@@ -95,6 +95,14 @@ public abstract class Robot {
 				// rc.setIndicatorString("Can't push to minimap!");
 				// }
 		}
+		if (Clock.getBytecodesLeft() > 1500) {
+			int[] islands = rc.senseNearbyIslands();
+			for(int island : islands) {
+				Team islandTeam = rc.senseTeamOccupyingIsland(island);
+				MapLocation islandLoc = rc.senseNearbyIslandLocations(island)[0];
+				minimap.markIsland(islandLoc, islandTeam, myTeam);
+			}
+		}
 	}
 
 	public void run() {
