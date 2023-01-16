@@ -264,6 +264,7 @@ public class Carrier extends Unit {
 	private void dangerLevels() throws GameActionException {
 		if (totalResources >= Constants.RUNAWAY_CARRY_LIMIT) {
 			attack();
+			encircle(navigator);
 		} else {
 			retreat(navigator);
 		}
@@ -803,12 +804,12 @@ public class Carrier extends Unit {
 						break;
 					}
 				}
-				if (threatLevel > 0) {
+				if (threatLevel > 2) {
 					mode = Mode.IN_DANGER;
 				}
 				switch (mode) {
 					case IN_DANGER:
-						if (threatLevel == 0) {
+						if (threatLevel <= 2) {
 							mode = Mode.GOTO_RESOURCES;
 						} else {
 							break;
@@ -863,12 +864,12 @@ public class Carrier extends Unit {
 				// System.out.println("Upgrade well selection");
 				// rc.setIndicatorDot(myWellLocation, 0, 0, 0);
 				// rc.setIndicatorDot(wellToUpgrade, 255, 255, 0);
-				if (threatLevel > 0) {
+				if (threatLevel > 2) {
 					mode = Mode.IN_DANGER;
 				}
 				switch (mode) {
 					case IN_DANGER:
-						if (threatLevel == 0) {
+						if (threatLevel <= 2) {
 							mode = Mode.GOTO_RESOURCES;
 						} else {
 							break;
