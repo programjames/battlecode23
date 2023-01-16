@@ -16,11 +16,12 @@ public class Headquarters extends Building {
 
 	@Override
 	public void runTurn() throws GameActionException {
-		if (rc.getRoundNum() > 300) {
+		if (rc.getRoundNum() > 500) {
 			rc.resign();
 		}
 
-		while(tryBuildRobot());
+		while (tryBuildRobot())
+			;
 
 		// Draw the minimap
 		/*
@@ -51,9 +52,10 @@ public class Headquarters extends Building {
 		 * }
 		 * }
 		 */
+
 	}
 
-	private boolean tryBuildRobot() throws GameActionException{
+	private boolean tryBuildRobot() throws GameActionException {
 		RobotType buildType;
 		int mana = rc.getResourceAmount(ResourceType.MANA);
 		int adam = rc.getResourceAmount(ResourceType.ADAMANTIUM);
@@ -81,32 +83,32 @@ public class Headquarters extends Building {
 	private void updateBuildOrder(RobotType buildType) {
 		if (buildType == nextManaBuild) {
 			int r = rng.nextInt(10);
-			switch(r) {
+			switch (r) {
 				case 0:
-				nextManaBuild = RobotType.AMPLIFIER;
-				break;
+					nextManaBuild = RobotType.AMPLIFIER;
+					break;
 				default:
-				nextManaBuild = RobotType.LAUNCHER;
+					nextManaBuild = RobotType.LAUNCHER;
 			}
 		}
 		if (buildType == nextAdamBuild) {
 			int r = rng.nextInt(10);
-			switch(r) {
+			switch (r) {
 				case 0:
-				nextAdamBuild = RobotType.AMPLIFIER;
-				break;
+					nextAdamBuild = RobotType.AMPLIFIER;
+					break;
 				default:
-				nextAdamBuild = RobotType.CARRIER;
+					nextAdamBuild = RobotType.CARRIER;
 			}
 		}
 		if (buildType == nextElixBuild) {
 			int r = rng.nextInt(2);
-			switch(r) {
+			switch (r) {
 				case 0:
-				nextElixBuild = RobotType.DESTABILIZER;
-				break;
+					nextElixBuild = RobotType.DESTABILIZER;
+					break;
 				default:
-				nextElixBuild = RobotType.BOOSTER;
+					nextElixBuild = RobotType.BOOSTER;
 			}
 		}
 	}

@@ -48,24 +48,31 @@ public class Navigator {
 		/*
 		 * Move towards the destination
 		 */
-		
+
 		if (rc.getMovementCooldownTurns() >= 10) {
 			return false; // Can't move at all because of high cooldown
 		}
 
 		int freeSquares = 0;
-		if (rc.canMove(Direction.EAST)) freeSquares++;
-		if (rc.canMove(Direction.NORTH)) freeSquares++;
-		if (rc.canMove(Direction.WEST)) freeSquares++;
-		if (rc.canMove(Direction.SOUTH)) freeSquares++;
-		if (rc.canMove(Direction.NORTHEAST)) freeSquares++;
-		if (rc.canMove(Direction.NORTHWEST)) freeSquares++;
-		if (rc.canMove(Direction.SOUTHWEST)) freeSquares++;
-		if (rc.canMove(Direction.SOUTHEAST)) freeSquares++;
+		if (rc.canMove(Direction.EAST))
+			freeSquares++;
+		if (rc.canMove(Direction.NORTH))
+			freeSquares++;
+		if (rc.canMove(Direction.WEST))
+			freeSquares++;
+		if (rc.canMove(Direction.SOUTH))
+			freeSquares++;
+		if (rc.canMove(Direction.NORTHEAST))
+			freeSquares++;
+		if (rc.canMove(Direction.NORTHWEST))
+			freeSquares++;
+		if (rc.canMove(Direction.SOUTHWEST))
+			freeSquares++;
+		if (rc.canMove(Direction.SOUTHEAST))
+			freeSquares++;
 
-		
 		// Check if we should be bugging or not
-		if (currentlyBugging && freeSquares >= 5 && wallLocation == null) {
+		if (currentlyBugging && freeSquares >= 5 && wallDirection == null) {
 			currentlyBugging = false;
 		}
 
@@ -84,11 +91,12 @@ public class Navigator {
 		Direction directionToMove;
 		if (path == null || pathIndex == path.length) {
 			directionToMove = getFuzzyMoveDirection();
+			currentlyBugging = true;
+			wallDirection = robot.pos.directionTo(destination);
 		} else {
 			directionToMove = path[pathIndex];
 			pathIndex++;
 		}
-
 		if (directionToMove != Direction.CENTER && rc.canMove(directionToMove)) {
 			rc.move(directionToMove);
 			robot.pos = rc.getLocation();
@@ -105,9 +113,9 @@ public class Navigator {
 		 * NOTE: THIS DOES NOT HAVE LONG TERM MEMORY ON DESTINATIONS,
 		 * SO IT'S ONLY REALLY USEFUL FOR CLOSE/TEMPORARY GOALS.
 		 */
-		
+
 		if (rc.getMovementCooldownTurns() >= 10) {
-			//rc.setIndicatorString("Too high cooldown to move");
+			// rc.setIndicatorString("Too high cooldown to move");
 			return false; // Can't move at all because of high cooldown
 		}
 

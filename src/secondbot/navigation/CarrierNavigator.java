@@ -28,10 +28,18 @@ public class CarrierNavigator extends Navigator {
 		carrier.lookAround();
 		if (carrier.myWellLocation == null) {
 			if (randomGoal == null) {
-				randomGoal = new MapLocation(carrier.rng.nextInt(carrier.mapWidth),
-						carrier.rng.nextInt(carrier.mapHeight));
+				randomGoal = carrier.getRandomWell();
+				if (randomGoal == null) {
+					// We still don't know have a goal--maybe there are no known wells?
+					// So, set a completely random goal
+					randomGoal = new MapLocation(carrier.rng.nextInt(carrier.mapWidth),
+							carrier.rng.nextInt(carrier.mapHeight));
+				}
 				setDestination(randomGoal);
 			} else if (carrier.pos.distanceSquaredTo(randomGoal) < 11) {
+				// We already have a random goal, but there wasn't anything there!
+				// This is kind of a fallback option, so let's not trust the getRandomWell()
+				// too much and instead just go to somewhere completely random.
 				randomGoal = new MapLocation(carrier.rng.nextInt(carrier.mapWidth),
 						carrier.rng.nextInt(carrier.mapHeight));
 				setDestination(randomGoal);

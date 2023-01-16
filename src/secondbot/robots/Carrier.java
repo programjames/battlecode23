@@ -13,7 +13,6 @@ public class Carrier extends Unit {
 	int totalResources; // total amount of resources we're carrying
 	int totalCarryWeight; // total weight of everything we're carrying
 
-
 	CarrierNavigator navigator;
 
 	public MapLocation myWellLocation = null; // MapLocation of the well this carrier frequents
@@ -30,6 +29,13 @@ public class Carrier extends Unit {
 		job = Job.GATHER_RESOURCES;
 		mode = Mode.FIND_RESOURCES;
 		navigator = new CarrierNavigator(this, rc);
+
+		//myWellLocation = new MapLocation(rng.nextInt(mapWidth), rng.nextInt(mapHeight)); // Set temporarily to a random location -- this will be corrected next turn
+	}
+
+	@Override
+	public void setup2() {
+		myWellLocation = getRandomWell(); // When starting off, go towards a random well
 	}
 
 	@Override
@@ -44,6 +50,29 @@ public class Carrier extends Unit {
 
 		totalResources = ad + mn + ex;
 		totalCarryWeight = totalResources + (anchor == null ? 0 : 40);
+
+		if (myWellLocation != null) {
+			if (rc.canSenseLocation(myWellLocation) && rc.senseWell(myWellLocation) == null) {
+				WellInfo[] nearbyWells = rc.senseNearbyWells();
+				if (nearbyWells.length == 0) {
+					myWellLocation = null;
+				} else {
+					MapLocation closestWell = null;
+					int closestDistance = Integer.MAX_VALUE;
+					for (WellInfo well : nearbyWells) {
+						MapLocation wellLocation = well.getMapLocation();
+						if (wellLocation == wellToAvoid) {
+							continue;
+						}
+						if (myWellLocation.distanceSquaredTo(wellLocation) < closestDistance) {
+							closestWell = wellLocation;
+							closestDistance = myWellLocation.distanceSquaredTo(wellLocation);
+						}
+					}
+					myWellLocation = closestWell;
+				}
+			}
+		}
 
 		// Determine what job we should be doing. NOTE: THIS SHOULDN'T CHANGE OFTEN.
 		findBestJob();
@@ -297,6 +326,7 @@ public class Carrier extends Unit {
 		/*
 		 * Use your senses to detect a well or HQ
 		 */
+
 		if (myWellLocation == null) {
 			int closestDistance = Integer.MAX_VALUE;
 			for (WellInfo well : rc.senseNearbyWells()) {
@@ -533,4 +563,25 @@ public class Carrier extends Unit {
 		}
 	}
 
+	public MapLocation getRandomWell() {
+		/*
+		 * Return a MapLocation close to a random nearby well.
+		 * If we don't know of ANY nearby wells, then return null.
+		 */
+		MapLocation randomNearbyLoc = rc.getLocation().translate(rng.nextInt(21) - 10, rng.nextInt(21) - 10);
+		// Try a few more times if not on the map
+		if (!onTheMap(randomNearbyLoc))
+			randomNearbyLoc = rc.getLocation().translate(rng.nextInt(21) - 10, rng.nextInt(21) - 10);
+		if (!onTheMap(randomNearbyLoc))
+			randomNearbyLoc = rc.getLocation().translate(rng.nextInt(21) - 10, rng.nextInt(21) - 10);
+		if (!onTheMap(randomNearbyLoc))
+			return null; // Didn't work too many times. Returns null.
+		int chunk = minimap.getChunkIndex(randomNearbyLoc);
+		int nearestWellChunk = MinimapInfo.nearestWellChunk(chunk, minimap.getChunks());
+		if (nearestWellChunk == -1) {
+			return null;
+		}
+		MapLocation nearbyCenter = minimap.getChunkCenter(nearestWellChunk);
+		return nearbyCenter;
+	}
 }

@@ -39,6 +39,13 @@ public abstract class Robot {
 		minimap = new Minimap(rc);
 	}
 
+	public void setup2() {
+		/*
+		 * Things to do at the very beginning of the **second** turn.
+		 * This is because we don't always have enough bytecode to do everything on the first turn.
+		 */
+	}
+
 	public void beginTurn() throws GameActionException {
 		/*
 		 * Actions to take before you start moving and attacking, like sensing and
@@ -85,6 +92,18 @@ public abstract class Robot {
 	public void run() {
 		setup();
 
+		try {
+			beginTurn();
+			runTurn();
+			endTurn();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			Clock.yield();
+		}
+
+		setup2();
+
 		while (true) {
 			try {
 				beginTurn();
@@ -96,5 +115,12 @@ public abstract class Robot {
 				Clock.yield();
 			}
 		}
+	}
+
+	public boolean onTheMap(MapLocation location) {
+		/*
+		 * Return whether the location is on the map or not
+		 */
+		return location.x >= 0 && location.y >= 0 && location.x < mapWidth && location.y < mapHeight;
 	}
 }

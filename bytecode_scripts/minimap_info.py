@@ -39,7 +39,7 @@ def make_nearest_well_chunk():
         chunks = sorted(chunk_centers.keys(), key=lambda c: r2(chunk_centers[c], center))
         func = f"private static int nearestWellChunkSub{id} (int[] chunks) {{"
         for c in chunks:
-            func += f"\nif ((chunks[{c}] & {WELL_BIT}) == 1) return {c};"
+            func += f"\nif ((chunks[{c}] & {WELL_BIT}) != 0) return {c};"
         func += f"\nreturn -1;}}"
         funcs += "\n" + func
     return funcs
@@ -57,7 +57,7 @@ def make_nearest_well_chunk_other():
         chunks = sorted(chunk_centers.keys(), key=lambda c: float('inf') if c == chunk else r2(chunk_centers[c], center))
         func = f"private static int nearestWellChunkOtherSub{id} (int[] chunks) {{"
         for c in chunks:
-            func += f"\nif ((chunks[{c}] & {WELL_BIT}) == 1) return {c};"
+            func += f"\nif ((chunks[{c}] & {WELL_BIT}) != 0) return {c};"
         func += f"\nreturn -1;}}"
         funcs += "\n" + func
     return funcs
