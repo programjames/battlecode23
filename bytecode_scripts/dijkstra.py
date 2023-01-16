@@ -181,7 +181,7 @@ def reset(num):
         {checked_vars(num)}
         {cost_vars(num)}
 
-        MapInfo[] infos = rc.senseNearbyMapInfos(nearLocation, 1+nearLocation.distanceSquaredTo(startLocation));
+        MapInfo[] infos = rc.senseNearbyMapInfos(nearLocation, Math.min(20, 1+nearLocation.distanceSquaredTo(startLocation)));
 
         MapInfo info;
         int encoded;
