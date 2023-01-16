@@ -582,6 +582,21 @@ public class Carrier extends Unit {
 		MapLocation wellLocation = bestWell.getMapLocation();
 
 		rc.collectResource(wellLocation, amountToCollect);
+		totalCarryWeight += amountToCollect;
+		totalResources += amountToCollect;
+		switch (bestWell.getResourceType()) {
+			case ADAMANTIUM:
+				ad += amountToCollect;
+				break;
+			case ELIXIR:
+				ex += amountToCollect;
+				break;
+			case MANA:
+				mn += amountToCollect;
+				break;
+			default:
+				break;
+		}
 		return true;
 	}
 
@@ -694,7 +709,8 @@ public class Carrier extends Unit {
 		switch (bestWell.getResourceType()) {
 			case ELIXIR:
 				t = Math.min(ex, GameConstants.UPGRADE_WELL_AMOUNT - bestWell.getResource(ResourceType.ELIXIR));
-				if (t <= 0) return false;
+				if (t <= 0)
+					return false;
 				rc.transferResource(wellLocation, ResourceType.ELIXIR, t);
 				totalResources -= t;
 				totalCarryWeight -= t;
@@ -702,7 +718,8 @@ public class Carrier extends Unit {
 				return true;
 			case ADAMANTIUM:
 				t = Math.min(mn, GameConstants.UPGRADE_TO_ELIXIR - bestWell.getResource(ResourceType.MANA));
-				if (t <= 0) return false;
+				if (t <= 0)
+					return false;
 				rc.transferResource(wellLocation, ResourceType.MANA, t);
 				totalResources -= t;
 				totalCarryWeight -= t;
@@ -710,7 +727,8 @@ public class Carrier extends Unit {
 				return true;
 			case MANA:
 				t = Math.min(mn, GameConstants.UPGRADE_WELL_AMOUNT - bestWell.getResource(ResourceType.MANA));
-				if (t <= 0) return false;
+				if (t <= 0)
+					return false;
 				rc.transferResource(wellLocation, ResourceType.MANA, t);
 				totalResources -= t;
 				totalCarryWeight -= t;

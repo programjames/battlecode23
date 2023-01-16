@@ -17,6 +17,9 @@ public class Destabilizer extends Unit {
 	public void setup() {
 		super.setup();
 		navigator = new Navigator(this, rc);
+
+		job = Job.ATTACK_ENEMY;
+		mode = Mode.FIND_ENEMY;
 	}
 
 	@Override
