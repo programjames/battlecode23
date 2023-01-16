@@ -24,7 +24,7 @@ public class Amplifier extends Unit {
 	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
-		navigator.needToPrepareMove = true;
+		navigator.needToPrepareMove = false;
 
 		if (noDangerousEnemies) {
 			mode = Mode.FIND_ENEMY;
