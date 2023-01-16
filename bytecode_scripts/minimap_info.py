@@ -107,7 +107,7 @@ def make_mark_enemies():
     return func
 
 
-s = f"""package secondbot.coordination;
+s = f"""package thirdbot.coordination;
 
 /* Finds out specific info about the minimap given the chunks array.
  * Current methods:

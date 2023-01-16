@@ -244,7 +244,7 @@ public class Carrier extends Unit {
 
 	private void dangerLevels() throws GameActionException {
 		if (totalResources >= Constants.RUNAWAY_CARRY_LIMIT) {
-			attack(navigator);
+			attack();
 		} else {
 			retreat(navigator);
 		}

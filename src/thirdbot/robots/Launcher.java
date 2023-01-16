@@ -24,11 +24,20 @@ public class Launcher extends Unit {
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
 		navigator.needToPrepareMove = true;
-		
-		if(noDangerousEnemies) {
+
+		if (noDangerousEnemies) {
+			int chunk = -1;
 			mode = Mode.FIND_ENEMY;
-			navigator.setDestination(enemyGoalLocation());
-		} else if (enemies.length > friends.length) {
+			if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
+				int myChunk = minimap.getChunkIndex(pos);
+				chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+			}
+			if (chunk == -1) {
+				navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
+			} else {
+				navigator.setDestination(minimap.getChunkCenter(chunk));
+			}
+		} else if (threatLevel > allyStrength) {
 			mode = Mode.RETREAT;
 		} else {
 			mode = Mode.ATTACK;
@@ -41,18 +50,24 @@ public class Launcher extends Unit {
 			case ATTACK_ENEMY:
 				switch (mode) {
 					case FIND_ENEMY: // move to our enemy goal location
-						navigator.move(enemyGoalLocation());
-						navigator.move(enemyGoalLocation());
+						navigator.move();
+						navigator.move();
 						break;
 
 					case ATTACK:
-						attack(navigator);
+						attack();
+						if (enemies.length > friends.length) {
+							encircle(navigator);
+						} else {
+							skirt(navigator);
+						}
+						attack();
 						break;
 
 					case RETREAT:
-						attack(navigator);
+						attack();
 						retreat(navigator);
-						attack(navigator);
+						attack();
 						break;
 
 					default:

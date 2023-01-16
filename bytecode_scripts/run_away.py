@@ -36,6 +36,25 @@ def run_away():
     func += f"case 0: }} return loc;}}"
     return func
 
+def switch_friendly_piece2(i):
+    return f"case HEADQUARTERS: break; default: loc = loc.add(loc.directionTo(friends[{i}].location));"
+
+def booster_move_location():
+    func = f"""private MapLocation boosterMoveLocation() throws GameActionException {{
+        MapLocation loc = pos;
+        switch(enemies.length) {{ default:
+            """
+    
+    for i in range(TOTAL_POSSIBLE-1, -1, -1):
+        func += f"""case {i+1}: switch(enemies[{i}].type) {{{switch_enemy_piece(i)}
+        }}"""
+    func += f"case 0: }} switch(friends.length) {{ default:"
+    for i in range(TOTAL_POSSIBLE-1, -1, -1):
+        func += f"""case {i+1}: switch(friends[{i}].type) {{{switch_friendly_piece2(i)}
+        }}"""
+    func += f"case 0: }} return loc;}}"
+    return func
+
 def switch_spread_out_piece(i):
     s = ""
     for type in ["BOOSTER", "LAUNCHER", "CARRIER"]:
@@ -60,4 +79,4 @@ def spread_out():
     func += f"case 0: }} return loc;}}"
     return func
 
-print(run_away())
+print(booster_move_location())
