@@ -82,7 +82,7 @@ public abstract class Unit extends Robot {
 		if (enemy == null)
 			return;
 
-		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location)) {
+		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location) && shouldCloseIn()) {
 			// Move in for the kill mwahahaha
 			navigator.move(enemy.location);
 		}
@@ -101,5 +101,12 @@ public abstract class Unit extends Robot {
 		MapLocation loc = runAwayLocation();
 		navigator.fuzzyMoveTo(loc, 4);
 		navigator.fuzzyMoveTo(loc, 4);
+	}
+
+	public boolean shouldCloseIn() {
+		/*
+		 * If we're in attack mode, should we close in for the kill, or should we stay still/run away?
+		 */
+		return true; // Should probably be overrided in subclasses
 	}
 }

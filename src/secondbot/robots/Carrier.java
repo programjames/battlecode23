@@ -5,12 +5,20 @@ import secondbot.coordination.*;
 import secondbot.navigation.*;
 
 public class Carrier extends Unit {
+	public static final int RUNAWAY_CARRY_LIMIT = 20; // limit of weight we should carry when running away
+
 	int ad; // amount of adamantium we're carrying
 	int mn; // amount of mana we're carrying
 	int ex; // amount of elixir we're carrying
 	Anchor anchor; // the anchor we're carrying
 	int totalResources; // total amount of resources we're carrying
 	int totalCarryWeight; // total weight of everything we're carrying
+
+	RobotInfo[] closeFriends = null;
+	int nearbyCarriers;
+	int nearbySnipers; // Number of launchers + carriers with at least RUNAWAY_CARRY_LIMIT
+	int threatLevel = 0; // How dangerous are the enemies we're facing? Right now each carrier gives
+							// threat level 1, other enemy units give threat levels of 4.
 
 	CarrierNavigator navigator;
 
@@ -34,6 +42,43 @@ public class Carrier extends Unit {
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
 		navigator.needToPrepareMove = true;
+
+		closeFriends = rc.senseNearbyRobots(10, myTeam);
+		nearbyCarriers = 0;
+		nearbySnipers = 0;
+		for (RobotInfo r : closeFriends) {
+			switch (r.type) {
+				case CARRIER:
+					nearbyCarriers++;
+					if (r.getResourceAmount(ResourceType.ADAMANTIUM) + r.getResourceAmount(ResourceType.MANA) < 20) {
+						break;
+					}
+				case LAUNCHER:
+					nearbySnipers++;
+				default:
+					break;
+			}
+		}
+
+		threatLevel = 0;
+		for (RobotInfo r : enemies) {
+			if (threatLevel >= 20) {
+				break; // Don't waste a ton of bytecode in situations with a ton of enemies
+			}
+			switch (r.type) {
+				case CARRIER:
+					threatLevel++;
+				case AMPLIFIER:
+				case BOOSTER:
+				case LAUNCHER:
+				case DESTABILIZER:
+					threatLevel += 4;
+				case HEADQUARTERS:
+					break;
+				default:
+					break;
+			}
+		}
 
 		ad = rc.getResourceAmount(ResourceType.ADAMANTIUM);
 		mn = rc.getResourceAmount(ResourceType.MANA);
@@ -63,8 +108,15 @@ public class Carrier extends Unit {
 		 * TODO: Take it into account that we DO NOT want to deposit resources or
 		 * gather them if we're under attack
 		 */
-		while (depositToNearbyHQ() | pickupFromNearbyWell())
-			; // single | is intentional so both are attempted
+		switch (mode) {
+			case IN_DANGER:
+				if (totalResources >= RUNAWAY_CARRY_LIMIT) {
+					break;
+				}
+			default:
+				while (depositToNearbyHQ() | pickupFromNearbyWell())
+					; // single | is intentional so both are attempted
+		}
 
 		switch (job) {
 			case GATHER_RESOURCES:
@@ -93,16 +145,28 @@ public class Carrier extends Unit {
 				break;
 		}
 
-		while (depositToNearbyHQ() | pickupFromNearbyWell())
-			; // single | is intentional so both are attempted
+		switch (mode) {
+			case IN_DANGER:
+				if (totalResources >= RUNAWAY_CARRY_LIMIT) {
+					break;
+				}
+			default:
+				while (depositToNearbyHQ() | pickupFromNearbyWell())
+					; // single | is intentional so both are attempted
+		}
 	}
 
 	private void dangerLevels() throws GameActionException {
-		if (totalCarryWeight > 30) {
+		if (totalResources >= RUNAWAY_CARRY_LIMIT) {
 			attack(navigator);
 		} else {
 			retreat(navigator);
 		}
+	}
+
+	@Override
+	public boolean shouldCloseIn() {
+		return nearbySnipers >= threatLevel;
 	}
 
 	private void giveHQResources() throws GameActionException {
@@ -263,7 +327,7 @@ public class Carrier extends Unit {
 			case 8:
 				// All of these are a distance of 2 from the well
 				// Try to move as close as possible
-				
+
 				Direction directionToMove = pos.directionTo(myWellLocation);
 				if (rc.canMove(directionToMove)) {
 					rc.move(directionToMove);
@@ -437,18 +501,12 @@ public class Carrier extends Unit {
 			default:
 				job = Job.GATHER_RESOURCES;
 			case GATHER_RESOURCES:
-				enemyLoop: for (RobotInfo r : enemies) {
-					switch (r.type) {
-						case LAUNCHER:
-						case DESTABILIZER:
-							mode = Mode.IN_DANGER;
-							break enemyLoop;
-						default:
-					}
-				}
+			if (threatLevel > 0) {
+				mode = Mode.IN_DANGER;
+			}
 				switch (mode) {
 					case IN_DANGER:
-						if (enemies.length == 0) {
+						if (threatLevel == 0) {
 							mode = Mode.GOTO_RESOURCES;
 						} else {
 							break;
@@ -457,11 +515,6 @@ public class Carrier extends Unit {
 					case DRAW_RESOURCES_FROM_WELL:
 						if (totalCarryWeight >= 40) {
 							mode = Mode.GOTO_HQ;
-							RobotInfo[] robots = rc.senseNearbyRobots(10, myTeam);
-							int nearbyCarriers = 0;
-							for (RobotInfo r : robots) {
-								if (r.type == RobotType.CARRIER) nearbyCarriers++;
-							}
 							if (nearbyCarriers >= 12) {
 								// Our current well is crowded. Next time, go to a new well (maybe)
 								switchWell();
@@ -508,13 +561,15 @@ public class Carrier extends Unit {
 	private void switchWell() {
 		switchWell(0.2);
 	}
-	
+
 	private void switchWell(double probability) {
 		/*
-		 * Switch what well we're mining from to some random other well (if available) with the given probability.
+		 * Switch what well we're mining from to some random other well (if available)
+		 * with the given probability.
 		 */
-		if (rng.nextDouble() >= probability) return; // randomness failed
-		
+		if (rng.nextDouble() >= probability)
+			return; // randomness failed
+
 		wellToAvoid = myWellLocation;
 		myWellLocation = null;
 		int myChunk = minimap.getChunkIndex(pos);
