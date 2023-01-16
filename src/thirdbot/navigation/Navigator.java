@@ -73,6 +73,8 @@ public class Navigator {
 			freeSquares++;
 		if (rc.canMove(Direction.SOUTHEAST))
 			freeSquares++;
+		
+		freeSquares += rc.senseNearbyRobots(2).length - 1; // Add robots to free squares
 
 		// Check if we should be bugging or not
 		if (currentlyBugging && freeSquares >= 5 && wallDirection == null) {

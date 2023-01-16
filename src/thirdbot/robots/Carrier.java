@@ -108,21 +108,21 @@ public class Carrier extends Unit {
 				switch (job) {
 					case UPGRADE_WELL:
 						if (totalCarryWeight >= 40) {
-							while (depositToNearbyWell())
-								;
-							MapLocation temp = myWellLocation;
-							myWellLocation = wellToUpgrade;
-							wellToUpgrade = temp;
-							while (pickupFromNearbyWell())
+							while (depositToNearbyWell() | pickupFromNearbyWell() | depositToNearbyHQ())
 								;
 						} else {
-							while (pickupFromNearbyWell())
+							while (pickupFromNearbyWell() | depositToNearbyWell() | depositToNearbyHQ())
 								;
 						}
 						break;
 					default:
-						while (depositToNearbyHQ() | pickupFromNearbyWell())
+					if (totalCarryWeight >= 40) {
+						while (pickupFromNearbyWell() | depositToNearbyHQ())
+							;
+					} else {
+						while (pickupFromNearbyWell() |depositToNearbyHQ())
 							; // single | is intentional so both are attempted
+					}
 				}
 				break;
 		}
@@ -170,21 +170,21 @@ public class Carrier extends Unit {
 				switch (job) {
 					case UPGRADE_WELL:
 						if (totalCarryWeight >= 40) {
-							while (depositToNearbyWell())
-								;
-							MapLocation temp = myWellLocation;
-							myWellLocation = wellToUpgrade;
-							wellToUpgrade = temp;
-							while (pickupFromNearbyWell())
+							while (depositToNearbyWell() | pickupFromNearbyWell() | depositToNearbyHQ())
 								;
 						} else {
-							while (pickupFromNearbyWell())
+							while (pickupFromNearbyWell() | depositToNearbyWell() | depositToNearbyHQ())
 								;
 						}
 						break;
 					default:
-						while (depositToNearbyHQ() | pickupFromNearbyWell())
+					if (totalCarryWeight >= 40) {
+						while (pickupFromNearbyWell() | depositToNearbyHQ())
+							;
+					} else {
+						while (pickupFromNearbyWell() |depositToNearbyHQ())
 							; // single | is intentional so both are attempted
+					}
 				}
 				break;
 		}
@@ -650,8 +650,8 @@ public class Carrier extends Unit {
 		 */
 		if (!rc.isActionReady())
 			return false; // can't take actions
-		if (totalResources <= 0)
-			return false; // No resources to deposit
+		if (mn <= 0)
+			return false; // No mana to deposit
 
 		/*
 		 * Determine the best well to deposit to. Right now it's basically random.
@@ -675,25 +675,21 @@ public class Carrier extends Unit {
 		 * Choose which resource to deposit. Right now this is whichever resource we
 		 * have the most of.
 		 */
-		ResourceType bestType = (ad > mn ? (ad > ex ? ResourceType.ADAMANTIUM : ResourceType.ELIXIR)
-				: (mn > ex ? ResourceType.MANA : ResourceType.ELIXIR));
 
 		MapLocation wellLocation = bestWell.getMapLocation();
-		switch (bestType) {
+		int t;
+		switch (bestWell.getResourceType()) {
 			case ADAMANTIUM:
-				rc.transferResource(wellLocation, bestType, ad);
-				totalResources -= ad;
-				ad = 0;
-				return true;
-			case ELIXIR:
-				rc.transferResource(wellLocation, bestType, ex);
-				totalResources -= ex;
-				ex = 0;
+				t = Math.min(mn, GameConstants.UPGRADE_TO_ELIXIR - bestWell.getResource(ResourceType.MANA));
+				rc.transferResource(wellLocation, ResourceType.MANA, t);
+				totalResources -= t;
+				mn -= t;
 				return true;
 			case MANA:
-				rc.transferResource(wellLocation, bestType, mn);
-				totalResources -= mn;
-				mn = 0;
+				t = Math.min(mn, GameConstants.UPGRADE_WELL_AMOUNT - bestWell.getResource(ResourceType.MANA));
+				rc.transferResource(wellLocation, ResourceType.MANA, t);
+				totalResources -= t;
+				mn -= t;
 				return true;
 			default:
 				return false;
@@ -726,21 +722,20 @@ public class Carrier extends Unit {
 			default:
 				job = Job.GATHER_RESOURCES;
 			case GATHER_RESOURCES:
-				if (nearMyHQ()) {
+				if (totalCarryWeight == 0 && myHQLocation != null && rc.canSenseLocation(myHQLocation)) {
 					RobotInfo hq = rc.senseRobotAtLocation(myHQLocation);
 					int hqMn = hq.getResourceAmount(ResourceType.MANA);
 					int hqAd = hq.getResourceAmount(ResourceType.ADAMANTIUM);
-					if (hqMn + hqAd > 150) {
+					if (hqMn + hqAd > 150 || (rc.getRoundNum() >= 150 && rng.nextDouble() < 0.4)) {
 						// The HQ has plenty of resources, so let's focus on
 						// upgrading wells instead of gathering more resources
 						// System.out.println("SWITCHED JOB to upgrade well");
 						job = Job.UPGRADE_WELL;
 						// Upgrade a well (but go back to our well to start with--we switch back and
 						// forth between the two):
-						if (rng.nextBoolean()) {
-							wellToUpgrade = myWellLocation;//getRandomWell();
-						} else {
-							wellToUpgrade = myWellLocation;
+						wellToUpgrade = myWellLocation;
+						if (rng.nextDouble() < 0.5) {
+							myWellLocation = getRandomWellOther();
 						}
 						mode = Mode.GOTO_RESOURCES;
 						break;
@@ -829,12 +824,31 @@ public class Carrier extends Unit {
 							}
 						}
 						if (totalCarryWeight >= 40) {
-							mode = Mode.GOTO_RESOURCES;
+							// Switch wells to go to
 							MapLocation temp = myWellLocation;
 							myWellLocation = wellToUpgrade;
 							wellToUpgrade = temp;
+							if (ad > 0) {
+								mode = Mode.GOTO_HQ;
+							} else {
+								mode = Mode.GOTO_RESOURCES;
+							}
 						} else {
 							mode = nearMyWell() ? Mode.DRAW_RESOURCES_FROM_WELL : Mode.GOTO_RESOURCES;
+						}
+						break;
+					case GOTO_HQ:
+					case GIVE_HQ_RESOURCES:
+						if (totalCarryWeight <= 0) {
+							// We've transferred everything we have, so go out and
+							// gather more resources!
+							if (navigator != null && myWellLocation != null) {
+								mode = Mode.GOTO_RESOURCES;
+							} else {
+								mode = Mode.FIND_RESOURCES;
+							}
+						} else {
+							mode = nearMyHQ() ? Mode.GIVE_HQ_RESOURCES : Mode.GOTO_HQ;
 						}
 						break;
 					default:
@@ -885,6 +899,20 @@ public class Carrier extends Unit {
 			return null; // Didn't work too many times. Returns null.
 		int chunk = minimap.getChunkIndex(randomNearbyLoc);
 		int nearestWellChunk = MinimapInfo.nearestWellChunk(chunk, minimap.getChunks());
+		if (nearestWellChunk == -1) {
+			return null;
+		}
+		MapLocation nearbyCenter = minimap.getChunkCenter(nearestWellChunk);
+		return nearbyCenter;
+	}
+	
+	public MapLocation getRandomWellOther() {
+		/*
+		 * Like switchWell, it tries to return a well other than the one we currently are at
+		 */
+		
+		int chunk = minimap.getChunkIndex(pos);
+		int nearestWellChunk = MinimapInfo.nearestWellChunkOther(chunk, minimap.getChunks());
 		if (nearestWellChunk == -1) {
 			return null;
 		}
