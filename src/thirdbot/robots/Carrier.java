@@ -16,6 +16,8 @@ public class Carrier extends Unit {
 	CarrierNavigator navigator;
 
 	public MapLocation myWellLocation = null; // MapLocation of the well this carrier frequents
+	public MapLocation wellToUpgrade = null; // MapLocation of the well this carrier will upgrade with resources from
+												// myWellLocation
 	public MapLocation wellToAvoid = null;
 	public MapLocation myHQLocation = null; // MapLocation of the HQ this carrier frequents
 
@@ -30,7 +32,9 @@ public class Carrier extends Unit {
 		mode = Mode.FIND_RESOURCES;
 		navigator = new CarrierNavigator(this, rc);
 
-		//myWellLocation = new MapLocation(rng.nextInt(mapWidth), rng.nextInt(mapHeight)); // Set temporarily to a random location -- this will be corrected next turn
+		// myWellLocation = new MapLocation(rng.nextInt(mapWidth),
+		// rng.nextInt(mapHeight)); // Set temporarily to a random location -- this will
+		// be corrected next turn
 	}
 
 	@Override
@@ -101,15 +105,34 @@ public class Carrier extends Unit {
 					break;
 				}
 			default:
-				while (depositToNearbyHQ() | pickupFromNearbyWell())
-					; // single | is intentional so both are attempted
+				switch (job) {
+					case UPGRADE_WELL:
+						if (totalCarryWeight >= 40) {
+							while (depositToNearbyWell())
+								;
+							MapLocation temp = myWellLocation;
+							myWellLocation = wellToUpgrade;
+							wellToUpgrade = temp;
+							while (pickupFromNearbyWell())
+								;
+						} else {
+							while (pickupFromNearbyWell())
+								;
+						}
+						break;
+					default:
+						while (depositToNearbyHQ() | pickupFromNearbyWell())
+							; // single | is intentional so both are attempted
+				}
+				break;
 		}
 
 		switch (job) {
 			case DEPLOY_ANCHOR:
-			deployAnchor();
-			break;
+				deployAnchor();
+				break;
 			case GATHER_RESOURCES:
+			case UPGRADE_WELL:
 				switch (mode) {
 					case FIND_RESOURCES:
 					case GOTO_RESOURCES:
@@ -123,6 +146,9 @@ public class Carrier extends Unit {
 						break;
 					case GIVE_HQ_RESOURCES:
 						giveHQResources();
+						break;
+					case GIVE_WELL_RESOURCES:
+						giveWellResources();
 						break;
 					case IN_DANGER:
 						dangerLevels();
@@ -141,13 +167,31 @@ public class Carrier extends Unit {
 					break;
 				}
 			default:
-				while (depositToNearbyHQ() | pickupFromNearbyWell())
-					; // single | is intentional so both are attempted
+				switch (job) {
+					case UPGRADE_WELL:
+						if (totalCarryWeight >= 40) {
+							while (depositToNearbyWell())
+								;
+							MapLocation temp = myWellLocation;
+							myWellLocation = wellToUpgrade;
+							wellToUpgrade = temp;
+							while (pickupFromNearbyWell())
+								;
+						} else {
+							while (pickupFromNearbyWell())
+								;
+						}
+						break;
+					default:
+						while (depositToNearbyHQ() | pickupFromNearbyWell())
+							; // single | is intentional so both are attempted
+				}
+				break;
 		}
 	}
 
 	private void deployAnchor() throws GameActionException {
-		if(rc.canPlaceAnchor()) {
+		if (rc.canPlaceAnchor()) {
 			rc.placeAnchor();
 			return;
 		}
@@ -157,11 +201,11 @@ public class Carrier extends Unit {
 		MapLocation placeLocation = null;
 		int dist = Integer.MAX_VALUE;
 		if (nearbyIslands.length != 0) {
-			for(int island : nearbyIslands) {
-				if(rc.senseAnchor(island) == null) {
+			for (int island : nearbyIslands) {
+				if (rc.senseAnchor(island) == null) {
 					MapLocation[] locs = rc.senseNearbyIslandLocations(island);
-					for(MapLocation loc : locs) {
-						if(loc.distanceSquaredTo(pos) < dist) {
+					for (MapLocation loc : locs) {
+						if (loc.distanceSquaredTo(pos) < dist) {
 							dist = loc.distanceSquaredTo(pos);
 							placeLocation = loc;
 						}
@@ -170,7 +214,7 @@ public class Carrier extends Unit {
 			}
 		}
 
-		if(placeLocation != null) {
+		if (placeLocation != null) {
 			navigator.move(placeLocation);
 		} else {
 			int myChunk = minimap.getChunkIndex(pos);
@@ -185,7 +229,8 @@ public class Carrier extends Unit {
 	}
 
 	private void tryTakeAnchor() throws GameActionException {
-		if(myHQLocation == null) return;
+		if (myHQLocation == null)
+			return;
 
 		if (rc.canTakeAnchor(myHQLocation, Anchor.ACCELERATING)) {
 			rc.takeAnchor(myHQLocation, Anchor.ACCELERATING);
@@ -199,7 +244,7 @@ public class Carrier extends Unit {
 
 	private void dangerLevels() throws GameActionException {
 		if (totalResources >= Constants.RUNAWAY_CARRY_LIMIT) {
-			attack();
+			attack(navigator);
 		} else {
 			retreat(navigator);
 		}
@@ -276,6 +321,80 @@ public class Carrier extends Unit {
 			default:
 				// This should probably never be called, but just in case...
 				navigator.navigateToHQ();
+		}
+	}
+
+	private void giveWellResources() throws GameActionException {
+		/*
+		 * This tries to dart in and out from around an HQ to draw the most possible
+		 * resources from it.
+		 * This is very similar to drawResourcesFromWell, but it doesn't try to move
+		 * onto the HQ
+		 * 
+		 * How it works:
+		 * 1. If we're on top of the well, never move--you might block another robot
+		 * from moving into
+		 * the spot we just moved to!
+		 * 2. If we're next to the well and the top of the well is open, move to that
+		 * top! This lets
+		 * a new robot take our place on the side.
+		 * 3. If we're by the side and we can move out and then back in on the next
+		 * turn, do so. This
+		 * lets a new robot take our place in the interim. Maybe they can even move back
+		 * out themselves!
+		 * 4. If we're two away from the well, try to move to move in. This will let us
+		 * mine on our turn.
+		 * 5. If we're two away and can't move in, try to position ourselves so we can
+		 * move in in the future.
+		 * If there are no empty spots, this means moving as close as possible--i.e.
+		 * along the "sides" of
+		 * the 5x5 square. Doing so gives us the most options for moving inward in the
+		 * future.
+		 */
+
+		switch (pos.distanceSquaredTo(myWellLocation)) {
+			case 0:
+				// We're on top of the well
+				return;
+			case 1:
+			case 2:
+				// We're adjacent to the well
+
+				// Try to dart back out
+				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
+					MapLocation moveLoc = pos.add(direction);
+					if (rc.canMove(direction)
+							&& rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+						// We have enough movement cooldown to come back on the next turn, so let's dart
+						// out.
+						rc.move(direction);
+						pos = rc.getLocation();
+						return;
+					}
+				}
+				return;
+
+			case 3:
+				// Shouldn't be possible, but whatever
+			case 4:
+			case 5:
+			case 6:
+				// Also shouldn't be possible
+			case 7:
+				// Also shouldn't be possible
+			case 8:
+				// All of these are a distance of 2 from the HQ
+				// Try to move as close as possible
+				Direction directionToMove = pos.directionTo(myWellLocation);
+				if (rc.canMove(directionToMove)) {
+					rc.move(directionToMove);
+					pos = rc.getLocation();
+				} else {
+					navigator.navigateToWell();
+				}
+			default:
+				// This should probably never be called, but just in case...
+				navigator.navigateToWell();
 		}
 	}
 
@@ -507,12 +626,74 @@ public class Carrier extends Unit {
 		switch (bestType) {
 			case ADAMANTIUM:
 				rc.transferResource(hqLocation, bestType, ad);
+				totalResources -= ad;
+				ad = 0;
 				return true;
 			case ELIXIR:
 				rc.transferResource(hqLocation, bestType, ex);
+				totalResources -= ex;
+				ex = 0;
 				return true;
 			case MANA:
 				rc.transferResource(hqLocation, bestType, mn);
+				totalResources -= mn;
+				mn = 0;
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	private boolean depositToNearbyWell() throws GameActionException {
+		/*
+		 * If possible, deposit resources to a nearby headquarters
+		 */
+		if (!rc.isActionReady())
+			return false; // can't take actions
+		if (totalResources <= 0)
+			return false; // No resources to deposit
+
+		/*
+		 * Determine the best well to deposit to. Right now it's basically random.
+		 */
+		WellInfo[] nearbyWells = rc.senseNearbyWells(pos, 2);
+		WellInfo bestWell = null;
+		for (WellInfo well : nearbyWells) {
+			if (well.isUpgraded())
+				continue;
+			if (well.getResourceType() == ResourceType.ADAMANTIUM) {
+				bestWell = well;
+				break;
+			}
+			bestWell = well;
+		}
+
+		if (bestWell == null)
+			return false; // No nearby wells
+
+		/*
+		 * Choose which resource to deposit. Right now this is whichever resource we
+		 * have the most of.
+		 */
+		ResourceType bestType = (ad > mn ? (ad > ex ? ResourceType.ADAMANTIUM : ResourceType.ELIXIR)
+				: (mn > ex ? ResourceType.MANA : ResourceType.ELIXIR));
+
+		MapLocation wellLocation = bestWell.getMapLocation();
+		switch (bestType) {
+			case ADAMANTIUM:
+				rc.transferResource(wellLocation, bestType, ad);
+				totalResources -= ad;
+				ad = 0;
+				return true;
+			case ELIXIR:
+				rc.transferResource(wellLocation, bestType, ex);
+				totalResources -= ex;
+				ex = 0;
+				return true;
+			case MANA:
+				rc.transferResource(wellLocation, bestType, mn);
+				totalResources -= mn;
+				mn = 0;
 				return true;
 			default:
 				return false;
@@ -534,18 +715,37 @@ public class Carrier extends Unit {
 		 * "support troops" or a Booster to "deploy an anchor".
 		 */
 
-		if(rc.getAnchor() != null) {
+		if (rc.getAnchor() != null) {
 			job = Job.DEPLOY_ANCHOR;
-		} else {
-			job = Job.GATHER_RESOURCES;
 		}
 
 		switch (job) {
+			case DEPLOY_ANCHOR:
+				if (rc.getAnchor() != null)
+					break;
 			default:
 				job = Job.GATHER_RESOURCES;
-			case DEPLOY_ANCHOR:
-				break;
 			case GATHER_RESOURCES:
+				if (nearMyHQ()) {
+					RobotInfo hq = rc.senseRobotAtLocation(myHQLocation);
+					int hqMn = hq.getResourceAmount(ResourceType.MANA);
+					int hqAd = hq.getResourceAmount(ResourceType.ADAMANTIUM);
+					if (hqMn + hqAd > 150) {
+						// The HQ has plenty of resources, so let's focus on
+						// upgrading wells instead of gathering more resources
+						// System.out.println("SWITCHED JOB to upgrade well");
+						job = Job.UPGRADE_WELL;
+						// Upgrade a well (but go back to our well to start with--we switch back and
+						// forth between the two):
+						if (rng.nextBoolean()) {
+							wellToUpgrade = myWellLocation;//getRandomWell();
+						} else {
+							wellToUpgrade = myWellLocation;
+						}
+						mode = Mode.GOTO_RESOURCES;
+						break;
+					}
+				}
 				if (threatLevel > 0) {
 					mode = Mode.IN_DANGER;
 				}
@@ -556,6 +756,7 @@ public class Carrier extends Unit {
 						} else {
 							break;
 						}
+					case FIND_RESOURCES:
 					case GOTO_RESOURCES:
 					case DRAW_RESOURCES_FROM_WELL:
 						if (totalCarryWeight >= 40) {
@@ -583,6 +784,7 @@ public class Carrier extends Unit {
 						}
 						break;
 					default:
+						// System.out.println("DEFAULT2 My mode is " + mode + " and my job is " + job);
 						if (totalCarryWeight <= 0) {
 							if (navigator != null && myWellLocation != null) {
 								mode = Mode.GOTO_RESOURCES;
@@ -597,6 +799,48 @@ public class Carrier extends Unit {
 						} else {
 							mode = Mode.GOTO_HQ;
 						}
+						break;
+				}
+				break;
+			case UPGRADE_WELL:
+			//System.out.println("Upgrade well selection");
+				//rc.setIndicatorDot(myWellLocation, 0, 0, 0);
+				//rc.setIndicatorDot(wellToUpgrade, 255, 255, 0);
+				if (threatLevel > 0) {
+					mode = Mode.IN_DANGER;
+				}
+				switch (mode) {
+					case IN_DANGER:
+						if (threatLevel == 0) {
+							mode = Mode.GOTO_RESOURCES;
+						} else {
+							break;
+						}
+					case FIND_RESOURCES:
+					case GOTO_RESOURCES:
+					case DRAW_RESOURCES_FROM_WELL:
+					case GIVE_WELL_RESOURCES:
+						if (myWellLocation != null && rc.canSenseLocation(myWellLocation)) {
+							WellInfo well = rc.senseWell(myWellLocation);
+							if (well.isUpgraded()) {
+								job = Job.GATHER_RESOURCES;
+								mode = Mode.GOTO_HQ;
+								break;
+							}
+						}
+						if (totalCarryWeight >= 40) {
+							mode = Mode.GOTO_RESOURCES;
+							MapLocation temp = myWellLocation;
+							myWellLocation = wellToUpgrade;
+							wellToUpgrade = temp;
+						} else {
+							mode = nearMyWell() ? Mode.DRAW_RESOURCES_FROM_WELL : Mode.GOTO_RESOURCES;
+						}
+						break;
+					default:
+						// System.out.println("I'm in mode " + mode + " and job " + job);
+						job = Job.GATHER_RESOURCES;
+						mode = Mode.GOTO_RESOURCES;
 						break;
 				}
 				break;
