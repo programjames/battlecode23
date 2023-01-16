@@ -137,6 +137,8 @@ public abstract class Unit extends Robot {
 	}
 
 	public void attack() throws GameActionException {
+		if(enemies.length == 0 || rc.getActionCooldownTurns() >= GameConstants.COOLDOWN_LIMIT) return;
+
 		RobotInfo enemy = null;
 		int health = Integer.MAX_VALUE;
 		for (RobotInfo r : rc.senseNearbyRobots(rc.getLocation(), type.actionRadiusSquared, enemyTeam)) {

@@ -52,25 +52,18 @@ public class Launcher extends Unit {
 					case FIND_ENEMY: // move to our enemy goal location
 						navigator.move();
 						navigator.move();
-						enemies = rc.senseNearbyRobots(-1, enemyTeam);
 						attack();
 						break;
 
 					case ATTACK:
 						attack();
-						if (enemies.length > friends.length) {
-							encircle(navigator);
-						} else {
-							skirt(navigator);
-						}
-						enemies = rc.senseNearbyRobots(-1, enemyTeam);
+						encircle(navigator);
 						attack();
 						break;
 
 					case RETREAT:
 						attack();
 						retreat(navigator);
-						enemies = rc.senseNearbyRobots(-1, enemyTeam);
 						attack();
 						break;
 
