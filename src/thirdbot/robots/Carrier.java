@@ -223,7 +223,26 @@ public class Carrier extends Unit {
 				navigator.setDestination(minimap.getChunkCenter(chunk));
 				navigator.move();
 			} else {
-				navigator.move(safeSpreadOutLocation());
+				if (rc.canSenseLocation(navigator.destination)) {
+					MapLocation corner;
+					switch (rng.nextInt(4)) {
+						case 0:
+							corner = new MapLocation(0, 0);
+							break;
+						case 1:
+							corner = new MapLocation(mapWidth - 1, 0);
+							break;
+						case 2:
+							corner = new MapLocation(mapWidth - 1, mapHeight - 1);
+							break;
+						default:
+							corner = new MapLocation(0, mapHeight - 1);
+							break;
+					}
+					navigator.setDestination(corner);
+				}
+
+				navigator.move();
 			}
 		}
 	}

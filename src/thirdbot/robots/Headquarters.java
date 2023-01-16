@@ -10,148 +10,144 @@ public class Headquarters extends Building {
 		// TODO Auto-generated constructor stub
 	}
 
-	RobotType nextManaBuild = RobotType.LAUNCHER;
-	RobotType nextAdamBuild = RobotType.CARRIER;
-	RobotType nextElixBuild = RobotType.BOOSTER;
-	boolean buildAnchor = false;
+	int ad = GameConstants.INITIAL_AD_AMOUNT;
+	int mn = GameConstants.INITIAL_MN_AMOUNT;
+	int ex = 0;
+
+	private final double DECAY_RATE = 0.9;
+	double adIncome = 0;
+	double mnIncome = 0;
+	double exIncome = 0;
+
+	boolean saveForAmplifier = false;
 
 	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
+		adIncome = DECAY_RATE * adIncome + rc.getResourceAmount(ResourceType.ADAMANTIUM) - ad;
+		mnIncome = DECAY_RATE * mnIncome + rc.getResourceAmount(ResourceType.MANA) - mn;
+		exIncome = DECAY_RATE * exIncome + rc.getResourceAmount(ResourceType.ELIXIR) - ex;
 
-		if (!noDangerousEnemies) {
-			buildAnchor = false;
-			nextManaBuild = RobotType.LAUNCHER;
-		}
+		// Also updates these at the end of turn:
+		ad = rc.getResourceAmount(ResourceType.ADAMANTIUM);
+		mn = rc.getResourceAmount(ResourceType.MANA);
+		ex = rc.getResourceAmount(ResourceType.ELIXIR);
+
+		rc.setIndicatorString(String.format("%.2f %.2f %.2f", adIncome, mnIncome, exIncome));
 	}
 
 	@Override
 	public void runTurn() throws GameActionException {
-		// if (rc.getRoundNum() > 500) {
-		// 	rc.resign();
-		// }
+		if (rc.getRoundNum() > 1000) {
+			rc.resign();
+		}
 
-		if (buildAnchor) {
-			tryBuildAnchor();
-		}
-		// (very rarely could build an anchor and still be able to build a robot)
-		if (!buildAnchor) {
-			while (tryBuildRobot())
+		if (exIncome >= 15 || (adIncome >= 15 && mnIncome >= 15))
+			while (tryBuildAnchor())
 				;
-		}
+
+		while (tryBuildRobot())
+			;
 
 		// Draw the minimap
 
-		// for (int x = 2; x < mapWidth; x += 5) {
-		// 	for (int y = 2; y < mapHeight; y += 5) {
-		// 		int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
-		// 		if ((chunk & Minimap.ISLAND_BITS) != 0) {
-		// 			rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y -
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x + 2, y - 2), new MapLocation(x + 2, y +
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x + 2, y + 2), new MapLocation(x - 2, y +
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x - 2, y + 2), new MapLocation(x - 2, y -
-		// 					2), 255, 255, 255);
-		// 		}
-		// 		if ((chunk & Minimap.ENEMY_BIT) != 0) {
-		// 			rc.setIndicatorLine(new MapLocation(x - 1, y - 1), new MapLocation(x + 1, y -
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x + 1, y - 1), new MapLocation(x + 1, y +
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x + 1, y + 1), new MapLocation(x - 1, y +
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x - 1, y + 1), new MapLocation(x - 1, y -
-		// 					1), 255, 0, 0);
-		// 		}
-		// 		if ((chunk & Minimap.WELL_BIT) != 0) {
-		// 			rc.setIndicatorDot(new MapLocation(x, y), 0, 0, 255);
-		// 		}
-		// 	}
-		// }
+		for (int x = 2; x < mapWidth; x += 5) {
+			for (int y = 2; y < mapHeight; y += 5) {
+				int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
+				if ((chunk & Minimap.ISLAND_BITS) != 0) {
+					rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y -
+							2), 255, 255, 255);
+					rc.setIndicatorLine(new MapLocation(x + 2, y - 2), new MapLocation(x + 2, y +
+							2), 255, 255, 255);
+					rc.setIndicatorLine(new MapLocation(x + 2, y + 2), new MapLocation(x - 2, y +
+							2), 255, 255, 255);
+					rc.setIndicatorLine(new MapLocation(x - 2, y + 2), new MapLocation(x - 2, y -
+							2), 255, 255, 255);
+				}
+				if ((chunk & Minimap.ENEMY_BIT) != 0) {
+					rc.setIndicatorLine(new MapLocation(x - 1, y - 1), new MapLocation(x + 1, y -
+							1), 255, 0, 0);
+					rc.setIndicatorLine(new MapLocation(x + 1, y - 1), new MapLocation(x + 1, y +
+							1), 255, 0, 0);
+					rc.setIndicatorLine(new MapLocation(x + 1, y + 1), new MapLocation(x - 1, y +
+							1), 255, 0, 0);
+					rc.setIndicatorLine(new MapLocation(x - 1, y + 1), new MapLocation(x - 1, y -
+							1), 255, 0, 0);
+				}
+				if ((chunk & Minimap.WELL_BIT) != 0) {
+					rc.setIndicatorDot(new MapLocation(x, y), 0, 0, 255);
+				}
+			}
+		}
 
+	}
+
+	@Override
+	public void endTurn() throws GameActionException {
+		super.endTurn();
+		ad = rc.getResourceAmount(ResourceType.ADAMANTIUM);
+		mn = rc.getResourceAmount(ResourceType.MANA);
+		ex = rc.getResourceAmount(ResourceType.ELIXIR);
 	}
 
 	private boolean tryBuildAnchor() throws GameActionException {
 		if (rc.canBuildAnchor(Anchor.ACCELERATING)) {
 			rc.buildAnchor(Anchor.ACCELERATING);
-			buildAnchor = false;
 			return true;
 		}
 		if (rc.canBuildAnchor(Anchor.STANDARD)) {
 			rc.buildAnchor(Anchor.STANDARD);
-			buildAnchor = false;
 			return true;
 		}
 		return false;
 	}
 
 	private boolean tryBuildRobot() throws GameActionException {
-		RobotType buildType;
-		int mana = rc.getResourceAmount(ResourceType.MANA);
-		int adam = rc.getResourceAmount(ResourceType.ADAMANTIUM);
-		int elix = rc.getResourceAmount(ResourceType.ELIXIR);
 
-		if (mana >= nextManaBuild.buildCostMana && adam >= nextManaBuild.buildCostAdamantium) {
-			buildType = nextManaBuild;
-		} else if (adam >= nextAdamBuild.buildCostAdamantium && mana >= nextAdamBuild.buildCostMana) {
-			buildType = nextAdamBuild;
-		} else if (elix >= nextElixBuild.buildCostElixir) {
-			buildType = nextElixBuild;
-		} else if (mana >= nextAdamBuild.buildCostMana + RobotType.LAUNCHER.buildCostMana) {
+		RobotType buildType = null;
+
+		if (exIncome < 15 && ex >= 200) {
+			// Build booster/destabilizer
+			buildType = rng.nextBoolean() ? RobotType.BOOSTER : RobotType.DESTABILIZER;
+		} else if (adIncome >= 15 && mnIncome >= 15) {
+			// Want to build standard anchor, but okay to spend the resource we have more
+			// of.
+			if (adIncome >= mnIncome && ad > mn + RobotType.CARRIER.buildCostAdamantium) {
+				buildType = RobotType.CARRIER;
+			} else if (mnIncome >= adIncome && mn > ad + RobotType.LAUNCHER.buildCostMana) {
+				buildType = RobotType.LAUNCHER;
+			}
+		} else if (saveForAmplifier && ad >= RobotType.AMPLIFIER.buildCostAdamantium
+				&& mn >= RobotType.AMPLIFIER.buildCostMana) {
+			buildType = RobotType.AMPLIFIER;
+		} else if ((!saveForAmplifier && mn >= RobotType.LAUNCHER.buildCostMana) ||
+				mn >= RobotType.LAUNCHER.buildCostMana + RobotType.AMPLIFIER.buildCostMana) {
 			buildType = RobotType.LAUNCHER;
-		} else if (adam >= nextManaBuild.buildCostAdamantium + RobotType.CARRIER.buildCostAdamantium) {
+		} else if ((!saveForAmplifier && ad >= RobotType.CARRIER.buildCostAdamantium) ||
+				ad >= RobotType.CARRIER.buildCostAdamantium + RobotType.AMPLIFIER.buildCostAdamantium) {
 			buildType = RobotType.CARRIER;
-		} else {
-			// nothing to build
-			return false;
 		}
+
+		if (buildType == null)
+			return false;
 
 		for (Direction direction : Direction.allDirections()) {
 			MapLocation buildLocation = rc.getLocation().add(direction);
 			if (rc.canBuildRobot(buildType, buildLocation)) {
 				rc.buildRobot(buildType, buildLocation);
-				updateBuildOrder(buildType);
+
+				if (buildType == RobotType.AMPLIFIER)
+					saveForAmplifier = false;
+
+				// 20% chance of saving for an amplifier once we have a decent income.
+				else if (adIncome >= 5 && mnIncome >= 5
+						&& (buildType == RobotType.CARRIER || buildType == RobotType.LAUNCHER) && rng.nextInt(5) == 0) {
+					saveForAmplifier = true;
+				}
+
 				return true;
 			}
 		}
 		return false;
-	}
-
-	private void updateBuildOrder(RobotType buildType) {
-		if (rc.getRoundNum() > Constants.CAPTURE_ISLAND_ROUND && rng.nextInt(50) == 0) {
-			buildAnchor = true;
-		}
-		if (buildType == nextManaBuild) {
-			int r = rng.nextInt(10);
-			switch (r) {
-				case 0:
-					nextManaBuild = RobotType.AMPLIFIER;
-					break;
-				default:
-					nextManaBuild = RobotType.LAUNCHER;
-			}
-		}
-		if (buildType == nextAdamBuild) {
-			int r = rng.nextInt(10);
-			switch (r) {
-				case 0:
-					nextAdamBuild = RobotType.AMPLIFIER;
-					break;
-				default:
-					nextAdamBuild = RobotType.CARRIER;
-			}
-		}
-		if (buildType == nextElixBuild) {
-			int r = rng.nextInt(2);
-			switch (r) {
-				case 0:
-					nextElixBuild = RobotType.DESTABILIZER;
-					break;
-				default:
-					nextElixBuild = RobotType.BOOSTER;
-			}
-		}
 	}
 }
