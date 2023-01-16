@@ -140,16 +140,14 @@ public abstract class Unit extends Robot {
 		if(enemies.length == 0 || rc.getActionCooldownTurns() >= GameConstants.COOLDOWN_LIMIT) return;
 
 		RobotInfo enemy = null;
-		int dist = Integer.MAX_VALUE;
 		int health = Integer.MAX_VALUE;
-		for (RobotInfo r : enemies) {
+		for (RobotInfo r : rc.senseNearbyRobots(rc.getLocation(), type.actionRadiusSquared, enemyTeam)) {
 			if (r.type == RobotType.HEADQUARTERS) {
 				continue;
 			}
 			int d = r.location.distanceSquaredTo(pos);
-			if ((r.health < health && d <= type.actionRadiusSquared) || d < dist) {
+			if (r.health < health) {
 				// Prey on the close, weak units.
-				dist = d;
 				health = r.health;
 				enemy = r;
 			}
