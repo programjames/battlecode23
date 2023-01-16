@@ -10,7 +10,6 @@ public class Launcher extends Unit {
 
 	public Launcher(RobotController rc) {
 		super(rc);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -51,7 +50,9 @@ public class Launcher extends Unit {
 						break;
 
 					case RETREAT:
+						attack(navigator);
 						retreat(navigator);
+						attack(navigator);
 						break;
 
 					default:
