@@ -30,7 +30,7 @@ public class Booster extends Unit {
 			int myChunk = minimap.getChunkIndex(pos);
 			int chunk = -1;
 			chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
-			if (chunk == -1) {
+			if (chunk == -1 && rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
 				chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
 			}
 			if (chunk == -1) {

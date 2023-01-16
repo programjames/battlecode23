@@ -789,7 +789,7 @@ public class Carrier extends Unit {
 					RobotInfo hq = rc.senseRobotAtLocation(myHQLocation);
 					int hqMn = hq.getResourceAmount(ResourceType.MANA);
 					int hqAd = hq.getResourceAmount(ResourceType.ADAMANTIUM);
-					if (hqMn + hqAd > 150 || (rc.getRoundNum() >= 150 && rng.nextDouble() < 0.4)) {
+					if (hqMn + hqAd > 150 || (rc.getRoundNum() >= Constants.UPGRADE_ROUND && rng.nextDouble() < 0.4)) {
 						// The HQ has plenty of resources, so let's focus on
 						// upgrading wells instead of gathering more resources
 						// System.out.println("SWITCHED JOB to upgrade well");
