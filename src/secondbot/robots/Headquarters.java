@@ -16,6 +16,16 @@ public class Headquarters extends Building {
 	boolean buildAnchor = false;
 
 	@Override
+	public void beginTurn() throws GameActionException {
+		super.beginTurn();
+
+		if(!noDangerousEnemies) {
+			buildAnchor = false;
+			nextManaBuild = RobotType.LAUNCHER;
+		}
+	}
+
+	@Override
 	public void runTurn() throws GameActionException {
 		if (rc.getRoundNum() > 500) {
 			rc.resign();
