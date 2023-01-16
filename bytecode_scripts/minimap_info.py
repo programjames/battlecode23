@@ -22,7 +22,7 @@ def make_nearest_unclaimed_island_chunk():
         func = f"private static int nearestUnclaimedIslandChunkSub{id} (int[] chunks) {{"
         for c in chunks:
             func += f"""\nswitch (chunks[{c}] & {ISLAND_BITS}){{
-                case 1: return {c};
+                case 0b0100: return {c};
                 default:
             }}"""
         func += f"\nreturn -1;}}"

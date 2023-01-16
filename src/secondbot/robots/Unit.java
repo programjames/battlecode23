@@ -50,7 +50,63 @@ public abstract class Unit extends Robot {
 		}
 	}
 
-	public void attack(Navigator navigator) throws GameActionException {
+	public void skirt(Navigator navigator) throws GameActionException {
+		/*
+		 * Move in and slightly counterclockwise to enemy units.
+		 */
+		MapLocation loc = pos;
+		for (RobotInfo r : enemies) {
+			switch(pos.directionTo(r.location)) {
+				case NORTH: loc = loc.add(Direction.NORTHEAST); break;
+				case NORTHEAST: loc = loc.add(Direction.EAST); break;
+				case EAST: loc = loc.add(Direction.SOUTHEAST); break;
+				case SOUTHEAST: loc = loc.add(Direction.SOUTH); break;
+				case SOUTH: loc = loc.add(Direction.SOUTHWEST); break;
+				case SOUTHWEST: loc = loc.add(Direction.WEST); break;
+				case WEST: loc = loc.add(Direction.NORTHWEST); break;
+				case NORTHWEST: loc = loc.add(Direction.NORTH); break;
+				default:
+			}
+		}
+		navigator.move(loc);
+	}
+
+	public void encircle(Navigator navigator) throws GameActionException {
+		/*
+		 * Move counterclockwise around enemy units.
+		 */
+		MapLocation loc = pos;
+		for (RobotInfo r : enemies) {
+			switch(pos.directionTo(r.location)) {
+				case NORTH: loc = loc.add(Direction.EAST); break;
+				case NORTHEAST: loc = loc.add(Direction.SOUTHEAST); break;
+				case EAST: loc = loc.add(Direction.SOUTH); break;
+				case SOUTHEAST: loc = loc.add(Direction.SOUTHWEST); break;
+				case SOUTH: loc = loc.add(Direction.WEST); break;
+				case SOUTHWEST: loc = loc.add(Direction.NORTHWEST); break;
+				case WEST: loc = loc.add(Direction.NORTH); break;
+				case NORTHWEST: loc = loc.add(Direction.NORTHEAST); break;
+				default:
+			}
+		}
+		navigator.move(loc);
+	}
+
+	public void retreat(Navigator navigator) throws GameActionException {
+		MapLocation loc = runAwayLocation();
+		navigator.fuzzyMoveTo(loc, 4);
+		navigator.fuzzyMoveTo(loc, 4);
+	}
+
+	public boolean shouldCloseIn() {
+		/*
+		 * If we're in attack mode, should we close in for the kill, or should we stay
+		 * still/run away?
+		 */
+		return allyStrength > threatLevel; // Maybe should be overrided in subclasses
+	}
+
+	public void attack() throws GameActionException {
 		RobotInfo enemy = null;
 		int dist = Integer.MAX_VALUE;
 		int health = Integer.MAX_VALUE;
@@ -70,33 +126,9 @@ public abstract class Unit extends Robot {
 		if (enemy == null)
 			return;
 
-		if (rc.getActionCooldownTurns() <= GameConstants.COOLDOWN_LIMIT && !rc.canAttack(enemy.location)
-				&& shouldCloseIn()) {
-			// Move in for the kill mwahahaha
-			navigator.move(enemy.location);
-		}
-
 		while (rc.canAttack(enemy.location)) {
 			rc.attack(enemy.location);
 		}
-	}
-
-	public void retreat(Navigator navigator) throws GameActionException {
-		MapLocation loc = runAwayLocation();
-		navigator.fuzzyMoveTo(loc, 4);
-		navigator.fuzzyMoveTo(loc, 4);
-	}
-
-	
-    
-   
-    // Spreads out from friendly units while remaining near boosters, launchers and carriers.
-	public boolean shouldCloseIn() {
-		/*
-		 * If we're in attack mode, should we close in for the kill, or should we stay
-		 * still/run away?
-		 */
-		return allyStrength > threatLevel; // Maybe should be overrided in subclasses
 	}
 
 	private void countUpNearbyStrengths() {
