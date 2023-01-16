@@ -26,17 +26,16 @@ public class Launcher extends Unit {
 		navigator.needToPrepareMove = true;
 
 		if (noDangerousEnemies) {
+			int chunk = -1;
 			mode = Mode.FIND_ENEMY;
 			if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
 				int myChunk = minimap.getChunkIndex(pos);
-				int chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
-				if (chunk != -1) {
-					navigator.setDestination(minimap.getChunkCenter(chunk));
-				} else {
-					navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
-				}
-			} else {
+				chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+			}
+			if (chunk == -1) {
 				navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
+			} else {
+				navigator.setDestination(minimap.getChunkCenter(chunk));
 			}
 		} else if (threatLevel > allyStrength) {
 			mode = Mode.RETREAT;

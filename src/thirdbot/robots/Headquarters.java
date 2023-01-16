@@ -27,9 +27,9 @@ public class Headquarters extends Building {
 
 	@Override
 	public void runTurn() throws GameActionException {
-		// if (rc.getRoundNum() > 500) {
-		// 	rc.resign();
-		// }
+		if (rc.getRoundNum() > 500) {
+			rc.resign();
+		}
 
 		if (buildAnchor) {
 			tryBuildAnchor();
