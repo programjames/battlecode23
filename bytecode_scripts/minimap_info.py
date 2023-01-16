@@ -9,6 +9,26 @@ for x in range(2, 60, 5):
 def r2(c1, c2):
     return (c1[0]-c2[0])**2 + (c1[1]-c2[1])**2
 
+ISLAND_BITS = 0b1100
+def make_nearest_unclaimed_island_chunk():
+    funcs = """public static int nearestUnclaimedIslandChunk (int chunk, int[] chunks) {
+        switch(chunk) {"""
+    for id, chunk in enumerate(chunk_centers.keys()):
+        funcs += f"\ncase {chunk}: return nearestUnclaimedIslandChunkSub{id}(chunks);"
+    funcs += f"}}\nreturn nearestUnclaimedIslandChunkSub0(chunks);}}"
+    for id, chunk in enumerate(chunk_centers.keys()):
+        center = chunk_centers[chunk]
+        chunks = sorted(chunk_centers.keys(), key=lambda c: r2(chunk_centers[c], center))
+        func = f"private static int nearestUnclaimedIslandChunkSub{id} (int[] chunks) {{"
+        for c in chunks:
+            func += f"""\nswitch (chunks[{c}] & {ISLAND_BITS}){{
+                case 1: return {c};
+                default:
+            }}"""
+        func += f"\nreturn -1;}}"
+        funcs += "\n" + func
+    return funcs
+
 ENEMY_BIT = 1
 def make_nearest_enemy_chunk():
     funcs = """public static int nearestEnemyChunk (int chunk, int[] chunks) {
@@ -97,6 +117,7 @@ s = f"""package secondbot.coordination;
  * - nearestWellChunkOther(int chunkIndex) // Finds the nearest chunk with a well given your location's chunk index. Places your current chunk at the back of the line.
                                       // Returns -1 if no known well chunks.
  * - markEnemies(Minimap minimap, RobotInfo[] enemies) // Marks enemies, ignoring amplifiers and headquarters.
+ * - nearestUnclaimedIslandChunk(Minimap minimap, RobotInfo[] enemies) // Chunks with islands unclaimed by either team.
 */
 
 import battlecode.common.*;
@@ -106,6 +127,7 @@ public class MinimapInfo {{
     {make_mark_enemies()}
     {make_nearest_well_chunk()}
     {make_nearest_well_chunk_other()}
+    {make_nearest_unclaimed_island_chunk()}
 }}"""
 
 print(s)

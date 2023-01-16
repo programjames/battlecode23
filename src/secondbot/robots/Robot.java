@@ -16,7 +16,8 @@ public abstract class Robot {
 	public RobotInfo[] friends;
 	public int mapWidth, mapHeight;
 	public int visionRadius;
-
+	public boolean noDangerousEnemies;
+	
 	public Robot(RobotController rc) {
 		this.rc = rc;
 		type = rc.getType();
@@ -58,8 +59,22 @@ public abstract class Robot {
 				: type.visionRadiusSquared;
 
 		minimap.pull();
+
+		noDangerousEnemies = true;
+		enemyLoop: for(RobotInfo enemy : enemies) {
+			switch(enemy.type) {
+				case AMPLIFIER:
+				case HEADQUARTERS:
+				break;
+				default:
+				noDangerousEnemies = false;
+				break enemyLoop;
+			}
+		}
+
+		
 		// Update the minimap with enemies & visible squares
-		if (enemies.length == 0) {
+		if (noDangerousEnemies) {
 			minimap.markClear(pos);
 		} else {
 			MinimapInfo.markEnemies(minimap, enemies);
@@ -86,6 +101,14 @@ public abstract class Robot {
 			} // else {
 				// rc.setIndicatorString("Can't push to minimap!");
 				// }
+		}
+		if (Clock.getBytecodesLeft() > 1500) {
+			int[] islands = rc.senseNearbyIslands();
+			for(int island : islands) {
+				Team islandTeam = rc.senseTeamOccupyingIsland(island);
+				MapLocation islandLoc = rc.senseNearbyIslandLocations(island)[0];
+				minimap.markIsland(islandLoc, islandTeam, myTeam);
+			}
 		}
 	}
 
