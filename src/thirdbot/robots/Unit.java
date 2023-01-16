@@ -138,16 +138,14 @@ public abstract class Unit extends Robot {
 
 	public void attack() throws GameActionException {
 		RobotInfo enemy = null;
-		int dist = Integer.MAX_VALUE;
 		int health = Integer.MAX_VALUE;
-		for (RobotInfo r : enemies) {
+		for (RobotInfo r : rc.senseNearbyRobots(rc.getLocation(), type.actionRadiusSquared, enemyTeam)) {
 			if (r.type == RobotType.HEADQUARTERS) {
 				continue;
 			}
 			int d = r.location.distanceSquaredTo(pos);
-			if ((r.health < health && d <= type.actionRadiusSquared) || d < dist) {
+			if (r.health < health) {
 				// Prey on the close, weak units.
-				dist = d;
 				health = r.health;
 				enemy = r;
 			}
