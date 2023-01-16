@@ -14,10 +14,13 @@ public class Headquarters extends Building {
 	int mn = GameConstants.INITIAL_MN_AMOUNT;
 	int ex = 0;
 
-	private final double DECAY_RATE = 0.9;
+	private final double DECAY_RATE = 0.99;
 	double adIncome = 0;
 	double mnIncome = 0;
 	double exIncome = 0;
+
+	private final int ANCHOR_INCOME = 10; // build an anchor if we have at least this income/turn
+	private final int AMPLIFIER_INCOME = 5; // build amplifiers after this income bracket
 
 	boolean saveForAmplifier = false;
 
@@ -38,11 +41,11 @@ public class Headquarters extends Building {
 
 	@Override
 	public void runTurn() throws GameActionException {
-		if (rc.getRoundNum() > 300) {
-			rc.resign();
-		}
+		// if (rc.getRoundNum() > 300) {
+		// 	rc.resign();
+		// }
 
-		if (exIncome >= 15 || (adIncome >= 15 && mnIncome >= 15))
+		if (exIncome >= ANCHOR_INCOME || (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME))
 			while (tryBuildAnchor())
 				;
 
@@ -106,10 +109,10 @@ public class Headquarters extends Building {
 
 		RobotType buildType = null;
 
-		if (exIncome < 15 && ex >= 200) {
+		if (exIncome < ANCHOR_INCOME && ex >= 200) {
 			// Build booster/destabilizer
 			buildType = rng.nextBoolean() ? RobotType.BOOSTER : RobotType.DESTABILIZER;
-		} else if (adIncome >= 15 && mnIncome >= 15) {
+		} else if (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME) {
 			// Want to build standard anchor, but okay to spend the resource we have more
 			// of.
 			if (adIncome >= mnIncome && ad > mn + RobotType.CARRIER.buildCostAdamantium) {
@@ -140,7 +143,7 @@ public class Headquarters extends Building {
 					saveForAmplifier = false;
 
 				// 20% chance of saving for an amplifier once we have a decent income.
-				else if (adIncome >= 5 && mnIncome >= 5
+				else if (adIncome >= AMPLIFIER_INCOME && mnIncome >= AMPLIFIER_INCOME
 						&& (buildType == RobotType.CARRIER || buildType == RobotType.LAUNCHER) && rng.nextInt(5) == 0) {
 					saveForAmplifier = true;
 				}
