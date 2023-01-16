@@ -116,7 +116,7 @@ public class Headquarters extends Building {
 			// Want to build standard anchor, but okay to spend the resource we have more
 			// of.
 			if (adIncome >= mnIncome && ad > mn + RobotType.CARRIER.buildCostAdamantium) {
-				buildType = RobotType.CARRIER;
+				// buildType = RobotType.CARRIER;
 			} else if (mnIncome >= adIncome && mn > ad + RobotType.LAUNCHER.buildCostMana) {
 				buildType = RobotType.LAUNCHER;
 			}
