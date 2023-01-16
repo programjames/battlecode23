@@ -1,8 +1,8 @@
-package secondbot.robots;
+package thirdbot.robots;
 
 import battlecode.common.*;
-import secondbot.navigation.*;
-import secondbot.coordination.*;
+import thirdbot.navigation.*;
+import thirdbot.coordination.*;
 
 public abstract class Unit extends Robot {
 

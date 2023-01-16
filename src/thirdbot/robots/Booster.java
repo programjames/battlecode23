@@ -1,8 +1,8 @@
-package secondbot.robots;
+package thirdbot.robots;
 
 import battlecode.common.*;
-import secondbot.coordination.*;
-import secondbot.navigation.*;
+import thirdbot.coordination.*;
+import thirdbot.navigation.*;
 
 public class Booster extends Unit {
 

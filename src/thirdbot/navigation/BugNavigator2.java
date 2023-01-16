@@ -1,9 +1,9 @@
-package secondbot.navigation;
+package thirdbot.navigation;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
-import secondbot.robots.Carrier;
+import thirdbot.robots.Carrier;
 
 public class BugNavigator2 extends BugNavigator {
 	public Carrier carrier;

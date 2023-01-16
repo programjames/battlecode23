@@ -1,7 +1,7 @@
-package secondbot.navigation;
+package thirdbot.navigation;
 
 import battlecode.common.*;
-import secondbot.robots.Robot;
+import thirdbot.robots.Robot;
 
 public class BugNavigator extends Navigator {
 	private Direction wallDirection = null;

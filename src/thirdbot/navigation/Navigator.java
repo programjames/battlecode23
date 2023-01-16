@@ -1,7 +1,7 @@
-package secondbot.navigation;
+package thirdbot.navigation;
 
 import battlecode.common.*;
-import secondbot.robots.*;
+import thirdbot.robots.*;
 
 public class Navigator {
 	/*

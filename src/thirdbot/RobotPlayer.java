@@ -1,7 +1,7 @@
-package secondbot;
+package thirdbot;
 
 import battlecode.common.*;
-import secondbot.robots.*;
+import thirdbot.robots.*;
 
 public strictfp class RobotPlayer {
 	public static void run(RobotController rc) throws GameActionException {

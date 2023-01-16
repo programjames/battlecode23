@@ -1,4 +1,4 @@
-package secondbot.robots;
+package thirdbot.robots;
 
 import battlecode.common.*;
 

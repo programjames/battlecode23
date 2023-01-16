@@ -1,7 +1,7 @@
-package secondbot.robots;
+package thirdbot.robots;
 
 import battlecode.common.*;
-import secondbot.coordination.*;
+import thirdbot.coordination.*;
 
 public class Headquarters extends Building {
 

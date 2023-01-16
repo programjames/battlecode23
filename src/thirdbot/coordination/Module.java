@@ -1,4 +1,4 @@
-package secondbot.coordination;
+package thirdbot.coordination;
 
 import battlecode.common.*;
 

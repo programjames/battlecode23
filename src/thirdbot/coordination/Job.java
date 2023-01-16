@@ -1,4 +1,4 @@
-package secondbot.coordination;
+package thirdbot.coordination;
 
 public enum Job {
 	/*
