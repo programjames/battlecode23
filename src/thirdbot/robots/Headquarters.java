@@ -24,9 +24,9 @@ public class Headquarters extends Building {
 	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
-		adIncome = DECAY_RATE * adIncome + rc.getResourceAmount(ResourceType.ADAMANTIUM) - ad;
-		mnIncome = DECAY_RATE * mnIncome + rc.getResourceAmount(ResourceType.MANA) - mn;
-		exIncome = DECAY_RATE * exIncome + rc.getResourceAmount(ResourceType.ELIXIR) - ex;
+		adIncome = DECAY_RATE * adIncome + (1 - DECAY_RATE) * (rc.getResourceAmount(ResourceType.ADAMANTIUM) - ad);
+		mnIncome = DECAY_RATE * mnIncome + (1 - DECAY_RATE) * (rc.getResourceAmount(ResourceType.MANA) - mn);
+		exIncome = DECAY_RATE * exIncome + (1 - DECAY_RATE) * (rc.getResourceAmount(ResourceType.ELIXIR) - ex);
 
 		// Also updates these at the end of turn:
 		ad = rc.getResourceAmount(ResourceType.ADAMANTIUM);
@@ -38,7 +38,7 @@ public class Headquarters extends Building {
 
 	@Override
 	public void runTurn() throws GameActionException {
-		if (rc.getRoundNum() > 1000) {
+		if (rc.getRoundNum() > 300) {
 			rc.resign();
 		}
 
