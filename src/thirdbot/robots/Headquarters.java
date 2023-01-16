@@ -144,7 +144,7 @@ public class Headquarters extends Building {
 
 				// 20% chance of saving for an amplifier once we have a decent income.
 				else if (adIncome >= AMPLIFIER_INCOME && mnIncome >= AMPLIFIER_INCOME
-						&& (buildType == RobotType.CARRIER || buildType == RobotType.LAUNCHER) && rng.nextInt(5) == 0) {
+						&& buildType == RobotType.LAUNCHER && rng.nextInt(5) == 0) {
 					saveForAmplifier = true;
 				}
 

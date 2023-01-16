@@ -26,10 +26,11 @@ public class Launcher extends Unit {
 		navigator.needToPrepareMove = true;
 
 		if (noDangerousEnemies) {
-			int chunk = -1;
 			mode = Mode.FIND_ENEMY;
-			if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
-				int myChunk = minimap.getChunkIndex(pos);
+			int myChunk = minimap.getChunkIndex(pos);
+			int chunk = -1;
+			chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
+			if (chunk == -1) {
 				chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
 			}
 			if (chunk == -1) {
