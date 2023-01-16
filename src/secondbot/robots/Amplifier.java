@@ -29,20 +29,8 @@ public class Amplifier extends Unit {
 		if (enemies.length > 0) {
 			retreat(navigator);
 		} else {
-			int dx = 0;
-			int dy = 0;
-			for (RobotInfo robot : rc.senseNearbyRobots(-1, myTeam)) {
-				switch (robot.type) {
-					case AMPLIFIER:
-					case HEADQUARTERS:
-						dx += pos.x - robot.location.x;
-						dy += pos.y - robot.location.y;
-						break;
-					default:
-				}
-			}
-			MapLocation loc = pos.translate(dx, dy);
-			navigator.fuzzyMoveTo(loc, 4);
+			MapLocation loc = safeSpreadOutLocation();
+			navigator.move(loc);
 		}
 	}
 }

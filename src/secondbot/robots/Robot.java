@@ -55,9 +55,7 @@ public abstract class Robot {
 		if (enemies.length == 0) {
 			minimap.markClear(pos);
 		} else {
-			for (RobotInfo enemy : enemies) {
-				minimap.markEnemy(enemy);
-			}
+			MinimapInfo.markEnemies(minimap, enemies);
 		}
 	}
 

@@ -5,6 +5,7 @@ package secondbot.coordination;
  * - nearestEnemyChunk(int chunkIndex) // Finds the nearest chunk with an enemy given your location's chunk index. Returns -1 if no known enemy chunks.
  * - nearestWellChunk(int chunkIndex) // Finds the nearest chunk with a well given your location's chunk index. Places your current chunk at the back of the line.
                                       // Returns -1 if no known well chunks.
+ * - markEnemies(Minimap minimap, RobotInfo[] enemies) // Marks enemies, ignoring amplifiers and headquarters.
 */
 
 import battlecode.common.*;
@@ -42352,4 +42353,287 @@ if ((chunks[17] & 2) == 1) return 17;
 if ((chunks[0] & 2) == 1) return 0;
 if ((chunks[127] & 2) == 1) return 127;
 return -1;}
+    
+    // Marks enemies, ignoring amplifiers and HQs.
+    public static void markEnemies(Minimap minimap, RobotInfo[] enemies) throws GameActionException {
+        int dx = 0;
+        int dy = 0;
+        switch(enemies.length) { default:
+            case 69: switch(enemies[68].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[68]);
+        }case 68: switch(enemies[67].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[67]);
+        }case 67: switch(enemies[66].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[66]);
+        }case 66: switch(enemies[65].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[65]);
+        }case 65: switch(enemies[64].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[64]);
+        }case 64: switch(enemies[63].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[63]);
+        }case 63: switch(enemies[62].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[62]);
+        }case 62: switch(enemies[61].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[61]);
+        }case 61: switch(enemies[60].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[60]);
+        }case 60: switch(enemies[59].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[59]);
+        }case 59: switch(enemies[58].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[58]);
+        }case 58: switch(enemies[57].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[57]);
+        }case 57: switch(enemies[56].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[56]);
+        }case 56: switch(enemies[55].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[55]);
+        }case 55: switch(enemies[54].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[54]);
+        }case 54: switch(enemies[53].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[53]);
+        }case 53: switch(enemies[52].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[52]);
+        }case 52: switch(enemies[51].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[51]);
+        }case 51: switch(enemies[50].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[50]);
+        }case 50: switch(enemies[49].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[49]);
+        }case 49: switch(enemies[48].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[48]);
+        }case 48: switch(enemies[47].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[47]);
+        }case 47: switch(enemies[46].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[46]);
+        }case 46: switch(enemies[45].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[45]);
+        }case 45: switch(enemies[44].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[44]);
+        }case 44: switch(enemies[43].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[43]);
+        }case 43: switch(enemies[42].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[42]);
+        }case 42: switch(enemies[41].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[41]);
+        }case 41: switch(enemies[40].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[40]);
+        }case 40: switch(enemies[39].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[39]);
+        }case 39: switch(enemies[38].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[38]);
+        }case 38: switch(enemies[37].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[37]);
+        }case 37: switch(enemies[36].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[36]);
+        }case 36: switch(enemies[35].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[35]);
+        }case 35: switch(enemies[34].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[34]);
+        }case 34: switch(enemies[33].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[33]);
+        }case 33: switch(enemies[32].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[32]);
+        }case 32: switch(enemies[31].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[31]);
+        }case 31: switch(enemies[30].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[30]);
+        }case 30: switch(enemies[29].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[29]);
+        }case 29: switch(enemies[28].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[28]);
+        }case 28: switch(enemies[27].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[27]);
+        }case 27: switch(enemies[26].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[26]);
+        }case 26: switch(enemies[25].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[25]);
+        }case 25: switch(enemies[24].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[24]);
+        }case 24: switch(enemies[23].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[23]);
+        }case 23: switch(enemies[22].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[22]);
+        }case 22: switch(enemies[21].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[21]);
+        }case 21: switch(enemies[20].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[20]);
+        }case 20: switch(enemies[19].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[19]);
+        }case 19: switch(enemies[18].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[18]);
+        }case 18: switch(enemies[17].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[17]);
+        }case 17: switch(enemies[16].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[16]);
+        }case 16: switch(enemies[15].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[15]);
+        }case 15: switch(enemies[14].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[14]);
+        }case 14: switch(enemies[13].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[13]);
+        }case 13: switch(enemies[12].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[12]);
+        }case 12: switch(enemies[11].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[11]);
+        }case 11: switch(enemies[10].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[10]);
+        }case 10: switch(enemies[9].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[9]);
+        }case 9: switch(enemies[8].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[8]);
+        }case 8: switch(enemies[7].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[7]);
+        }case 7: switch(enemies[6].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[6]);
+        }case 6: switch(enemies[5].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[5]);
+        }case 5: switch(enemies[4].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[4]);
+        }case 4: switch(enemies[3].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[3]);
+        }case 3: switch(enemies[2].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[2]);
+        }case 2: switch(enemies[1].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[1]);
+        }case 1: switch(enemies[0].type) {
+case AMPLIFIER: 
+case HEADQUARTERS: break;default:
+            minimap.markEnemy(enemies[0]);
+        }case 0: } }
 }

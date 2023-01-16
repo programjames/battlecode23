@@ -43,13 +43,39 @@ def make_nearest_well_chunk():
         funcs += "\n" + func
     return funcs
 
-s = f"""package firstbot.coordination;
+def switch_mark_enemies(i):
+    s = ""
+    for type in ["AMPLIFIER", "HEADQUARTERS"]:
+        s += f"\ncase {type}: "
+    s += "break;"
+    s += f"""default:
+            minimap.markEnemy(enemies[{i}]);"""
+    return s
+
+def make_mark_enemies():
+    func = f"""
+    // Marks enemies, ignoring amplifiers and HQs.
+    public static void markEnemies(Minimap minimap, RobotInfo[] enemies) throws GameActionException {{
+        int dx = 0;
+        int dy = 0;
+        switch(enemies.length) {{ default:
+            """
+    
+    for i in range(68, -1, -1):
+        func += f"""case {i+1}: switch(enemies[{i}].type) {{{switch_mark_enemies(i)}
+        }}"""
+    func += f"case 0: }} }}"
+    return func
+
+
+s = f"""package secondbot.coordination;
 
 /* Finds out specific info about the minimap given the chunks array.
  * Current methods:
  * - nearestEnemyChunk(int chunkIndex) // Finds the nearest chunk with an enemy given your location's chunk index. Returns -1 if no known enemy chunks.
  * - nearestWellChunk(int chunkIndex) // Finds the nearest chunk with a well given your location's chunk index. Places your current chunk at the back of the line.
                                       // Returns -1 if no known well chunks.
+ * - markEnemies(Minimap minimap, RobotInfo[] enemies) // Marks enemies, ignoring amplifiers and headquarters.
 */
 
 import battlecode.common.*;
@@ -57,6 +83,7 @@ import battlecode.common.*;
 public class MinimapInfo {{
     {make_nearest_enemy_chunk()}
     {make_nearest_well_chunk()}
+    {make_mark_enemies()}
 }}"""
 
 print(s)
