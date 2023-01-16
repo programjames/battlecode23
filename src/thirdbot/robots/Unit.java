@@ -107,6 +107,8 @@ public abstract class Unit extends Robot {
 	}
 
 	public void attack() throws GameActionException {
+		if(enemies.length == 0 || rc.getActionCooldownTurns() >= GameConstants.COOLDOWN_LIMIT) return;
+
 		RobotInfo enemy = null;
 		int dist = Integer.MAX_VALUE;
 		int health = Integer.MAX_VALUE;

@@ -19,8 +19,8 @@ public class Headquarters extends Building {
 	double mnIncome = 0;
 	double exIncome = 0;
 
-	private final int ANCHOR_INCOME = 10; // build an anchor if we have at least this income/turn
-	private final int AMPLIFIER_INCOME = 5; // build amplifiers after this income bracket
+	private final double ANCHOR_INCOME = 5; // build an anchor if we have at least this income/turn
+	private final double AMPLIFIER_INCOME = 2.5; // build amplifiers after this income bracket
 
 	boolean saveForAmplifier = false;
 

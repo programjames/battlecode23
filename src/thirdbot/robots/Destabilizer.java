@@ -51,6 +51,7 @@ public class Destabilizer extends Unit {
 					case FIND_ENEMY: // move to our enemy goal location
 						navigator.move();
 						navigator.move();
+						destablizeAttack();
 						break;
 
 					case ATTACK:
@@ -75,21 +76,32 @@ public class Destabilizer extends Unit {
 	}
 
 	private void destablizeAttack() throws GameActionException {
-		if (enemies.length == 0) return;
+		if (enemies.length == 0 || rc.getActionCooldownTurns() >= GameConstants.COOLDOWN_LIMIT) return;
 
-		int x = 0, y = 0;
-		for(RobotInfo r : enemies) {
-			x += r.location.x;
-			y += r.location.y;
-		}
+		RobotInfo[] enemiesToAttack = rc.senseNearbyRobots(type.actionRadiusSquared, enemyTeam);
+		if (enemiesToAttack.length == 0) return;
 
-		MapLocation attackLocation = new MapLocation(x / enemies.length, y / enemies.length);
-		RobotInfo[] enemiesToAttack = rc.senseNearbyRobots(attackLocation, 5, enemyTeam);
 		for(RobotInfo r : enemiesToAttack) {
 			if(rc.canAttack(r.location)) {
 				rc.attack(r.location);
 				return;
 			}
 		}
+
+
+		// int x = 0, y = 0;
+		// for(RobotInfo r : enemies) {
+		// 	x += r.location.x;
+		// 	y += r.location.y;
+		// }
+
+		// MapLocation attackLocation = new MapLocation(x / enemies.length, y / enemies.length);
+		// RobotInfo[] enemiesToAttack = rc.senseNearbyRobots(attackLocation, 5, enemyTeam);
+		// for(RobotInfo r : enemiesToAttack) {
+		// 	if(rc.canAttack(r.location)) {
+		// 		rc.attack(r.location);
+		// 		return;
+		// 	}
+		// }
 	}
 }
