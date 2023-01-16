@@ -5,7 +5,6 @@ import secondbot.coordination.*;
 import secondbot.navigation.*;
 
 public class Carrier extends Unit {
-	public static final int RUNAWAY_CARRY_LIMIT = 20; // limit of weight we should carry when running away
 
 	int ad; // amount of adamantium we're carrying
 	int mn; // amount of mana we're carrying
@@ -14,11 +13,6 @@ public class Carrier extends Unit {
 	int totalResources; // total amount of resources we're carrying
 	int totalCarryWeight; // total weight of everything we're carrying
 
-	RobotInfo[] closeFriends = null;
-	int nearbyCarriers;
-	int nearbySnipers; // Number of launchers + carriers with at least RUNAWAY_CARRY_LIMIT
-	int threatLevel = 0; // How dangerous are the enemies we're facing? Right now each carrier gives
-							// threat level 1, other enemy units give threat levels of 4.
 
 	CarrierNavigator navigator;
 
@@ -42,43 +36,6 @@ public class Carrier extends Unit {
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
 		navigator.needToPrepareMove = true;
-
-		closeFriends = rc.senseNearbyRobots(10, myTeam);
-		nearbyCarriers = 0;
-		nearbySnipers = 0;
-		for (RobotInfo r : closeFriends) {
-			switch (r.type) {
-				case CARRIER:
-					nearbyCarriers++;
-					if (r.getResourceAmount(ResourceType.ADAMANTIUM) + r.getResourceAmount(ResourceType.MANA) < 20) {
-						break;
-					}
-				case LAUNCHER:
-					nearbySnipers++;
-				default:
-					break;
-			}
-		}
-
-		threatLevel = 0;
-		for (RobotInfo r : enemies) {
-			if (threatLevel >= 20) {
-				break; // Don't waste a ton of bytecode in situations with a ton of enemies
-			}
-			switch (r.type) {
-				case CARRIER:
-					threatLevel++;
-				case AMPLIFIER:
-				case BOOSTER:
-				case LAUNCHER:
-				case DESTABILIZER:
-					threatLevel += 4;
-				case HEADQUARTERS:
-					break;
-				default:
-					break;
-			}
-		}
 
 		ad = rc.getResourceAmount(ResourceType.ADAMANTIUM);
 		mn = rc.getResourceAmount(ResourceType.MANA);
@@ -110,7 +67,7 @@ public class Carrier extends Unit {
 		 */
 		switch (mode) {
 			case IN_DANGER:
-				if (totalResources >= RUNAWAY_CARRY_LIMIT) {
+				if (totalResources >= Constants.RUNAWAY_CARRY_LIMIT) {
 					break;
 				}
 			default:
@@ -147,7 +104,7 @@ public class Carrier extends Unit {
 
 		switch (mode) {
 			case IN_DANGER:
-				if (totalResources >= RUNAWAY_CARRY_LIMIT) {
+				if (totalResources >= Constants.RUNAWAY_CARRY_LIMIT) {
 					break;
 				}
 			default:
@@ -157,16 +114,11 @@ public class Carrier extends Unit {
 	}
 
 	private void dangerLevels() throws GameActionException {
-		if (totalResources >= RUNAWAY_CARRY_LIMIT) {
+		if (totalResources >= Constants.RUNAWAY_CARRY_LIMIT) {
 			attack(navigator);
 		} else {
 			retreat(navigator);
 		}
-	}
-
-	@Override
-	public boolean shouldCloseIn() {
-		return nearbySnipers >= threatLevel;
 	}
 
 	private void giveHQResources() throws GameActionException {
@@ -501,9 +453,9 @@ public class Carrier extends Unit {
 			default:
 				job = Job.GATHER_RESOURCES;
 			case GATHER_RESOURCES:
-			if (threatLevel > 0) {
-				mode = Mode.IN_DANGER;
-			}
+				if (threatLevel > 0) {
+					mode = Mode.IN_DANGER;
+				}
 				switch (mode) {
 					case IN_DANGER:
 						if (threatLevel == 0) {

@@ -50,7 +50,9 @@ public class Launcher extends Unit {
 						break;
 
 					case RETREAT:
+						attack(navigator);
 						retreat(navigator);
+						attack(navigator);
 						break;
 
 					default:
