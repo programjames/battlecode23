@@ -37,10 +37,10 @@ def run_away():
     return func
 
 def switch_friendly_piece2(i):
-    return "case HEADQUARTERS: break; default: loc = loc.add(loc.directionTo(friends[{i}].location));"
+    return f"case HEADQUARTERS: break; default: loc = loc.add(loc.directionTo(friends[{i}].location));"
 
 def booster_move_location():
-    func = f"""public MapLocation boosterMoveLocation() throws GameActionException {{
+    func = f"""private MapLocation boosterMoveLocation() throws GameActionException {{
         MapLocation loc = pos;
         switch(enemies.length) {{ default:
             """
