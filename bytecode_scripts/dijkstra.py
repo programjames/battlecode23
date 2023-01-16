@@ -1,6 +1,7 @@
 # Game constants
 radius = 20 #int(input("What is the radius squared? "))
-directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)] # clockwise from WEST
+# directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)] # clockwise from WEST
+directions = [(-1, 0), (0, 1), (1, 0), (0, -1), (1, -1), (-1, -1), (-1, 1), (1, 1)] # More direct
 dict_dirs = {(-1, 0): "WEST", (-1, 1): "NORTHWEST", (0, 1): "NORTH", (1, 1): "NORTHEAST",
 (1, 0):"EAST", (1, -1): "SOUTHEAST", (0, -1): "SOUTH", (-1, -1): "SOUTHWEST"}
 
@@ -221,7 +222,8 @@ def move_with_current(num):
         case {n}:
             if(currents[{n}] == null) {{return -1;}}
             switch(currents[{n}]) {{"""
-        for (dx, dy), dir in dict_dirs.items():
+        for dx, dy in directions:
+            dir = dict_dirs[(dx, dy)]
             x = numbers[n][0] + dx
             y = numbers[n][1] + dy
             if (x, y) in numbers:
@@ -238,7 +240,8 @@ def translate_dir(num):
         func += f"""
         case {n}:
             switch(dir) {{"""
-        for (dx, dy), dir in dict_dirs.items():
+        for dx, dy in directions:
+            dir = dict_dirs[(dx, dy)]
             x = numbers[n][0] + dx
             y = numbers[n][1] + dy
             if (x, y) in numbers:
