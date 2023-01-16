@@ -52,7 +52,18 @@ public abstract class Robot {
 
 		minimap.pull();
 		// Update the minimap with enemies & visible squares
-		if (enemies.length == 0) {
+		boolean noEnemies = true;
+		enemyLoop: for(RobotInfo enemy : enemies) {
+			switch(enemy.type) {
+				case AMPLIFIER:
+				case HEADQUARTERS:
+				break;
+				default:
+				noEnemies = false;
+				break enemyLoop;
+			}
+		}
+		if (noEnemies) {
 			minimap.markClear(pos);
 		} else {
 			MinimapInfo.markEnemies(minimap, enemies);
