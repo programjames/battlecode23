@@ -14,6 +14,7 @@ public abstract class Robot {
 	public Random rng;
 	public Minimap minimap;
 	public RobotInfo[] enemies;
+	public RobotInfo[] previousEnemies;
 	public RobotInfo[] friends;
 	public int mapWidth, mapHeight;
 	public int visionRadius;
@@ -54,6 +55,9 @@ public abstract class Robot {
 		 * processing messages
 		 */
 		// Sense enemies
+		if (previousEnemies == null || (enemies != null && enemies.length > previousEnemies.length)) {
+			previousEnemies = enemies;
+		}
 		enemies = rc.senseNearbyRobots(-1, enemyTeam);
 		friends = rc.senseNearbyRobots(-1, myTeam);
 		visionRadius = rc.senseMapInfo(rc.getLocation()).hasCloud() ? GameConstants.CLOUD_VISION_RADIUS_SQUARED

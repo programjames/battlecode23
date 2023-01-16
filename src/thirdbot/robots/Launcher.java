@@ -37,7 +37,7 @@ public class Launcher extends Unit {
 			} else {
 				navigator.setDestination(minimap.getChunkCenter(chunk));
 			}
-		} else if (threatLevel > allyStrength) {
+		} else if (threatLevel > 2 * allyStrength) {
 			mode = Mode.RETREAT;
 		} else {
 			mode = Mode.ATTACK;

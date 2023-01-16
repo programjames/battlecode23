@@ -68,6 +68,21 @@ public abstract class Unit extends Robot {
 				default:
 			}
 		}
+		if (previousEnemies != null) {
+			for (RobotInfo r : previousEnemies) {
+				switch(pos.directionTo(r.location)) {
+					case NORTH: loc = loc.add(Direction.NORTHEAST); break;
+					case NORTHEAST: loc = loc.add(Direction.EAST); break;
+					case EAST: loc = loc.add(Direction.SOUTHEAST); break;
+					case SOUTHEAST: loc = loc.add(Direction.SOUTH); break;
+					case SOUTH: loc = loc.add(Direction.SOUTHWEST); break;
+					case SOUTHWEST: loc = loc.add(Direction.WEST); break;
+					case WEST: loc = loc.add(Direction.NORTHWEST); break;
+					case NORTHWEST: loc = loc.add(Direction.NORTH); break;
+					default:
+				}
+			}
+		}
 		navigator.move(loc);
 	}
 
@@ -87,6 +102,21 @@ public abstract class Unit extends Robot {
 				case WEST: loc = loc.add(Direction.NORTH); break;
 				case NORTHWEST: loc = loc.add(Direction.NORTHEAST); break;
 				default:
+			}
+		}
+		if (previousEnemies != null) {
+			for (RobotInfo r : previousEnemies) {
+				switch(pos.directionTo(r.location)) {
+					case NORTH: loc = loc.add(Direction.EAST); break;
+					case NORTHEAST: loc = loc.add(Direction.SOUTHEAST); break;
+					case EAST: loc = loc.add(Direction.SOUTH); break;
+					case SOUTHEAST: loc = loc.add(Direction.SOUTHWEST); break;
+					case SOUTH: loc = loc.add(Direction.WEST); break;
+					case SOUTHWEST: loc = loc.add(Direction.NORTHWEST); break;
+					case WEST: loc = loc.add(Direction.NORTH); break;
+					case NORTHWEST: loc = loc.add(Direction.NORTHEAST); break;
+					default:
+				}
 			}
 		}
 		navigator.move(loc);
@@ -117,7 +147,7 @@ public abstract class Unit extends Robot {
 				continue;
 			}
 			int d = r.location.distanceSquaredTo(pos);
-			if ((r.health < health && d <= type.actionRadiusSquared) || (d > type.actionRadiusSquared && d < dist)) {
+			if ((r.health < health && d <= type.actionRadiusSquared) || d < dist) {
 				// Prey on the close, weak units.
 				dist = d;
 				health = r.health;
