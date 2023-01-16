@@ -728,4 +728,4 @@ public class Pather {{
         class_string += method(num)
     return class_string + "}"
 
-print(all_together(len(locs), "firstbot.navigation"))
+print(all_together(len(locs), "secondbot.navigation"))
