@@ -67,6 +67,5 @@ public class Booster extends Unit {
 			default:
 				break;
 		}
-
 	}
 }
