@@ -16,7 +16,8 @@ public abstract class Robot {
 	public RobotInfo[] friends;
 	public int mapWidth, mapHeight;
 	public int visionRadius;
-
+	public boolean noDangerousEnemies;
+	
 	public Robot(RobotController rc) {
 		this.rc = rc;
 		type = rc.getType();
@@ -51,19 +52,22 @@ public abstract class Robot {
 				: type.visionRadiusSquared;
 
 		minimap.pull();
-		// Update the minimap with enemies & visible squares
-		boolean noEnemies = true;
+
+		noDangerousEnemies = true;
 		enemyLoop: for(RobotInfo enemy : enemies) {
 			switch(enemy.type) {
 				case AMPLIFIER:
 				case HEADQUARTERS:
 				break;
 				default:
-				noEnemies = false;
+				noDangerousEnemies = false;
 				break enemyLoop;
 			}
 		}
-		if (noEnemies) {
+
+		
+		// Update the minimap with enemies & visible squares
+		if (noDangerousEnemies) {
 			minimap.markClear(pos);
 		} else {
 			MinimapInfo.markEnemies(minimap, enemies);

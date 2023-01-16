@@ -25,7 +25,7 @@ public class Launcher extends Unit {
 		super.beginTurn();
 		navigator.needToPrepareMove = true;
 		
-		if(enemies.length == 0) {
+		if(noDangerousEnemies) {
 			mode = Mode.FIND_ENEMY;
 			navigator.setDestination(enemyGoalLocation());
 		} else if (enemies.length > friends.length) {
