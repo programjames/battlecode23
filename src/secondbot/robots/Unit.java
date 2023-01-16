@@ -81,9 +81,9 @@ public abstract class Unit extends Robot {
 		}
 
 		// Run away so they don't hit us!
-		MapLocation loc = runAwayLocation();
-		navigator.fuzzyMoveTo(loc, 4);
-		navigator.fuzzyMoveTo(loc, 4);
+		//MapLocation loc = runAwayLocation();
+		//navigator.fuzzyMoveTo(loc, 4);
+		//navigator.fuzzyMoveTo(loc, 4);
 	}
 
 	public void retreat(Navigator navigator) throws GameActionException {
@@ -98,7 +98,7 @@ public abstract class Unit extends Robot {
 		 * If we're in attack mode, should we close in for the kill, or should we stay
 		 * still/run away?
 		 */
-		return true; // Should probably be overrided in subclasses
+		return allyStrength > threatLevel; // Maybe should be overrided in subclasses
 	}
 
 	private void countUpNearbyStrengths() {

@@ -121,11 +121,6 @@ public class Carrier extends Unit {
 		}
 	}
 
-	@Override
-	public boolean shouldCloseIn() {
-		return allyStrength >= threatLevel;
-	}
-
 	private void giveHQResources() throws GameActionException {
 		/*
 		 * This tries to dart in and out from around an HQ to draw the most possible
