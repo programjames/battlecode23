@@ -1,6 +1,7 @@
 ##### DOUBLE J #####
 *.pyc
 *.zip
+.vscode/
 
 ###### BATTLECODE ######
 

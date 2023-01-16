@@ -6,6 +6,7 @@ import secondbot.coordination.*;
 import java.util.Random;
 
 public abstract class Robot {
+
 	public RobotController rc;
 	public RobotType type;
 	public Team myTeam, enemyTeam;

@@ -120,7 +120,7 @@ public class Headquarters extends Building {
 	}
 
 	private void updateBuildOrder(RobotType buildType) {
-		if (rc.getRoundNum() > 500 && rng.nextInt(50) == 0) {
+		if (rc.getRoundNum() > Constants.CAPTURE_ISLAND_ROUND && rng.nextInt(50) == 0) {
 			buildAnchor = true;
 		}
 		if (buildType == nextManaBuild) {
