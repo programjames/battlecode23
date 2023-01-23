@@ -26,11 +26,44 @@ public class Launcher extends Unit {
 		navigator.needToPrepareMove = true;
 
 		if (noDangerousEnemies) {
-			mode = Mode.FIND_ENEMY;
+			// Only if we're not healing.
+			if (mode != Mode.HEAL || rc.getHealth() == type.health) {
+				mode = Mode.FIND_ENEMY;
+			}
 		} else if (threatLevel > 2 * allyStrength) {
 			mode = Mode.RETREAT;
 		} else {
 			mode = Mode.ATTACK;
+		}
+
+		if (mode == Mode.HEAL || rc.getHealth() <= type.health / 3) {
+			// See if we own any islands we can heal at.
+			int healIsland = -1;
+			for (int island : rc.senseNearbyIslands()) {
+				if(rc.senseTeamOccupyingIsland(island) == myTeam) {
+					healIsland = island;
+					break;
+				}
+			}
+			if (healIsland != -1) {
+				MapLocation healLoc = null;
+				for (MapLocation loc : rc.senseNearbyIslandLocations(healIsland)) {
+					if (loc == pos) continue; // Alternate between tiles on an island so that other units can get in and heal.
+
+					if (healLoc == null || pos.distanceSquaredTo(loc) < pos.distanceSquaredTo(healLoc)) {
+						healLoc = loc;
+					}
+				}
+				navigator.setDestination(healLoc);
+				mode = Mode.HEAL;
+			} else {
+				int myChunk = Minimap.getChunkIndex(pos);
+				int chunk = MinimapInfo.nearestFriendlyIslandChunk(myChunk, minimap.getChunks());
+				if (chunk != -1) {
+					navigator.setDestination(Minimap.getChunkCenter(chunk));
+					mode = Mode.HEAL;
+				}
+			}
 		}
 
 		if (mode == Mode.FIND_ENEMY) {
@@ -77,6 +110,7 @@ public class Launcher extends Unit {
 				switch (mode) {
 					case FIND_ENEMY: // move to our enemy goal location
 						navigator.move();
+						attack();
 						navigator.move();
 						attack();
 						break;
@@ -96,6 +130,13 @@ public class Launcher extends Unit {
 
 					case STAY_STILL:
 						break;
+					
+					case HEAL:
+						attack();
+						navigator.move();
+						attack();
+						navigator.move();
+						attack();
 
 					default:
 						break;

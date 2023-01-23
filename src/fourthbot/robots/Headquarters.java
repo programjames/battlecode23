@@ -19,8 +19,8 @@ public class Headquarters extends Building {
 	double mnIncome = 0;
 	double exIncome = 0;
 
-	private final double ANCHOR_INCOME = 5; // build an anchor if we have at least this income/turn
-	private final double AMPLIFIER_INCOME = 2.5; // build amplifiers after this income bracket
+	private final double ANCHOR_INCOME = 3; // build an anchor if we have at least this income/turn
+	private final double AMPLIFIER_INCOME = 1.5; // build amplifiers after this income bracket
 
 	boolean saveForAmplifier = false;
 
@@ -94,11 +94,11 @@ public class Headquarters extends Building {
 	}
 
 	private boolean tryBuildAnchor() throws GameActionException {
-		if (rc.canBuildAnchor(Anchor.ACCELERATING)) {
+		if (exIncome >= ANCHOR_INCOME && rc.canBuildAnchor(Anchor.ACCELERATING)) {
 			rc.buildAnchor(Anchor.ACCELERATING);
 			return true;
 		}
-		if (rc.canBuildAnchor(Anchor.STANDARD)) {
+		if ((adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME) && rc.canBuildAnchor(Anchor.STANDARD)) {
 			rc.buildAnchor(Anchor.STANDARD);
 			return true;
 		}

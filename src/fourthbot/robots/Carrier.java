@@ -60,10 +60,10 @@ public class Carrier extends Unit {
 			if (myWell != null && myWell.getResourceType() == ResourceType.ADAMANTIUM) {
 				// See how many friendly carriers are around our well.
 				int numCarriers = 0;
-				for (RobotInfo r : rc.senseNearbyRobots(myWellLocation, -1, myTeam)) {
+				for (RobotInfo r : rc.senseNearbyRobots(myWellLocation, 4, myTeam)) {
 					if (r.type == RobotType.CARRIER) numCarriers++;
 				}
-				if (numCarriers >= 8) {
+				if (numCarriers >= 5) {
 					// See if there are mana/elixir wells we can switch to.
 					for (WellInfo well : rc.senseNearbyWells()) {
 						if (well.getResourceType() != ResourceType.ADAMANTIUM) {

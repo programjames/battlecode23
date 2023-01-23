@@ -160,6 +160,23 @@ def make_nearest_unfriendly_island_chunk():
         funcs += "\n" + func
     return funcs
 
+FRIENDLY_ISLAND_BIT = 0b1000
+def make_nearest_friendly_island_chunk():
+    funcs = """public static int nearestFriendlyIslandChunk (int chunk, int[] chunks) {
+        switch(chunk) {"""
+    for id, chunk in enumerate(chunk_centers.keys()):
+        funcs += f"\ncase {chunk}: return nearestFriendlyIslandChunkSub{id}(chunks);"
+    funcs += f"}}\nreturn nearestFriendlyIslandChunkSub0(chunks);}}"
+    for id, chunk in enumerate(chunk_centers.keys()):
+        center = chunk_centers[chunk]
+        chunks = sorted(chunk_centers.keys(), key=lambda c: r2(chunk_centers[c], center))
+        func = f"private static int nearestFriendlyIslandChunkSub{id} (int[] chunks) {{"
+        for c in chunks:
+            func += f"""if ((chunks[{c}] & {FRIENDLY_ISLAND_BIT}) != 0) return {c};"""
+        func += f"\nreturn -1;}}"
+        funcs += "\n" + func
+    return funcs
+
 
 s = f"""package fourthbot.coordination;
 
@@ -186,6 +203,7 @@ public class MinimapInfo {{
     {make_nearest_well_chunk_other()}
     {make_nearest_unclaimed_island_chunk()}
     {make_nearest_unfriendly_island_chunk()}
+    {make_nearest_friendly_island_chunk()}
     {make_nearest_enemy_island_chunk()}
     {make_nearest_enemy_well_chunk()}
 }}"""
