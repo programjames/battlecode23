@@ -19,7 +19,9 @@ public class Headquarters extends Building {
 	double mnIncome = 0;
 	double exIncome = 0;
 
-	private final double ANCHOR_INCOME = 5; // build an anchor if we have at least this income/turn
+	private final double ANCHOR_INCOME_AD = 3; // build an anchor if we have at least this income/turn
+	private final double ANCHOR_INCOME_MN = 5; // build an anchor if we have at least this income/turn
+	private final double ANCHOR_INCOME_EX = 5; // build an anchor if we have at least this income/turn
 	private final double AMPLIFIER_INCOME = 2.5; // build amplifiers after this income bracket
 
 	private boolean saveForAmplifier = false;
@@ -47,14 +49,14 @@ public class Headquarters extends Building {
 		// rc.resign();
 		// }
 
-		if (exIncome < ANCHOR_INCOME && (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME)) {
+		if (exIncome < ANCHOR_INCOME_EX && (adIncome >= ANCHOR_INCOME_AD && mnIncome >= ANCHOR_INCOME_MN)) {
 			saveForStandardAnchor = true;
 		} else {
 			saveForStandardAnchor = false;
 			manaToSave = 0;
 		}
 
-		if (exIncome >= ANCHOR_INCOME || (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME))
+		if (exIncome >= ANCHOR_INCOME_EX || (adIncome >= ANCHOR_INCOME_AD && mnIncome >= ANCHOR_INCOME_MN))
 			while (tryBuildAnchor())
 				;
 
@@ -122,10 +124,10 @@ public class Headquarters extends Building {
 
 		RobotType buildType = null;
 
-		if (exIncome < ANCHOR_INCOME && ex >= 200) {
+		if (exIncome < ANCHOR_INCOME_EX && ex >= 200) {
 			// Build booster/destabilizer
 			buildType = rng.nextBoolean() ? RobotType.BOOSTER : RobotType.DESTABILIZER;
-		} else if (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME) {
+		} else if (adIncome >= ANCHOR_INCOME_AD && mnIncome >= ANCHOR_INCOME_MN) {
 			// Want to build standard anchor, but okay to spend the resource we have more
 			// of.
 			if (adIncome >= mnIncome && ad > mn + RobotType.CARRIER.buildCostAdamantium) {
