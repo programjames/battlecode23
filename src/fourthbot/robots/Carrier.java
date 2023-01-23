@@ -21,6 +21,8 @@ public class Carrier extends Unit {
 	public MapLocation wellToAvoid = null;
 	public MapLocation myHQLocation = null; // MapLocation of the HQ this carrier frequents
 
+	public MapLocation corner = null;
+
 	public Carrier(RobotController rc) {
 		super(rc);
 	}
@@ -294,7 +296,6 @@ public class Carrier extends Unit {
 				navigator.move();
 			} else {
 				if (rc.canSenseLocation(navigator.destination)) {
-					MapLocation corner;
 					switch (rng.nextInt(4)) {
 						case 0:
 							corner = new MapLocation(0, 0);
@@ -312,7 +313,7 @@ public class Carrier extends Unit {
 					navigator.setDestination(corner);
 				}
 
-				navigator.move();
+				navigator.move(corner);
 			}
 		}
 	}
