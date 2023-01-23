@@ -15,9 +15,6 @@ def count_up_friendlies():
                 break;
             case CARRIER:
                 nearbyCarriers++;
-                if (r.getResourceAmount(ResourceType.ADAMANTIUM) + r.getResourceAmount(ResourceType.MANA) >= 20) {{
-                    allyStrength += 2;
-                }}
                 break;
             case DESTABILIZER:
                 allyStrength += 8;
@@ -46,7 +43,7 @@ def count_up_enemies():
         }}
         switch (r.type) {{
             case CARRIER:
-                threatLevel += 2;
+                threatLevel += 1;
                 break;
             case AMPLIFIER:
                 break;
