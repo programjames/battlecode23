@@ -38,26 +38,9 @@ public class Headquarters extends Building {
 
 		rc.setIndicatorString(String.format("%.2f %.2f %.2f", adIncome, mnIncome, exIncome));
 
-		if (tasklist.getNextTaskBits(Task.ATTACK) == -1) {
-			// Move units towards:
-			// 1. Nearest enemy island.
-			// 2. Nearest enemy well.
-			int chunk = -1;
-			int myChunk = Minimap.getChunkIndex(pos);
-
-			if (chunk == -1) {
-				chunk = MinimapInfo.nearestEnemyIslandChunk(myChunk, minimap.getChunks());
-			}
-			if (chunk == -1) {
-				chunk = MinimapInfo.nearestEnemyWellChunk(myChunk, minimap.getChunks());
-			}
-			if (chunk != -1) {
-				MapLocation attackPos = Minimap.getChunkCenter(chunk);
-				tasklist.addTaskAttack(attackPos, 64 + rc.getRoundNum());
-			} else if (rc.getRoundNum() == 1) {
-				MapLocation attackPos = new MapLocation(mapWidth / 2, mapHeight / 2);
-				tasklist.addTaskAttack(attackPos, 64 + rc.getRoundNum());
-			}
+		if (rc.getRoundNum() == 1 && tasklist.getNextTaskBits(Task.ATTACK) == -1) {
+			MapLocation attackPos = new MapLocation(mapWidth / 2, mapHeight / 2);
+			tasklist.addTaskAttack(attackPos, 64 + rc.getRoundNum());
 		}
 	}
 
