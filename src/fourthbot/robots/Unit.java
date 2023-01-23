@@ -147,9 +147,16 @@ public abstract class Unit extends Robot {
 				continue;
 			}
 			int d = r.location.distanceSquaredTo(pos);
-			if (r.health < health) {
+			int h = r.health;
+			switch(r.type) {
+				case CARRIER: h += 3000; break;
+				case LAUNCHER: h += 2000; break;
+				case BOOSTER: h += 1000; break;
+				default:
+			}
+			if (h < health) {
 				// Prey on the close, weak units.
-				health = r.health;
+				health = h;
 				enemy = r;
 			}
 		}
