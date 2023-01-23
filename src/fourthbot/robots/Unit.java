@@ -137,6 +137,7 @@ public abstract class Unit extends Robot {
 	}
 
 	public void attack() throws GameActionException {
+		enemies = rc.senseNearbyRobots(-1, enemyTeam);
 		if(enemies.length == 0 || rc.getActionCooldownTurns() >= GameConstants.COOLDOWN_LIMIT) return;
 
 		RobotInfo enemy = null;
