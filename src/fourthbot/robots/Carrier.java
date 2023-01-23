@@ -56,7 +56,7 @@ public class Carrier extends Unit {
 
 		if (myWellLocation != null && rc.canSenseLocation(myWellLocation) && rc.senseWell(myWellLocation).getResourceType() == ResourceType.ADAMANTIUM) {
 			// See if there are mana/elixir wells we can switch to.
-			for (WellInfo well : rc.senseNearbyWells) {
+			for (WellInfo well : rc.senseNearbyWells()) {
 				if (well.getResourceType() != ResourceType.ADAMANTIUM) {
 					myWellLocation = well.getMapLocation();
 					break;
