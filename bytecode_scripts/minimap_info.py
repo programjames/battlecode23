@@ -44,6 +44,23 @@ def make_nearest_well_chunk():
         funcs += "\n" + func
     return funcs
 
+ENEMY_WELL_BITS = 0b11
+def make_nearest_enemy_well_chunk():
+    funcs = """public static int nearestEnemyWellChunk (int chunk, int[] chunks) {
+        switch(chunk) {"""
+    for id, chunk in enumerate(chunk_centers.keys()):
+        funcs += f"\ncase {chunk}: return nearestEnemyWellChunkSub{id}(chunks);"
+    funcs += f"}}\nreturn nearestEnemyWellChunkSub0(chunks);}}"
+    for id, chunk in enumerate(chunk_centers.keys()):
+        center = chunk_centers[chunk]
+        chunks = sorted(chunk_centers.keys(), key=lambda c: r2(chunk_centers[c], center))
+        func = f"private static int nearestEnemyWellChunkSub{id} (int[] chunks) {{"
+        for c in chunks:
+            func += f"\nif ((chunks[{c}] & {ENEMY_WELL_BITS}) == {ENEMY_WELL_BITS}) return {c};"
+        func += f"\nreturn -1;}}"
+        funcs += "\n" + func
+    return funcs
+
 
 WELL_BIT = 0b10
 def make_nearest_well_chunk_other():
@@ -106,6 +123,26 @@ def make_nearest_unclaimed_island_chunk():
         funcs += "\n" + func
     return funcs
 
+ISLAND_BITS = 0b1100
+def make_nearest_enemy_island_chunk():
+    funcs = """public static int nearestEnemyIslandChunk (int chunk, int[] chunks) {
+        switch(chunk) {"""
+    for id, chunk in enumerate(chunk_centers.keys()):
+        funcs += f"\ncase {chunk}: return nearestEnemyIslandChunkSub{id}(chunks);"
+    funcs += f"}}\nreturn nearestEnemyIslandChunkSub0(chunks);}}"
+    for id, chunk in enumerate(chunk_centers.keys()):
+        center = chunk_centers[chunk]
+        chunks = sorted(chunk_centers.keys(), key=lambda c: r2(chunk_centers[c], center))
+        func = f"private static int nearestEnemyIslandChunkSub{id} (int[] chunks) {{"
+        for c in chunks:
+            func += f"""\nswitch (chunks[{c}] & {ISLAND_BITS}){{
+                case 0b1100: return {c};
+                default:
+            }}"""
+        func += f"\nreturn -1;}}"
+        funcs += "\n" + func
+    return funcs
+
 UNFRIENDLY_ISLAND_BIT = 0b0100
 def make_nearest_unfriendly_island_chunk():
     funcs = """public static int nearestUnfriendlyIslandChunk (int chunk, int[] chunks) {
@@ -124,7 +161,7 @@ def make_nearest_unfriendly_island_chunk():
     return funcs
 
 
-s = f"""package thirdbot.coordination;
+s = f"""package fourthbot.coordination;
 
 /* Finds out specific info about the minimap given the chunks array.
  * Current methods:
@@ -136,6 +173,8 @@ s = f"""package thirdbot.coordination;
  * - markEnemies(Minimap minimap, RobotInfo[] enemies) // Marks enemies, ignoring amplifiers and headquarters.
  * - nearestUnclaimedIslandChunk(int chunk, int[] chunks) // Nearest island unclaimed by either team.
  * - nearestUnfriendlyIslandChunk(int chunk, int[] chunks) // Nearest island claimed by no one or the enemy.
+ * - nearestEnemyIslandChunk(int chunk, int[] chunks) // Nearest island claimed by the enemy.
+ * - nearestEnemyWellChunk(int chunk, int[] chunks) // Nearest well with an enemy presence.
 */
 
 import battlecode.common.*;
@@ -147,6 +186,8 @@ public class MinimapInfo {{
     {make_nearest_well_chunk_other()}
     {make_nearest_unclaimed_island_chunk()}
     {make_nearest_unfriendly_island_chunk()}
+    {make_nearest_enemy_island_chunk()}
+    {make_nearest_enemy_well_chunk()}
 }}"""
 
 print(s)

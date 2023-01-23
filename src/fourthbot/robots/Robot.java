@@ -19,6 +19,7 @@ public abstract class Robot {
 	public int mapWidth, mapHeight;
 	public int visionRadius;
 	public boolean noDangerousEnemies;
+	public TaskList tasklist;
 	
 	public Robot(RobotController rc) {
 		this.rc = rc;
@@ -40,6 +41,7 @@ public abstract class Robot {
 		pos = rc.getLocation();
 		rng = new Random(rc.getID() ^ 12353);
 		minimap = new Minimap(rc);
+		tasklist = new TaskList(rc);
 	}
 
 	public void setup2() {

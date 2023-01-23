@@ -100,13 +100,14 @@ public class Navigator {
 	public void prepareMove(MapLocation destination) throws GameActionException {
 		robot.pos = rc.getLocation();
 		int distToDest = robot.pos.distanceSquaredTo(destination);
-		switch(robot.type) {
-			case LAUNCHER:
-			case BOOSTER:
-			case AMPLIFIER:
-			updateVelocityDelta();
-			default:
-		}
+		// Uncomment if you want Boid'ing.
+		// switch(robot.type) {
+		// 	case LAUNCHER:
+		// 	case BOOSTER:
+		// 	case AMPLIFIER:
+		// 	updateVelocityDelta();
+		// 	default:
+		// }
 		// rc.setIndicatorString(String.format("%.2f %.2f %.2f %.2f", velX, velY, accX, accY));
 		// rc.setIndicatorLine(robot.pos, robot.pos.translate((int) (-velX * 5), (int) (-velY * 5)), 255, 255, 0);
 		MapLocation dest = destination.translate((int) (velX * distToDest), (int) (velY * distToDest));

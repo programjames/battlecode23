@@ -29,7 +29,7 @@ public class Destabilizer extends Unit {
 
 		if (noDangerousEnemies) {
 			mode = Mode.FIND_ENEMY;
-			int myChunk = minimap.getChunkIndex(pos);
+			int myChunk = Minimap.getChunkIndex(pos);
 			int chunk = -1;
 			chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
 			if (chunk == -1 && rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
@@ -38,7 +38,7 @@ public class Destabilizer extends Unit {
 			if (chunk == -1) {
 				navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
 			} else {
-				navigator.setDestination(minimap.getChunkCenter(chunk));
+				navigator.setDestination(Minimap.getChunkCenter(chunk));
 			}
 		} else if (!rc.isActionReady() || threatLevel > allyStrength) {
 			mode = Mode.RETREAT;

@@ -34,20 +34,33 @@ public class Launcher extends Unit {
 		}
 
 		if (mode == Mode.FIND_ENEMY) {
-			int myChunk = minimap.getChunkIndex(pos);
+			int myChunk = Minimap.getChunkIndex(pos);
 			int chunk = -1;
-			chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
-			if (chunk == -1) {
-				if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
-					chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
+			int bits = tasklist.getNextTaskBits(Task.ATTACK);
+			if (bits != -1) {
+				chunk = tasklist.getTaskChunk(bits);
+				MapLocation dest = Minimap.getChunkCenter(chunk);
+				int roundsLeft = tasklist.getTaskRound(bits) - rc.getRoundNum(); // Number of rounds before convergence
+				if (Math.pow(roundsLeft / 2, 2) >= pos.distanceSquaredTo(dest)) { // Magic constants, you can try to find better ones.
+					mode = Mode.STAY_STILL;
 				} else {
-					chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+					navigator.setDestination(dest);
 				}
-			}
-			if (chunk == -1) {
-				navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
+				
 			} else {
-				navigator.setDestination(minimap.getChunkCenter(chunk));
+				chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
+				if (chunk == -1) {
+					if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
+						chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
+					} else {
+						chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+					}
+				}
+				if (chunk == -1) {
+					navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
+				} else {
+					navigator.setDestination(Minimap.getChunkCenter(chunk));
+				}
 			}
 		}
 	}
@@ -73,6 +86,9 @@ public class Launcher extends Unit {
 						attack();
 						retreat(navigator);
 						attack();
+						break;
+
+					case STAY_STILL:
 						break;
 
 					default:

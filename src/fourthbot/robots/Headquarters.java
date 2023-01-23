@@ -37,12 +37,40 @@ public class Headquarters extends Building {
 		ex = rc.getResourceAmount(ResourceType.ELIXIR);
 
 		rc.setIndicatorString(String.format("%.2f %.2f %.2f", adIncome, mnIncome, exIncome));
+
+		if (tasklist.getNextTaskBits(Task.ATTACK) == -1) {
+			// Move units towards:
+			// 1. Nearest enemy island.
+			// 2. Nearest enemy well.
+			// 3. Nearest unclaimed island.
+			// 4. Nearest enemy location.
+			// 5. Center of the board.
+			int chunk;
+			int myChunk = Minimap.getChunkIndex(pos);
+			chunk = MinimapInfo.nearestEnemyIslandChunk(myChunk, minimap.getChunks());
+			if (chunk == -1) {
+				chunk = MinimapInfo.nearestEnemyWellChunk(myChunk, minimap.getChunks());
+			}
+			if (chunk == -1) {
+				chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
+			}
+			if (chunk == -1) {
+				chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+			}
+			MapLocation attackPos;
+			if (chunk == -1) {
+				attackPos = new MapLocation(mapWidth / 2, mapHeight / 2);
+			} else {
+				attackPos = Minimap.getChunkCenter(chunk);
+			}
+			tasklist.addTaskAttack(attackPos, 100 + rc.getRoundNum());
+		}
 	}
 
 	@Override
 	public void runTurn() throws GameActionException {
-		// if (rc.getRoundNum() > 1000) {
-		// 	rc.resign();
+		// if (rc.getRoundNum() > 300) {
+		// rc.resign();
 		// }
 
 		if (exIncome >= ANCHOR_INCOME || (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME))
@@ -55,32 +83,32 @@ public class Headquarters extends Building {
 		// Draw the minimap
 
 		// for (int x = 2; x < mapWidth; x += 5) {
-		// 	for (int y = 2; y < mapHeight; y += 5) {
-		// 		int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
-		// 		if ((chunk & Minimap.ISLAND_BITS) != 0) {
-		// 			rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y -
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x + 2, y - 2), new MapLocation(x + 2, y +
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x + 2, y + 2), new MapLocation(x - 2, y +
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x - 2, y + 2), new MapLocation(x - 2, y -
-		// 					2), 255, 255, 255);
-		// 		}
-		// 		if ((chunk & Minimap.ENEMY_BIT) != 0) {
-		// 			rc.setIndicatorLine(new MapLocation(x - 1, y - 1), new MapLocation(x + 1, y -
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x + 1, y - 1), new MapLocation(x + 1, y +
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x + 1, y + 1), new MapLocation(x - 1, y +
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x - 1, y + 1), new MapLocation(x - 1, y -
-		// 					1), 255, 0, 0);
-		// 		}
-		// 		if ((chunk & Minimap.WELL_BIT) != 0) {
-		// 			rc.setIndicatorDot(new MapLocation(x, y), 0, 0, 255);
-		// 		}
-		// 	}
+		// for (int y = 2; y < mapHeight; y += 5) {
+		// int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
+		// if ((chunk & Minimap.ISLAND_BITS) != 0) {
+		// rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y -
+		// 2), 255, 255, 255);
+		// rc.setIndicatorLine(new MapLocation(x + 2, y - 2), new MapLocation(x + 2, y +
+		// 2), 255, 255, 255);
+		// rc.setIndicatorLine(new MapLocation(x + 2, y + 2), new MapLocation(x - 2, y +
+		// 2), 255, 255, 255);
+		// rc.setIndicatorLine(new MapLocation(x - 2, y + 2), new MapLocation(x - 2, y -
+		// 2), 255, 255, 255);
+		// }
+		// if ((chunk & Minimap.ENEMY_BIT) != 0) {
+		// rc.setIndicatorLine(new MapLocation(x - 1, y - 1), new MapLocation(x + 1, y -
+		// 1), 255, 0, 0);
+		// rc.setIndicatorLine(new MapLocation(x + 1, y - 1), new MapLocation(x + 1, y +
+		// 1), 255, 0, 0);
+		// rc.setIndicatorLine(new MapLocation(x + 1, y + 1), new MapLocation(x - 1, y +
+		// 1), 255, 0, 0);
+		// rc.setIndicatorLine(new MapLocation(x - 1, y + 1), new MapLocation(x - 1, y -
+		// 1), 255, 0, 0);
+		// }
+		// if ((chunk & Minimap.WELL_BIT) != 0) {
+		// rc.setIndicatorDot(new MapLocation(x, y), 0, 0, 255);
+		// }
+		// }
 		// }
 
 	}

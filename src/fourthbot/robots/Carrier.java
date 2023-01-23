@@ -217,10 +217,10 @@ public class Carrier extends Unit {
 		if (placeLocation != null) {
 			navigator.move(placeLocation);
 		} else {
-			int myChunk = minimap.getChunkIndex(pos);
+			int myChunk = Minimap.getChunkIndex(pos);
 			int chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
 			if (chunk != -1) {
-				navigator.setDestination(minimap.getChunkCenter(chunk));
+				navigator.setDestination(Minimap.getChunkCenter(chunk));
 				navigator.move();
 			} else {
 				if (rc.canSenseLocation(navigator.destination)) {
@@ -938,10 +938,10 @@ public class Carrier extends Unit {
 
 		wellToAvoid = myWellLocation;
 		myWellLocation = null;
-		int myChunk = minimap.getChunkIndex(pos);
+		int myChunk = Minimap.getChunkIndex(pos);
 		int nearestWellChunk = MinimapInfo.nearestWellChunkOther(myChunk, minimap.getChunks());
 		if (nearestWellChunk != myChunk) {
-			navigator.randomGoal = minimap.getChunkCenter(nearestWellChunk);
+			navigator.randomGoal = Minimap.getChunkCenter(nearestWellChunk);
 		} else {
 			navigator.randomGoal = null;
 		}
@@ -960,12 +960,12 @@ public class Carrier extends Unit {
 			randomNearbyLoc = rc.getLocation().translate(rng.nextInt(21) - 10, rng.nextInt(21) - 10);
 		if (!onTheMap(randomNearbyLoc))
 			return null; // Didn't work too many times. Returns null.
-		int chunk = minimap.getChunkIndex(randomNearbyLoc);
+		int chunk = Minimap.getChunkIndex(randomNearbyLoc);
 		int nearestWellChunk = MinimapInfo.nearestWellChunk(chunk, minimap.getChunks());
 		if (nearestWellChunk == -1) {
 			return null;
 		}
-		MapLocation nearbyCenter = minimap.getChunkCenter(nearestWellChunk);
+		MapLocation nearbyCenter = Minimap.getChunkCenter(nearestWellChunk);
 		return nearbyCenter;
 	}
 
@@ -975,12 +975,12 @@ public class Carrier extends Unit {
 		 * are at
 		 */
 
-		int chunk = minimap.getChunkIndex(pos);
+		int chunk = Minimap.getChunkIndex(pos);
 		int nearestWellChunk = MinimapInfo.nearestWellChunkOther(chunk, minimap.getChunks());
 		if (nearestWellChunk == -1) {
 			return null;
 		}
-		MapLocation nearbyCenter = minimap.getChunkCenter(nearestWellChunk);
+		MapLocation nearbyCenter = Minimap.getChunkCenter(nearestWellChunk);
 		return nearbyCenter;
 	}
 }
