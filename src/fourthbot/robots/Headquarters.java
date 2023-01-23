@@ -19,10 +19,12 @@ public class Headquarters extends Building {
 	double mnIncome = 0;
 	double exIncome = 0;
 
-	private final double ANCHOR_INCOME = 3; // build an anchor if we have at least this income/turn
-	private final double AMPLIFIER_INCOME = 1.5; // build amplifiers after this income bracket
+	private final double ANCHOR_INCOME = 5; // build an anchor if we have at least this income/turn
+	private final double AMPLIFIER_INCOME = 2.5; // build amplifiers after this income bracket
 
-	boolean saveForAmplifier = false;
+	private boolean saveForAmplifier = false;
+	private boolean saveForStandardAnchor = false;
+	private int manaToSave = 0;
 
 	@Override
 	public void beginTurn() throws GameActionException {
@@ -44,6 +46,13 @@ public class Headquarters extends Building {
 		// if (rc.getRoundNum() > 50) {
 		// rc.resign();
 		// }
+
+		if (exIncome < ANCHOR_INCOME && (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME)) {
+			saveForStandardAnchor = true;
+		} else {
+			saveForStandardAnchor = false;
+			manaToSave = 0;
+		}
 
 		if (exIncome >= ANCHOR_INCOME || (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME))
 			while (tryBuildAnchor())
@@ -94,12 +103,16 @@ public class Headquarters extends Building {
 	}
 
 	private boolean tryBuildAnchor() throws GameActionException {
-		if (exIncome >= ANCHOR_INCOME && rc.canBuildAnchor(Anchor.ACCELERATING)) {
+		if (rc.canBuildAnchor(Anchor.ACCELERATING)) {
 			rc.buildAnchor(Anchor.ACCELERATING);
+			saveForStandardAnchor = false;
+			manaToSave = 0;
 			return true;
 		}
-		if ((adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME) && rc.canBuildAnchor(Anchor.STANDARD)) {
+		if (rc.canBuildAnchor(Anchor.STANDARD)) {
 			rc.buildAnchor(Anchor.STANDARD);
+			saveForStandardAnchor = false;
+			manaToSave = 0;
 			return true;
 		}
 		return false;
@@ -117,7 +130,7 @@ public class Headquarters extends Building {
 			// of.
 			if (adIncome >= mnIncome && ad > mn + RobotType.CARRIER.buildCostAdamantium) {
 				// buildType = RobotType.CARRIER;
-			} else if (mnIncome >= adIncome && mn > ad + RobotType.LAUNCHER.buildCostMana) {
+			} else if (mnIncome >= adIncome && mn > ad + manaToSave) {
 				buildType = RobotType.LAUNCHER;
 			}
 		} else if (saveForAmplifier && ad >= RobotType.AMPLIFIER.buildCostAdamantium
@@ -131,8 +144,12 @@ public class Headquarters extends Building {
 			buildType = RobotType.CARRIER;
 		}
 
-		if (buildType == null)
+		if (buildType == null) {
+			if (!saveForAmplifier && MinimapInfo.nearestEnemyChunk(Minimap.getChunkIndex(pos), minimap.getChunks()) != -1) {
+				// Build a launcher?
+			}
 			return false;
+		}
 
 		for (Direction direction : Direction.allDirections()) {
 			MapLocation buildLocation = rc.getLocation().add(direction);
@@ -146,6 +163,10 @@ public class Headquarters extends Building {
 				else if (adIncome >= AMPLIFIER_INCOME && mnIncome >= AMPLIFIER_INCOME
 						&& buildType == RobotType.LAUNCHER && rng.nextInt(5) == 0) {
 					saveForAmplifier = true;
+				}
+
+				if (buildType == RobotType.LAUNCHER && saveForStandardAnchor) {
+					manaToSave += 10;
 				}
 
 				return true;
