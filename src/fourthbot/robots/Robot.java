@@ -1,7 +1,7 @@
-package fourthbotcopy.robots;
+package fourthbot.robots;
 
 import battlecode.common.*;
-import fourthbotcopy.coordination.*;
+import fourthbot.coordination.*;
 
 import java.util.Random;
 

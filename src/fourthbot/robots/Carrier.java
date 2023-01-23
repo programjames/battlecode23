@@ -1,8 +1,8 @@
-package fourthbotcopy.robots;
+package fourthbot.robots;
 
 import battlecode.common.*;
-import fourthbotcopy.coordination.*;
-import fourthbotcopy.navigation.*;
+import fourthbot.coordination.*;
+import fourthbot.navigation.*;
 
 public class Carrier extends Unit {
 
@@ -53,6 +53,16 @@ public class Carrier extends Unit {
 		mn = rc.getResourceAmount(ResourceType.MANA);
 		ex = rc.getResourceAmount(ResourceType.ELIXIR);
 		anchor = rc.getAnchor();
+
+		if (myWellLocation != null && rc.canSenseLocation(myWellLocation) && rc.senseWell(myWellLocation).getResourceType() == ResourceType.ADAMANTIUM) {
+			// See if there are mana/elixir wells we can switch to.
+			for (WellInfo well : rc.senseNearbyWells) {
+				if (well.getResourceType() != ResourceType.ADAMANTIUM) {
+					myWellLocation = well.getMapLocation();
+					break;
+				}
+			}
+		}
 
 		totalResources = ad + mn + ex;
 		totalCarryWeight = totalResources + (anchor == null ? 0 : 40);

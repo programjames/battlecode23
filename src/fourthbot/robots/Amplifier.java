@@ -1,8 +1,8 @@
-package fourthbotcopy.robots;
+package fourthbot.robots;
 
 import battlecode.common.*;
-import fourthbotcopy.coordination.*;
-import fourthbotcopy.navigation.*;
+import fourthbot.coordination.*;
+import fourthbot.navigation.*;
 
 public class Amplifier extends Unit {
 

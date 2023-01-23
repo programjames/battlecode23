@@ -1,4 +1,4 @@
-package fourthbotcopy.coordination;
+package fourthbot.coordination;
 
 public enum Mode {
 	/*

@@ -1,7 +1,7 @@
-package fourthbotcopy;
+package fourthbot;
 
 import battlecode.common.*;
-import fourthbotcopy.robots.*;
+import fourthbot.robots.*;
 
 public strictfp class RobotPlayer {
 	public static void run(RobotController rc) throws GameActionException {

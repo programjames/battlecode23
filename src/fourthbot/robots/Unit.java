@@ -1,8 +1,8 @@
-package fourthbotcopy.robots;
+package fourthbot.robots;
 
 import battlecode.common.*;
-import fourthbotcopy.navigation.*;
-import fourthbotcopy.coordination.*;
+import fourthbot.navigation.*;
+import fourthbot.coordination.*;
 
 public abstract class Unit extends Robot {
 

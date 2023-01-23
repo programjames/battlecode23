@@ -1,7 +1,7 @@
-package fourthbotcopy.navigation;
+package fourthbot.navigation;
 
 import battlecode.common.*;
-import fourthbotcopy.robots.*;
+import fourthbot.robots.*;
 
 public class CarrierNavigator extends Navigator {
 	/*
