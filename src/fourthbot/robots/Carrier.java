@@ -873,7 +873,7 @@ public class Carrier extends Unit {
 		}
 
 		if (rc.getRoundNum() % 100 == 10) {
-			if (rng.nextDouble() >= 12.0 / (1.0 + nearbyCarriers)) {
+			if (rng.nextDouble() >= 7.0 / (1.0 + nearbyCarriers)) {
 				job = Job.ATTACK_ENEMY;
 				mode = Mode.FIND_ENEMY;
 			}
