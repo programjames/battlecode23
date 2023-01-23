@@ -55,7 +55,7 @@ public abstract class Robot {
 		 * processing messages
 		 */
 		// Sense enemies
-		if (previousEnemies == null || (enemies != null && enemies.length > previousEnemies.length)) {
+		if (previousEnemies == null || (enemies != null && enemies.length != previousEnemies.length)) {
 			previousEnemies = enemies;
 		}
 		enemies = rc.senseNearbyRobots(-1, enemyTeam);
