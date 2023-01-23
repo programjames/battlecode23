@@ -263,7 +263,7 @@ public class Carrier extends Unit {
 	}
 
 	private void deployAnchor() throws GameActionException {
-		if (rc.canPlaceAnchor()) {
+		if (rc.canPlaceAnchor() && rc.senseTeamOccupyingIsland(rc.senseIsland(pos)) != myTeam) {
 			rc.placeAnchor();
 			return;
 		}

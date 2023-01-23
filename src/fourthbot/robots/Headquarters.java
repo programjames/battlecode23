@@ -37,11 +37,6 @@ public class Headquarters extends Building {
 		ex = rc.getResourceAmount(ResourceType.ELIXIR);
 
 		rc.setIndicatorString(String.format("%.2f %.2f %.2f", adIncome, mnIncome, exIncome));
-
-		if (rc.getRoundNum() == 1 && tasklist.getNextTaskBits(Task.ATTACK) == -1) {
-			MapLocation attackPos = new MapLocation(mapWidth / 2, mapHeight / 2);
-			tasklist.addTaskAttack(attackPos, 64 + rc.getRoundNum());
-		}
 	}
 
 	@Override
