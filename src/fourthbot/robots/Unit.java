@@ -41,10 +41,10 @@ public abstract class Unit extends Robot {
 
 	public MapLocation enemyGoalLocation() throws GameActionException {
 		// Moving towards this goal should bring you closer to the enemy.
-		int chunk = MinimapInfo.nearestEnemyChunk(minimap.getChunkIndex(pos), minimap.getChunks());
+		int chunk = MinimapInfo.nearestEnemyChunk(Minimap.getChunkIndex(pos), minimap.getChunks());
 		if (chunk != -1) {
 			// move to the nearest enemy chunk
-			return minimap.getChunkCenter(chunk);
+			return Minimap.getChunkCenter(chunk);
 		} else {
 			return safeSpreadOutLocation();
 		}

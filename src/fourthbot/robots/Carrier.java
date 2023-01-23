@@ -65,20 +65,35 @@ public class Carrier extends Unit {
 			}
 
 			if (mode == Mode.FIND_ENEMY) {
-				int myChunk = minimap.getChunkIndex(pos);
+				int myChunk = Minimap.getChunkIndex(pos);
 				int chunk = -1;
-				chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
-				if (chunk == -1) {
-					if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
-						chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
+				int bits = tasklist.getNextTaskBits(Task.ATTACK);
+				if (bits != -1) {
+					chunk = tasklist.getTaskChunk(bits);
+					MapLocation dest = Minimap.getChunkCenter(chunk);
+					int roundsLeft = tasklist.getTaskRound(bits) - rc.getRoundNum(); // Number of rounds before
+																						// convergence
+					if (Math.pow(roundsLeft / 2, 2) >= pos.distanceSquaredTo(dest)) { // Magic constants, you can try to
+																						// find better ones.
+						mode = Mode.STAY_STILL;
 					} else {
-						chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+						navigator.setDestination(dest);
 					}
-				}
-				if (chunk == -1) {
-					navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
+
 				} else {
-					navigator.setDestination(minimap.getChunkCenter(chunk));
+					chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
+					if (chunk == -1) {
+						if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
+							chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
+						} else {
+							chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+						}
+					}
+					if (chunk == -1) {
+						navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
+					} else {
+						navigator.setDestination(Minimap.getChunkCenter(chunk));
+					}
 				}
 			}
 		}
@@ -174,6 +189,9 @@ public class Carrier extends Unit {
 						attack();
 						retreat(navigator);
 						attack();
+						break;
+
+					case STAY_STILL:
 						break;
 
 					default:
@@ -362,7 +380,8 @@ public class Carrier extends Unit {
 				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
 					MapLocation moveLoc = pos.add(direction);
 					if (rc.canMove(direction)
-							&& rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+							&& rc.getMovementCooldownTurns()
+									+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
@@ -436,7 +455,8 @@ public class Carrier extends Unit {
 				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
 					MapLocation moveLoc = pos.add(direction);
 					if (rc.canMove(direction)
-							&& rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+							&& rc.getMovementCooldownTurns()
+									+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
@@ -517,7 +537,8 @@ public class Carrier extends Unit {
 				// Try to dart back out
 				Direction direction = myWellLocation.directionTo(pos);
 				MapLocation moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -526,7 +547,8 @@ public class Carrier extends Unit {
 
 				direction = direction.rotateRight();
 				moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -535,7 +557,8 @@ public class Carrier extends Unit {
 
 				direction = direction.rotateLeft().rotateLeft();
 				moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -839,7 +862,8 @@ public class Carrier extends Unit {
 
 		switch (job) {
 			case ATTACK_ENEMY:
-				// If you're job is to attack the enemy, you're suicidal and will always attack the enemy until you die
+				// If you're job is to attack the enemy, you're suicidal and will always attack
+				// the enemy until you die
 				break;
 			case DEPLOY_ANCHOR:
 				if (rc.getAnchor() != null)

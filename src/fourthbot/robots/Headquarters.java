@@ -42,28 +42,19 @@ public class Headquarters extends Building {
 			// Move units towards:
 			// 1. Nearest enemy island.
 			// 2. Nearest enemy well.
-			// 3. Nearest unclaimed island.
-			// 4. Nearest enemy location.
-			// 5. Center of the board.
-			int chunk;
+			int chunk = -1;
 			int myChunk = Minimap.getChunkIndex(pos);
-			chunk = MinimapInfo.nearestEnemyIslandChunk(myChunk, minimap.getChunks());
+
+			if (chunk == -1) {
+				chunk = MinimapInfo.nearestEnemyIslandChunk(myChunk, minimap.getChunks());
+			}
 			if (chunk == -1) {
 				chunk = MinimapInfo.nearestEnemyWellChunk(myChunk, minimap.getChunks());
 			}
-			if (chunk == -1) {
-				chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
+			if (chunk != -1) {
+				MapLocation attackPos = Minimap.getChunkCenter(chunk);
+				tasklist.addTaskAttack(attackPos, 128 + rc.getRoundNum());
 			}
-			if (chunk == -1) {
-				chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
-			}
-			MapLocation attackPos;
-			if (chunk == -1) {
-				attackPos = new MapLocation(mapWidth / 2, mapHeight / 2);
-			} else {
-				attackPos = Minimap.getChunkCenter(chunk);
-			}
-			tasklist.addTaskAttack(attackPos, 100 + rc.getRoundNum());
 		}
 	}
 

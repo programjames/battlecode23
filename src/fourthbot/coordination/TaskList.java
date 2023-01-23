@@ -22,16 +22,21 @@ public class TaskList {
 			case MINE: taskBits = 3; break;
 			default: taskBits = -1;
 		}
-		int soonestRound = Integer.MAX_VALUE;
+
+		int closestDist = Integer.MAX_VALUE;
+		MapLocation pos = rc.getLocation();
 		int currentRound = rc.getRoundNum();
 		int bits = -1;
 		for(int i=56; i < 64; i++) {
 			int b = rc.readSharedArray(i);
 			if((b & TASK_BITS) == taskBits) {
 				int r = b >> 5;
-				if (r >= currentRound && r < soonestRound) {
-					soonestRound = r;
-					bits = b;
+				if (r >= currentRound) {
+					int d = getTaskPosition(b).distanceSquaredTo(pos);
+					if (d < closestDist) {
+						closestDist = d;
+						bits = b;
+					}
 				}
 			}
 		}
