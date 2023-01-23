@@ -46,7 +46,6 @@ public class Launcher extends Unit {
 				} else {
 					navigator.setDestination(dest);
 				}
-				
 			} else {
 				chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
 				if (chunk == -1) {

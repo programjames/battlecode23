@@ -53,14 +53,17 @@ public class Headquarters extends Building {
 			}
 			if (chunk != -1) {
 				MapLocation attackPos = Minimap.getChunkCenter(chunk);
-				tasklist.addTaskAttack(attackPos, 128 + rc.getRoundNum());
+				tasklist.addTaskAttack(attackPos, 64 + rc.getRoundNum());
+			} else if (rc.getRoundNum() == 1) {
+				MapLocation attackPos = new MapLocation(mapWidth / 2, mapHeight / 2);
+				tasklist.addTaskAttack(attackPos, 64 + rc.getRoundNum());
 			}
 		}
 	}
 
 	@Override
 	public void runTurn() throws GameActionException {
-		// if (rc.getRoundNum() > 300) {
+		// if (rc.getRoundNum() > 50) {
 		// rc.resign();
 		// }
 

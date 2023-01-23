@@ -248,7 +248,7 @@ public class Minimap implements Module {
 		 */
 		int index = getChunkIndex(loc);
 		int updateBits;
-		if(team == null) {
+		if(team == Team.NEUTRAL || team == null) {
 			updateBits = 0b0100;
 		} else if(team == myTeam) {
 			updateBits = 0b1000;
