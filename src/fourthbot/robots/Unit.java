@@ -90,35 +90,34 @@ public abstract class Unit extends Robot {
 		/*
 		 * Move counterclockwise around enemy units.
 		 */
-		MapLocation loc = pos;
+
+		// First, get center of mass of friendly robots
+		MapLocation centerFriends = pos;
+		for (RobotInfo r : friends) {
+			centerFriends = centerFriends.add(pos.directionTo(r.location));
+		}
+
+		// Next, get center of mass of enemy robots
+		MapLocation centerEnemy = pos;
 		for (RobotInfo r : enemies) {
-			switch(pos.directionTo(r.location)) {
-				case NORTH: loc = loc.add(Direction.EAST); break;
-				case NORTHEAST: loc = loc.add(Direction.SOUTHEAST); break;
-				case EAST: loc = loc.add(Direction.SOUTH); break;
-				case SOUTHEAST: loc = loc.add(Direction.SOUTHWEST); break;
-				case SOUTH: loc = loc.add(Direction.WEST); break;
-				case SOUTHWEST: loc = loc.add(Direction.NORTHWEST); break;
-				case WEST: loc = loc.add(Direction.NORTH); break;
-				case NORTHWEST: loc = loc.add(Direction.NORTHEAST); break;
-				default:
-			}
+			centerEnemy = centerEnemy.add(pos.directionTo(r.location));
 		}
 		if (previousEnemies != null) {
-			for (RobotInfo r : previousEnemies) {
-				switch(pos.directionTo(r.location)) {
-					case NORTH: loc = loc.add(Direction.EAST); break;
-					case NORTHEAST: loc = loc.add(Direction.SOUTHEAST); break;
-					case EAST: loc = loc.add(Direction.SOUTH); break;
-					case SOUTHEAST: loc = loc.add(Direction.SOUTHWEST); break;
-					case SOUTH: loc = loc.add(Direction.WEST); break;
-					case SOUTHWEST: loc = loc.add(Direction.NORTHWEST); break;
-					case WEST: loc = loc.add(Direction.NORTH); break;
-					case NORTHWEST: loc = loc.add(Direction.NORTHEAST); break;
-					default:
-				}
+			for (RobotInfo r : enemies) {
+				centerEnemy = centerEnemy.add(pos.directionTo(r.location));
 			}
 		}
+
+		Direction dirFriend = pos.directionTo(centerFriends);
+		Direction dirEnemy = pos.directionTo(centerEnemy);
+		Direction circleDir;
+		if (dirFriend.dx * dirEnemy.dy - dirFriend.dy * dirEnemy.dx >= 0) {
+			circleDir = dirEnemy.rotateRight().rotateRight();
+		} else {
+			circleDir = dirEnemy.rotateLeft().rotateLeft();
+		}
+
+		MapLocation loc = pos.add(circleDir).add(circleDir).add(dirEnemy);
 		navigator.move(loc);
 	}
 
