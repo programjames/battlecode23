@@ -55,10 +55,15 @@ public abstract class Robot {
 		 * processing messages
 		 */
 		// Sense enemies
-		if (previousEnemies == null || (enemies != null && enemies.length != previousEnemies.length)) {
-			previousEnemies = enemies;
+		RobotInfo[] newEnemies = rc.senseNearbyRobots(-1, enemyTeam);
+		if (newEnemies.length == 0) {
+			if(enemies != null && enemies.length > 0){
+				previousEnemies = enemies;
+			}
+		} else {
+			previousEnemies = null;
 		}
-		enemies = rc.senseNearbyRobots(-1, enemyTeam);
+		enemies = newEnemies;
 		friends = rc.senseNearbyRobots(-1, myTeam);
 		visionRadius = rc.senseMapInfo(rc.getLocation()).hasCloud() ? GameConstants.CLOUD_VISION_RADIUS_SQUARED
 				: type.visionRadiusSquared;
