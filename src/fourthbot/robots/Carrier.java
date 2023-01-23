@@ -54,12 +54,29 @@ public class Carrier extends Unit {
 		ex = rc.getResourceAmount(ResourceType.ELIXIR);
 		anchor = rc.getAnchor();
 
-		if (myWellLocation != null && rc.canSenseLocation(myWellLocation) && rc.senseWell(myWellLocation).getResourceType() == ResourceType.ADAMANTIUM) {
-			// See if there are mana/elixir wells we can switch to.
-			for (WellInfo well : rc.senseNearbyWells()) {
-				if (well.getResourceType() != ResourceType.ADAMANTIUM) {
-					myWellLocation = well.getMapLocation();
-					break;
+		// See if we should move wells to get mana instead of adamantium.
+		if (myWellLocation != null && rc.canSenseLocation(myWellLocation)) {
+			WellInfo myWell = rc.senseWell(myWellLocation);
+			if (myWell != null && myWell.getResourceType() == ResourceType.ADAMANTIUM) {
+				// See how many friendly carriers are around our well.
+				int numCarriers = 0;
+				for (RobotInfo r : rc.senseNearbyRobots(myWellLocation, -1, myTeam)) {
+					if (r.type == RobotType.CARRIER) numCarriers++;
+				}
+				if (numCarriers >= 8) {
+					// See if there are mana/elixir wells we can switch to.
+					for (WellInfo well : rc.senseNearbyWells()) {
+						if (well.getResourceType() != ResourceType.ADAMANTIUM) {
+							myWellLocation = well.getMapLocation();
+							break;
+						}
+					}
+					// Otherwise, move to minimap other well.
+					int myChunk = minimap.getChunkIndex(pos);
+					int chunk = MinimapInfo.nearestWellChunkOther(myChunk, minimap.getChunks());
+					if (chunk != -1) {
+						myWellLocation = Minimap.getChunkCenter(chunk);
+					}
 				}
 			}
 		}
@@ -922,7 +939,7 @@ public class Carrier extends Unit {
 					case FIND_RESOURCES:
 					case GOTO_RESOURCES:
 					case DRAW_RESOURCES_FROM_WELL:
-						if (totalCarryWeight >= 40) {
+						if (totalCarryWeight >= 40 || (totalCarryWeight >= 25 && rc.getRoundNum() < 100)) {
 							mode = Mode.GOTO_HQ;
 							if (nearbyCarriers >= 12) {
 								// Our current well is crowded. Next time, go to a new well (maybe)
