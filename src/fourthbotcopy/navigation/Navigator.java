@@ -10,7 +10,7 @@ public class Navigator {
 
 	public RobotController rc;
 	public Robot robot;
-	public MapLocation destination; // the current destination to navigate to
+	public MapLocation destination = null; // the current destination to navigate to
 	public Direction lastMoveDirection = Direction.CENTER;
 
 	public Direction[] path;
@@ -25,6 +25,7 @@ public class Navigator {
 	boolean currentlyBugging = false;
 
 	// VARIABLES FOR BOID/REYNOLD NAVIGATION
+	// private static final double velDecayRate = 0.9;
 	private double accX = 0;
 	private double accY = 0;
 	private double velX = 0;
@@ -75,6 +76,17 @@ public class Navigator {
 			}
 		}
 
+		// double delta = 1.0 / (1 + myDistance);
+
+		// if (destination.x > x)
+		// 	accX += delta;
+		// else
+		// 	accX -= delta;
+		// if (destination.y > y)
+		// 	accY += delta;
+		// else
+		// 	accY -= delta;
+		
 		velX += accX;
 		velY += accY;
 		// bit magic for sqrt:
@@ -88,15 +100,16 @@ public class Navigator {
 	public void prepareMove(MapLocation destination) throws GameActionException {
 		robot.pos = rc.getLocation();
 		int distToDest = robot.pos.distanceSquaredTo(destination);
-		switch(robot.type) {
-			case LAUNCHER:
-			case BOOSTER:
-			case AMPLIFIER:
-			updateVelocityDelta();
-			default:
-		}
-		rc.setIndicatorString(String.format("%.2f %.2f %.2f %.2f", velX, velY, accX, accY));
-		rc.setIndicatorLine(robot.pos, robot.pos.translate((int) (velX * 5), (int) (velY * 5)), 255, 255, 0);
+		// Uncomment if you want Boid'ing.
+		// switch(robot.type) {
+		// 	case LAUNCHER:
+		// 	case BOOSTER:
+		// 	case AMPLIFIER:
+		// 	updateVelocityDelta();
+		// 	default:
+		// }
+		// rc.setIndicatorString(String.format("%.2f %.2f %.2f %.2f", velX, velY, accX, accY));
+		// rc.setIndicatorLine(robot.pos, robot.pos.translate((int) (-velX * 5), (int) (-velY * 5)), 255, 255, 0);
 		MapLocation dest = destination.translate((int) (velX * distToDest), (int) (velY * distToDest));
 		Pather.reset(rc, dest);
 		int localDestEncoding = Pather.dijkstra(rc);

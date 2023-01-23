@@ -19,6 +19,7 @@ public abstract class Robot {
 	public int mapWidth, mapHeight;
 	public int visionRadius;
 	public boolean noDangerousEnemies;
+	public TaskList tasklist;
 	
 	public Robot(RobotController rc) {
 		this.rc = rc;
@@ -40,6 +41,7 @@ public abstract class Robot {
 		pos = rc.getLocation();
 		rng = new Random(rc.getID() ^ 12353);
 		minimap = new Minimap(rc);
+		tasklist = new TaskList(rc);
 	}
 
 	public void setup2() {
@@ -55,10 +57,15 @@ public abstract class Robot {
 		 * processing messages
 		 */
 		// Sense enemies
-		if (previousEnemies == null || (enemies != null && enemies.length > previousEnemies.length)) {
-			previousEnemies = enemies;
+		RobotInfo[] newEnemies = rc.senseNearbyRobots(-1, enemyTeam);
+		if (newEnemies.length == 0) {
+			if(enemies != null && enemies.length > 0){
+				previousEnemies = enemies;
+			}
+		} else {
+			previousEnemies = null;
 		}
-		enemies = rc.senseNearbyRobots(-1, enemyTeam);
+		enemies = newEnemies;
 		friends = rc.senseNearbyRobots(-1, myTeam);
 		visionRadius = rc.senseMapInfo(rc.getLocation()).hasCloud() ? GameConstants.CLOUD_VISION_RADIUS_SQUARED
 				: type.visionRadiusSquared;

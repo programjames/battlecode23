@@ -35,7 +35,7 @@ public class Minimap implements Module {
 		this.rc = rc;
 	}
 
-	public MapLocation getChunkCenter(int index) {
+	public static MapLocation getChunkCenter(int index) {
 		/*
 		 * Given a chunk's index, return the MapLocation at the center of that chunk
 		 */
@@ -191,14 +191,14 @@ public class Minimap implements Module {
 		return chunks;
 	}
 
-	public int getChunkIndex(MapLocation location) {
+	public static int getChunkIndex(MapLocation location) {
 		/*
 		 * Get the chunk that a given location is in.
 		 */
 		return (location.x / 5 * 17 + location.y / 5 * 60) % 144;
 	}
 
-	public int getChunkIndex(int x, int y) {
+	public static int getChunkIndex(int x, int y) {
 		return (x / 5 * 17 + y / 5 * 60) % 144;
 	}
 
@@ -248,7 +248,7 @@ public class Minimap implements Module {
 		 */
 		int index = getChunkIndex(loc);
 		int updateBits;
-		if(team == null) {
+		if(team == Team.NEUTRAL || team == null) {
 			updateBits = 0b0100;
 		} else if(team == myTeam) {
 			updateBits = 0b1000;

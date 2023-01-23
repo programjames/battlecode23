@@ -1,8 +1,8 @@
-package fourthbot.robots;
+package fourthbotcopy.robots;
 
 import battlecode.common.*;
-import fourthbot.navigation.*;
-import fourthbot.coordination.*;
+import fourthbotcopy.navigation.*;
+import fourthbotcopy.coordination.*;
 
 public abstract class Unit extends Robot {
 
@@ -148,6 +148,7 @@ public abstract class Unit extends Robot {
 			int d = r.location.distanceSquaredTo(pos);
 			int h = r.health;
 			switch(r.type) {
+				case AMPLIFIER: h += 4000; break;
 				case CARRIER: h += 3000; break;
 				case LAUNCHER: h += 2000; break;
 				case BOOSTER: h += 1000; break;

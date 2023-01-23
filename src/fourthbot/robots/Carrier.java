@@ -1,8 +1,8 @@
-package fourthbot.robots;
+package fourthbotcopy.robots;
 
 import battlecode.common.*;
-import fourthbot.coordination.*;
-import fourthbot.navigation.*;
+import fourthbotcopy.coordination.*;
+import fourthbotcopy.navigation.*;
 
 public class Carrier extends Unit {
 
@@ -71,18 +71,21 @@ public class Carrier extends Unit {
 				int chunk = -1;
 				int bits = tasklist.getNextTaskBits(Task.ATTACK);
 				if (bits != -1) {
+					int roundsLeft = tasklist.getTaskRound(bits) - rc.getRoundNum(); // Number of rounds before convergence.
 					chunk = tasklist.getTaskChunk(bits);
 					MapLocation dest = Minimap.getChunkCenter(chunk);
-					int roundsLeft = tasklist.getTaskRound(bits) - rc.getRoundNum(); // Number of rounds before
-																						// convergence
 					if (Math.pow(roundsLeft / 2, 2) >= pos.distanceSquaredTo(dest)) { // Magic constants, you can try to
 																						// find better ones.
 						mode = Mode.STAY_STILL;
-					} else {
+					} else if (Math.pow(Math.min(10, roundsLeft), 2) >= pos.distanceSquaredTo(dest)) {
 						navigator.setDestination(dest);
+						rc.setIndicatorLine(pos, dest, 255, 255, 255);
+					} else {
+						bits = -1; // Task is too far to deal with.
 					}
-
-				} else {
+				}
+	
+				if (bits == -1) {
 					chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
 					if (chunk == -1) {
 						if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
@@ -183,13 +186,18 @@ public class Carrier extends Unit {
 
 					case ATTACK:
 						attack();
-						encircle(navigator);
+						// encircle(navigator);
+						while (pickupFromNearbyWell());
+						retreat(navigator);
+						while (pickupFromNearbyWell());
 						attack();
 						break;
 
 					case RETREAT:
 						attack();
+						while (pickupFromNearbyWell());
 						retreat(navigator);
+						while (pickupFromNearbyWell());
 						attack();
 						break;
 

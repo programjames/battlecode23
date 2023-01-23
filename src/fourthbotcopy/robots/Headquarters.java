@@ -41,6 +41,9 @@ public class Headquarters extends Building {
 
 	@Override
 	public void runTurn() throws GameActionException {
+		// if (rc.getRoundNum() > 50) {
+		// rc.resign();
+		// }
 
 		if (exIncome >= ANCHOR_INCOME || (adIncome >= ANCHOR_INCOME && mnIncome >= ANCHOR_INCOME))
 			while (tryBuildAnchor())
@@ -52,32 +55,32 @@ public class Headquarters extends Building {
 		// Draw the minimap
 
 		// for (int x = 2; x < mapWidth; x += 5) {
-		// 	for (int y = 2; y < mapHeight; y += 5) {
-		// 		int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
-		// 		if ((chunk & Minimap.ISLAND_BITS) != 0) {
-		// 			rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y -
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x + 2, y - 2), new MapLocation(x + 2, y +
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x + 2, y + 2), new MapLocation(x - 2, y +
-		// 					2), 255, 255, 255);
-		// 			rc.setIndicatorLine(new MapLocation(x - 2, y + 2), new MapLocation(x - 2, y -
-		// 					2), 255, 255, 255);
-		// 		}
-		// 		if ((chunk & Minimap.ENEMY_BIT) != 0) {
-		// 			rc.setIndicatorLine(new MapLocation(x - 1, y - 1), new MapLocation(x + 1, y -
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x + 1, y - 1), new MapLocation(x + 1, y +
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x + 1, y + 1), new MapLocation(x - 1, y +
-		// 					1), 255, 0, 0);
-		// 			rc.setIndicatorLine(new MapLocation(x - 1, y + 1), new MapLocation(x - 1, y -
-		// 					1), 255, 0, 0);
-		// 		}
-		// 		if ((chunk & Minimap.WELL_BIT) != 0) {
-		// 			rc.setIndicatorDot(new MapLocation(x, y), 0, 0, 255);
-		// 		}
-		// 	}
+		// for (int y = 2; y < mapHeight; y += 5) {
+		// int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
+		// if ((chunk & Minimap.ISLAND_BITS) != 0) {
+		// rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y -
+		// 2), 255, 255, 255);
+		// rc.setIndicatorLine(new MapLocation(x + 2, y - 2), new MapLocation(x + 2, y +
+		// 2), 255, 255, 255);
+		// rc.setIndicatorLine(new MapLocation(x + 2, y + 2), new MapLocation(x - 2, y +
+		// 2), 255, 255, 255);
+		// rc.setIndicatorLine(new MapLocation(x - 2, y + 2), new MapLocation(x - 2, y -
+		// 2), 255, 255, 255);
+		// }
+		// if ((chunk & Minimap.ENEMY_BIT) != 0) {
+		// rc.setIndicatorLine(new MapLocation(x - 1, y - 1), new MapLocation(x + 1, y -
+		// 1), 255, 0, 0);
+		// rc.setIndicatorLine(new MapLocation(x + 1, y - 1), new MapLocation(x + 1, y +
+		// 1), 255, 0, 0);
+		// rc.setIndicatorLine(new MapLocation(x + 1, y + 1), new MapLocation(x - 1, y +
+		// 1), 255, 0, 0);
+		// rc.setIndicatorLine(new MapLocation(x - 1, y + 1), new MapLocation(x - 1, y -
+		// 1), 255, 0, 0);
+		// }
+		// if ((chunk & Minimap.WELL_BIT) != 0) {
+		// rc.setIndicatorDot(new MapLocation(x, y), 0, 0, 255);
+		// }
+		// }
 		// }
 
 	}

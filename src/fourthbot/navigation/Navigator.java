@@ -1,7 +1,7 @@
-package fourthbot.navigation;
+package fourthbotcopy.navigation;
 
 import battlecode.common.*;
-import fourthbot.robots.*;
+import fourthbotcopy.robots.*;
 
 public class Navigator {
 	/*

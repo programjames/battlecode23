@@ -1,4 +1,4 @@
-package fourthbot.coordination;
+package fourthbotcopy.coordination;
 
 public enum Job {
 	/*

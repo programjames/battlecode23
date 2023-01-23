@@ -27,21 +27,46 @@ public class Launcher extends Unit {
 
 		if (noDangerousEnemies) {
 			mode = Mode.FIND_ENEMY;
-			int myChunk = minimap.getChunkIndex(pos);
-			int chunk = -1;
-			chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
-			if (chunk == -1 && rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
-				chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
-			}
-			if (chunk == -1) {
-				navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
-			} else {
-				navigator.setDestination(minimap.getChunkCenter(chunk));
-			}
 		} else if (threatLevel > 2 * allyStrength) {
 			mode = Mode.RETREAT;
 		} else {
 			mode = Mode.ATTACK;
+		}
+
+		if (mode == Mode.FIND_ENEMY) {
+			int myChunk = Minimap.getChunkIndex(pos);
+			int chunk = -1;
+			int bits = tasklist.getNextTaskBits(Task.ATTACK);
+			if (bits != -1) {
+				int roundsLeft = tasklist.getTaskRound(bits) - rc.getRoundNum(); // Number of rounds before convergence.
+				chunk = tasklist.getTaskChunk(bits);
+				MapLocation dest = Minimap.getChunkCenter(chunk);
+				if (Math.pow(roundsLeft / 2, 2) >= pos.distanceSquaredTo(dest)) { // Magic constants, you can try to
+																					// find better ones.
+					mode = Mode.STAY_STILL;
+				} else if (Math.pow(Math.min(10, roundsLeft), 2) >= pos.distanceSquaredTo(dest)) {
+					navigator.setDestination(dest);
+					rc.setIndicatorLine(pos, dest, 255, 255, 255);
+				} else {
+					bits = -1; // Task is too far to deal with.
+				}
+			}
+
+			if (bits == -1) {
+				chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
+				if (chunk == -1) {
+					if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
+						chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
+					} else {
+						chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+					}
+				}
+				if (chunk == -1) {
+					navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
+				} else {
+					navigator.setDestination(Minimap.getChunkCenter(chunk));
+				}
+			}
 		}
 	}
 
@@ -58,7 +83,8 @@ public class Launcher extends Unit {
 
 					case ATTACK:
 						attack();
-						encircle(navigator);
+						// encircle(navigator);
+						retreat(navigator);
 						attack();
 						break;
 
@@ -66,6 +92,9 @@ public class Launcher extends Unit {
 						attack();
 						retreat(navigator);
 						attack();
+						break;
+
+					case STAY_STILL:
 						break;
 
 					default:

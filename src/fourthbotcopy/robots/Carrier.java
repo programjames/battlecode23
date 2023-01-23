@@ -21,6 +21,8 @@ public class Carrier extends Unit {
 	public MapLocation wellToAvoid = null;
 	public MapLocation myHQLocation = null; // MapLocation of the HQ this carrier frequents
 
+	public MapLocation corner = null;
+
 	public Carrier(RobotController rc) {
 		super(rc);
 	}
@@ -54,6 +56,52 @@ public class Carrier extends Unit {
 
 		totalResources = ad + mn + ex;
 		totalCarryWeight = totalResources + (anchor == null ? 0 : 40);
+
+		if (job == Job.ATTACK_ENEMY) {
+			if (noDangerousEnemies) {
+				mode = Mode.FIND_ENEMY;
+			} else if (threatLevel > 2 * allyStrength) {
+				mode = Mode.RETREAT;
+			} else {
+				mode = Mode.ATTACK;
+			}
+
+			if (mode == Mode.FIND_ENEMY) {
+				int myChunk = Minimap.getChunkIndex(pos);
+				int chunk = -1;
+				int bits = tasklist.getNextTaskBits(Task.ATTACK);
+				if (bits != -1) {
+					int roundsLeft = tasklist.getTaskRound(bits) - rc.getRoundNum(); // Number of rounds before convergence.
+					chunk = tasklist.getTaskChunk(bits);
+					MapLocation dest = Minimap.getChunkCenter(chunk);
+					if (Math.pow(roundsLeft / 2, 2) >= pos.distanceSquaredTo(dest)) { // Magic constants, you can try to
+																						// find better ones.
+						mode = Mode.STAY_STILL;
+					} else if (Math.pow(Math.min(10, roundsLeft), 2) >= pos.distanceSquaredTo(dest)) {
+						navigator.setDestination(dest);
+						rc.setIndicatorLine(pos, dest, 255, 255, 255);
+					} else {
+						bits = -1; // Task is too far to deal with.
+					}
+				}
+	
+				if (bits == -1) {
+					chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
+					if (chunk == -1) {
+						if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
+							chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
+						} else {
+							chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+						}
+					}
+					if (chunk == -1) {
+						navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
+					} else {
+						navigator.setDestination(Minimap.getChunkCenter(chunk));
+					}
+				}
+			}
+		}
 
 		if (myWellLocation != null) {
 			if (rc.canSenseLocation(myWellLocation) && rc.senseWell(myWellLocation) == null) {
@@ -128,6 +176,38 @@ public class Carrier extends Unit {
 		}
 
 		switch (job) {
+			case ATTACK_ENEMY:
+				switch (mode) {
+					case FIND_ENEMY: // move to our enemy goal location
+						navigator.move();
+						navigator.move();
+						attack();
+						break;
+
+					case ATTACK:
+						attack();
+						// encircle(navigator);
+						while (pickupFromNearbyWell());
+						retreat(navigator);
+						while (pickupFromNearbyWell());
+						attack();
+						break;
+
+					case RETREAT:
+						attack();
+						while (pickupFromNearbyWell());
+						retreat(navigator);
+						while (pickupFromNearbyWell());
+						attack();
+						break;
+
+					case STAY_STILL:
+						break;
+
+					default:
+						break;
+				}
+				break;
 			case DEPLOY_ANCHOR:
 				deployAnchor();
 				break;
@@ -191,7 +271,7 @@ public class Carrier extends Unit {
 	}
 
 	private void deployAnchor() throws GameActionException {
-		if (rc.canPlaceAnchor()) {
+		if (rc.canPlaceAnchor() && rc.senseTeamOccupyingIsland(rc.senseIsland(pos)) != myTeam) {
 			rc.placeAnchor();
 			return;
 		}
@@ -217,14 +297,13 @@ public class Carrier extends Unit {
 		if (placeLocation != null) {
 			navigator.move(placeLocation);
 		} else {
-			int myChunk = minimap.getChunkIndex(pos);
+			int myChunk = Minimap.getChunkIndex(pos);
 			int chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
 			if (chunk != -1) {
-				navigator.setDestination(minimap.getChunkCenter(chunk));
+				navigator.setDestination(Minimap.getChunkCenter(chunk));
 				navigator.move();
 			} else {
 				if (rc.canSenseLocation(navigator.destination)) {
-					MapLocation corner;
 					switch (rng.nextInt(4)) {
 						case 0:
 							corner = new MapLocation(0, 0);
@@ -242,7 +321,7 @@ public class Carrier extends Unit {
 					navigator.setDestination(corner);
 				}
 
-				navigator.move();
+				navigator.move(corner);
 			}
 		}
 	}
@@ -310,7 +389,8 @@ public class Carrier extends Unit {
 				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
 					MapLocation moveLoc = pos.add(direction);
 					if (rc.canMove(direction)
-							&& rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+							&& rc.getMovementCooldownTurns()
+									+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
@@ -384,7 +464,8 @@ public class Carrier extends Unit {
 				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
 					MapLocation moveLoc = pos.add(direction);
 					if (rc.canMove(direction)
-							&& rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+							&& rc.getMovementCooldownTurns()
+									+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
@@ -465,7 +546,8 @@ public class Carrier extends Unit {
 				// Try to dart back out
 				Direction direction = myWellLocation.directionTo(pos);
 				MapLocation moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -474,7 +556,8 @@ public class Carrier extends Unit {
 
 				direction = direction.rotateRight();
 				moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -483,7 +566,8 @@ public class Carrier extends Unit {
 
 				direction = direction.rotateLeft().rotateLeft();
 				moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -778,7 +862,18 @@ public class Carrier extends Unit {
 			job = Job.DEPLOY_ANCHOR;
 		}
 
+		if (rc.getRoundNum() % 100 == 10) {
+			if (rng.nextDouble() >= 12.0 / (1.0 + nearbyCarriers)) {
+				job = Job.ATTACK_ENEMY;
+				mode = Mode.FIND_ENEMY;
+			}
+		}
+
 		switch (job) {
+			case ATTACK_ENEMY:
+				// If you're job is to attack the enemy, you're suicidal and will always attack
+				// the enemy until you die
+				break;
 			case DEPLOY_ANCHOR:
 				if (rc.getAnchor() != null)
 					break;
@@ -938,10 +1033,10 @@ public class Carrier extends Unit {
 
 		wellToAvoid = myWellLocation;
 		myWellLocation = null;
-		int myChunk = minimap.getChunkIndex(pos);
+		int myChunk = Minimap.getChunkIndex(pos);
 		int nearestWellChunk = MinimapInfo.nearestWellChunkOther(myChunk, minimap.getChunks());
 		if (nearestWellChunk != myChunk) {
-			navigator.randomGoal = minimap.getChunkCenter(nearestWellChunk);
+			navigator.randomGoal = Minimap.getChunkCenter(nearestWellChunk);
 		} else {
 			navigator.randomGoal = null;
 		}
@@ -960,12 +1055,12 @@ public class Carrier extends Unit {
 			randomNearbyLoc = rc.getLocation().translate(rng.nextInt(21) - 10, rng.nextInt(21) - 10);
 		if (!onTheMap(randomNearbyLoc))
 			return null; // Didn't work too many times. Returns null.
-		int chunk = minimap.getChunkIndex(randomNearbyLoc);
+		int chunk = Minimap.getChunkIndex(randomNearbyLoc);
 		int nearestWellChunk = MinimapInfo.nearestWellChunk(chunk, minimap.getChunks());
 		if (nearestWellChunk == -1) {
 			return null;
 		}
-		MapLocation nearbyCenter = minimap.getChunkCenter(nearestWellChunk);
+		MapLocation nearbyCenter = Minimap.getChunkCenter(nearestWellChunk);
 		return nearbyCenter;
 	}
 
@@ -975,12 +1070,12 @@ public class Carrier extends Unit {
 		 * are at
 		 */
 
-		int chunk = minimap.getChunkIndex(pos);
+		int chunk = Minimap.getChunkIndex(pos);
 		int nearestWellChunk = MinimapInfo.nearestWellChunkOther(chunk, minimap.getChunks());
 		if (nearestWellChunk == -1) {
 			return null;
 		}
-		MapLocation nearbyCenter = minimap.getChunkCenter(nearestWellChunk);
+		MapLocation nearbyCenter = Minimap.getChunkCenter(nearestWellChunk);
 		return nearbyCenter;
 	}
 }

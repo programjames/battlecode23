@@ -1,4 +1,4 @@
-package fourthbot.robots;
+package fourthbotcopy.robots;
 
 import battlecode.common.*;
 

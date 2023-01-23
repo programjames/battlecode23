@@ -1,7 +1,7 @@
-package fourthbot.robots;
+package fourthbotcopy.robots;
 
 import battlecode.common.*;
-import fourthbot.coordination.*;
+import fourthbotcopy.coordination.*;
 
 public class Headquarters extends Building {
 
