@@ -27,21 +27,28 @@ public class Launcher extends Unit {
 
 		if (noDangerousEnemies) {
 			mode = Mode.FIND_ENEMY;
+		} else if (threatLevel > 2 * allyStrength) {
+			mode = Mode.RETREAT;
+		} else {
+			mode = Mode.ATTACK;
+		}
+
+		if (mode == Mode.FIND_ENEMY) {
 			int myChunk = minimap.getChunkIndex(pos);
 			int chunk = -1;
 			chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
-			if (chunk == -1 && rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
-				chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
+			if (chunk == -1) {
+				if (rc.getRoundNum() >= Constants.CAPTURE_ISLAND_ROUND) {
+					chunk = MinimapInfo.nearestUnfriendlyIslandChunk(myChunk, minimap.getChunks());
+				} else {
+					chunk = MinimapInfo.nearestUnclaimedIslandChunk(myChunk, minimap.getChunks());
+				}
 			}
 			if (chunk == -1) {
 				navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
 			} else {
 				navigator.setDestination(minimap.getChunkCenter(chunk));
 			}
-		} else if (threatLevel > 2 * allyStrength) {
-			mode = Mode.RETREAT;
-		} else {
-			mode = Mode.ATTACK;
 		}
 	}
 

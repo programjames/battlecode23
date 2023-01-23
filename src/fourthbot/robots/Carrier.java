@@ -310,7 +310,7 @@ public class Carrier extends Unit {
 				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
 					MapLocation moveLoc = pos.add(direction);
 					if (rc.canMove(direction)
-							&& rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+							&& rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
@@ -384,7 +384,7 @@ public class Carrier extends Unit {
 				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
 					MapLocation moveLoc = pos.add(direction);
 					if (rc.canMove(direction)
-							&& rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+							&& rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
@@ -465,7 +465,7 @@ public class Carrier extends Unit {
 				// Try to dart back out
 				Direction direction = myWellLocation.directionTo(pos);
 				MapLocation moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -474,7 +474,7 @@ public class Carrier extends Unit {
 
 				direction = direction.rotateRight();
 				moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -483,7 +483,7 @@ public class Carrier extends Unit {
 
 				direction = direction.rotateLeft().rotateLeft();
 				moveLoc = pos.add(direction);
-				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseCooldownMultiplier(moveLoc) < 20) {
+				if (rc.canMove(direction) && rc.getMovementCooldownTurns() + rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();

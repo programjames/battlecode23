@@ -36,12 +36,12 @@ public class Headquarters extends Building {
 		mn = rc.getResourceAmount(ResourceType.MANA);
 		ex = rc.getResourceAmount(ResourceType.ELIXIR);
 
-		// rc.setIndicatorString(String.format("%.2f %.2f %.2f", adIncome, mnIncome, exIncome));
+		rc.setIndicatorString(String.format("%.2f %.2f %.2f", adIncome, mnIncome, exIncome));
 	}
 
 	@Override
 	public void runTurn() throws GameActionException {
-		// if (rc.getRoundNum() > 300) {
+		// if (rc.getRoundNum() > 1000) {
 		// 	rc.resign();
 		// }
 
