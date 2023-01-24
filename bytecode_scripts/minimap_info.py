@@ -172,7 +172,7 @@ def make_nearest_friendly_island_chunk():
         chunks = sorted(chunk_centers.keys(), key=lambda c: r2(chunk_centers[c], center))
         func = f"private static int nearestFriendlyIslandChunkSub{id} (int[] chunks) {{"
         for c in chunks:
-            func += f"""if ((chunks[{c}] & {FRIENDLY_ISLAND_BIT}) != 0) return {c};"""
+            func += f"""if ((chunks[{c}] & {ISLAND_BITS}) == {FRIENDLY_ISLAND_BIT}) return {c};"""
         func += f"\nreturn -1;}}"
         funcs += "\n" + func
     return funcs
