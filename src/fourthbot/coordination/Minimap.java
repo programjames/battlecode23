@@ -307,21 +307,24 @@ public class Minimap implements Module {
 			int left = 2 * i;
 			int right = left + 1;
 			int update = 0;
+			boolean madeUpdate = false;
 			if (updateTimes[left] > remoteUpdateTimes[left]) {
 				// We have extra info on some chunks
 				writeOut(left);
 				update |= updateTimes[left] << 8;
+				madeUpdate = true;
 			} else {
-				update |= remoteUpdateTimes[left];
+				update |= remoteUpdateTimes[left] << 8;
 			}
 			if (updateTimes[right] > remoteUpdateTimes[right]) {
 				// We have extra info on some chunks
 				writeOut(right);
 				update |= updateTimes[right];
+				madeUpdate = true;
 			} else {
 				update |= remoteUpdateTimes[right];
 			}
-			if (update > 0) {
+			if (madeUpdate) {
 				rc.writeSharedArray(i, update);
 			}
 		}
