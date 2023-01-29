@@ -33,7 +33,8 @@ public class Headquarters extends Building {
 	public void setup() {
 		super.setup();
 
-		// Get launchers to move to opposite side of the map at the beginning of the game.
+		// Get launchers to move to opposite side of the map at the beginning of the
+		// game.
 		minimap.markEnemyLocation(new MapLocation(mapWidth - pos.x, mapHeight - pos.y));
 	}
 
@@ -161,33 +162,88 @@ public class Headquarters extends Building {
 		}
 
 		if (buildType == null) {
-			if (!saveForAmplifier && MinimapInfo.nearestEnemyChunk(Minimap.getChunkIndex(pos), minimap.getChunks()) != -1) {
+			if (!saveForAmplifier
+					&& MinimapInfo.nearestEnemyChunk(Minimap.getChunkIndex(pos), minimap.getChunks()) != -1) {
 				// Build a launcher?
 			}
 			return false;
 		}
-
-		for (Direction direction : Direction.allDirections()) {
-			MapLocation buildLocation = rc.getLocation().add(direction);
-			if (rc.canBuildRobot(buildType, buildLocation)) {
-				rc.buildRobot(buildType, buildLocation);
-
-				if (buildType == RobotType.AMPLIFIER)
-					saveForAmplifier = false;
-
-				// 20% chance of saving for an amplifier once we have a decent income.
-				else if (adIncome >= AMPLIFIER_INCOME && mnIncome >= AMPLIFIER_INCOME
-						&& buildType == RobotType.LAUNCHER && rng.nextInt(5) == 0) {
-					saveForAmplifier = true;
+		
+		MapLocation buildDestination = new MapLocation(mapWidth / 2, mapHeight / 2); // Build towards center of map by default
+		if (enemies.length > 0) {
+			buildDestination = pos;
+		} else {
+			if (buildType == RobotType.CARRIER) {
+				MapLocation wellLocation = getRandomWell();
+				if (wellLocation != null) {
+					buildDestination = wellLocation;
 				}
-
-				if (buildType == RobotType.LAUNCHER && saveForStandardAnchor) {
-					manaToSave += 10;
+			} else {
+				int myChunk = Minimap.getChunkIndex(pos);
+				int enemyChunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
+				if (enemyChunk != -1) {
+					buildDestination = Minimap.getChunkCenter(enemyChunk);
 				}
-
-				return true;
 			}
 		}
+
+		if (buildDestination == null) {
+			buildDestination = pos;
+		}
+
+		// Try to build towards the build destination
+		if (buildTowards(buildType, buildDestination)) {
+			if (buildType == RobotType.AMPLIFIER)
+				saveForAmplifier = false;
+
+			// 20% chance of saving for an amplifier once we have a decent income.
+			else if (adIncome >= AMPLIFIER_INCOME && mnIncome >= AMPLIFIER_INCOME
+					&& buildType == RobotType.LAUNCHER && rng.nextInt(5) == 0) {
+				saveForAmplifier = true;
+			}
+
+			if (buildType == RobotType.LAUNCHER && saveForStandardAnchor) {
+				manaToSave += 10;
+			}
+
+			return true;
+		}
 		return false;
+	}
+
+	public boolean buildTowards(RobotType buildType, MapLocation location) throws GameActionException {
+		/*
+		 * Try to build a robot of type RobotType as close to the given location as
+		 * possible.
+		 * Return true if successful.
+		 * 
+		 * Note: If we are under attack (i.e. can see enemy units, we instead build as
+		 * close to our HQ
+		 * as possible for added protection)
+		 */
+		
+		return HqBuilder.buildTowards(rc, buildType, pos, location);
+	}
+
+	public MapLocation getRandomWell() {
+		/*
+		 * Return a MapLocation close to a random nearby well.
+		 * If we don't know of ANY nearby wells, then return null.
+		 */
+		MapLocation randomNearbyLoc = rc.getLocation().translate(rng.nextInt(21) - 10, rng.nextInt(21) - 10);
+		// Try a few more times if not on the map
+		if (!onTheMap(randomNearbyLoc))
+			randomNearbyLoc = rc.getLocation().translate(rng.nextInt(21) - 10, rng.nextInt(21) - 10);
+		if (!onTheMap(randomNearbyLoc))
+			randomNearbyLoc = rc.getLocation().translate(rng.nextInt(21) - 10, rng.nextInt(21) - 10);
+		if (!onTheMap(randomNearbyLoc))
+			return null; // Didn't work too many times. Returns null.
+		int chunk = Minimap.getChunkIndex(randomNearbyLoc);
+		int nearestWellChunk = MinimapInfo.nearestWellChunk(chunk, minimap.getChunks());
+		if (nearestWellChunk == -1) {
+			return null;
+		}
+		MapLocation nearbyCenter = Minimap.getChunkCenter(nearestWellChunk);
+		return nearbyCenter;
 	}
 }
