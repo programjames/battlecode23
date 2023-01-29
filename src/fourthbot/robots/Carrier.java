@@ -426,9 +426,10 @@ public class Carrier extends Unit {
 				// Try to dart back out
 				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
 					MapLocation moveLoc = pos.add(direction);
+					int moveCooldown = getMoveCooldown();
 					if (rc.canMove(direction)
 							&& rc.getMovementCooldownTurns()
-									+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+									+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) * moveCooldown < 20) {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
@@ -501,9 +502,10 @@ public class Carrier extends Unit {
 				// Try to dart back out
 				for (Direction direction : Constants.NONZERO_DIRECTIONS) {
 					MapLocation moveLoc = pos.add(direction);
+					int moveCooldown = getMoveCooldown();
 					if (rc.canMove(direction)
 							&& rc.getMovementCooldownTurns()
-									+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+									+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) * moveCooldown < 20) {
 						// We have enough movement cooldown to come back on the next turn, so let's dart
 						// out.
 						rc.move(direction);
@@ -584,8 +586,9 @@ public class Carrier extends Unit {
 				// Try to dart back out
 				Direction direction = myWellLocation.directionTo(pos);
 				MapLocation moveLoc = pos.add(direction);
+				int moveCooldown = getMoveCooldown();
 				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
-						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) * moveCooldown < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -595,7 +598,7 @@ public class Carrier extends Unit {
 				direction = direction.rotateRight();
 				moveLoc = pos.add(direction);
 				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
-						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) * moveCooldown < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -605,7 +608,7 @@ public class Carrier extends Unit {
 				direction = direction.rotateLeft().rotateLeft();
 				moveLoc = pos.add(direction);
 				if (rc.canMove(direction) && rc.getMovementCooldownTurns()
-						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) < 20) {
+						+ rc.senseMapInfo(moveLoc).getCooldownMultiplier(myTeam) * moveCooldown < 20) {
 					// We have enough action to come back on the next turn, so let's dart out.
 					rc.move(direction);
 					pos = rc.getLocation();
@@ -952,10 +955,6 @@ public class Carrier extends Unit {
 					case DRAW_RESOURCES_FROM_WELL:
 						if (totalCarryWeight >= 40 || (totalCarryWeight >= 25 && rc.getRoundNum() < 100)) {
 							mode = Mode.GOTO_HQ;
-							if (nearbyCarriers >= 12) {
-								// Our current well is crowded. Next time, go to a new well (maybe)
-								switchWell();
-							}
 						} else {
 							mode = nearMyWell() ? Mode.DRAW_RESOURCES_FROM_WELL : Mode.GOTO_RESOURCES;
 						}
@@ -1115,5 +1114,10 @@ public class Carrier extends Unit {
 		}
 		MapLocation nearbyCenter = Minimap.getChunkCenter(nearestWellChunk);
 		return nearbyCenter;
+	}
+
+	private int getMoveCooldown() {
+		return (int) (GameConstants.CARRIER_MOVEMENT_INTERCEPT
+				+ GameConstants.CARRIER_MOVEMENT_SLOPE * rc.getWeight());
 	}
 }
