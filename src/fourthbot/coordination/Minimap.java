@@ -312,7 +312,7 @@ public class Minimap implements Module {
 				writeOut(left);
 				update |= updateTimes[left] << 8;
 			} else {
-				update |= remoteUpdateTimes[left];
+				update |= remoteUpdateTimes[left] << 8;
 			}
 			if (updateTimes[right] > remoteUpdateTimes[right]) {
 				// We have extra info on some chunks
