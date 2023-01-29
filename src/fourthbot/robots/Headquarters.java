@@ -19,10 +19,11 @@ public class Headquarters extends Building {
 	double mnIncome = 0;
 	double exIncome = 0;
 
-	private final double ANCHOR_INCOME_AD = 3; // build an anchor if we have at least this income/turn
-	private final double ANCHOR_INCOME_MN = 5; // build an anchor if we have at least this income/turn
-	private final double ANCHOR_INCOME_EX = 5; // build an anchor if we have at least this income/turn
-	private final double AMPLIFIER_INCOME = 2.5; // build amplifiers after this income bracket
+	private final double ANCHOR_INCOME_DECAY_RATE = 0.999;
+	private double ANCHOR_INCOME_AD = 5; // build an anchor if we have at least this income/turn
+	private double ANCHOR_INCOME_MN = 7; // build an anchor if we have at least this income/turn
+	private double ANCHOR_INCOME_EX = 7; // build an anchor if we have at least this income/turn
+	private double AMPLIFIER_INCOME = 2.5; // build amplifiers after this income bracket
 
 	private boolean saveForAmplifier = false;
 	private boolean saveForStandardAnchor = false;
@@ -39,6 +40,11 @@ public class Headquarters extends Building {
 	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
+
+		ANCHOR_INCOME_AD *= ANCHOR_INCOME_DECAY_RATE;
+		ANCHOR_INCOME_MN *= ANCHOR_INCOME_DECAY_RATE;
+		ANCHOR_INCOME_EX *= ANCHOR_INCOME_DECAY_RATE;
+
 		adIncome = DECAY_RATE * adIncome + (1 - DECAY_RATE) * (rc.getResourceAmount(ResourceType.ADAMANTIUM) - ad);
 		mnIncome = DECAY_RATE * mnIncome + (1 - DECAY_RATE) * (rc.getResourceAmount(ResourceType.MANA) - mn);
 		exIncome = DECAY_RATE * exIncome + (1 - DECAY_RATE) * (rc.getResourceAmount(ResourceType.ELIXIR) - ex);
