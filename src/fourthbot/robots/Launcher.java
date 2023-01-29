@@ -24,7 +24,7 @@ public class Launcher extends Unit {
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
 		// Draw the minimap
-		
+
 		navigator.needToPrepareMove = true;
 
 		if (noDangerousEnemies) {
@@ -42,7 +42,7 @@ public class Launcher extends Unit {
 			// See if we own any islands we can heal at.
 			int healIsland = -1;
 			for (int island : rc.senseNearbyIslands()) {
-				if(rc.senseTeamOccupyingIsland(island) == myTeam) {
+				if (rc.senseTeamOccupyingIsland(island) == myTeam) {
 					healIsland = island;
 					break;
 				}
@@ -50,7 +50,8 @@ public class Launcher extends Unit {
 			if (healIsland != -1) {
 				MapLocation healLoc = null;
 				for (MapLocation loc : rc.senseNearbyIslandLocations(healIsland)) {
-					if (loc == pos) continue; // Alternate between tiles on an island so that other units can get in and heal.
+					if (loc == pos)
+						continue; // Alternate between tiles on an island so that other units can get in and heal.
 
 					if (healLoc == null || pos.distanceSquaredTo(loc) < pos.distanceSquaredTo(healLoc)) {
 						healLoc = loc;
@@ -118,17 +119,21 @@ public class Launcher extends Unit {
 						break;
 
 					case ATTACK:
-						attack();
-						// Move towards center of enemies.
-						int centerX = 0, centerY = 0;
-						for (RobotInfo r : enemies) {
-							centerX += r.location.x;
-							centerY += r.location.y;
-						}
-						if (enemies.length > 0) {
-							MapLocation center = new MapLocation(Math.round(centerX / (float)enemies.length), Math.round(centerY / (float)enemies.length));
-							navigator.move(center);
-							attack();
+						if (!attack()) {
+							// Move towards center of enemies.
+							int centerX = 0, centerY = 0;
+							for (RobotInfo r : enemies) {
+								centerX += r.location.x;
+								centerY += r.location.y;
+							}
+							if (enemies.length > 0) {
+								MapLocation center = new MapLocation(Math.round(centerX / (float) enemies.length),
+										Math.round(centerY / (float) enemies.length));
+								navigator.move(center);
+								attack();
+							}
+						} else {
+							retreat(navigator);
 						}
 						break;
 
@@ -140,7 +145,7 @@ public class Launcher extends Unit {
 
 					case STAY_STILL:
 						break;
-					
+
 					case HEAL:
 						attack();
 						navigator.move();
@@ -156,5 +161,8 @@ public class Launcher extends Unit {
 				break;
 		}
 
+		if (enemies.length == 0) {
+			attackCloud();
+		}
 	}
 }

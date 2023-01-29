@@ -135,14 +135,9 @@ public abstract class Unit extends Robot {
 		return allyStrength > threatLevel; // Maybe should be overrided in subclasses
 	}
 
-	public void attack() throws GameActionException {
-		if (rc.getActionCooldownTurns() >= GameConstants.COOLDOWN_LIMIT) return;
+	public boolean attack() throws GameActionException {
+		if (rc.getActionCooldownTurns() >= GameConstants.COOLDOWN_LIMIT) return false;
 		enemies = rc.senseNearbyRobots(-1, enemyTeam);
-		if(enemies.length == 0) {
-			attackCloud();
-			return;
-		}
-
 		RobotInfo enemy = null;
 		int health = Integer.MAX_VALUE;
 		for (RobotInfo r : rc.senseNearbyRobots(rc.getLocation(), type.actionRadiusSquared, enemyTeam)) {
@@ -164,18 +159,19 @@ public abstract class Unit extends Robot {
 				enemy = r;
 			}
 		}
-
 		if (enemy == null) {
-			attackCloud();
-			return;
+			return false;
 		}
-
-		while (rc.canAttack(enemy.location)) {
-			rc.attack(enemy.location);
+		if (rc.canAttack(enemy.location)) {
+			while (rc.canAttack(enemy.location)) {
+				rc.attack(enemy.location);
+			}
+			return true;
 		}
+		return false;
 	}
 
-	private void attackCloud() throws GameActionException{
+	public void attackCloud() throws GameActionException{
 		for (MapLocation loc : rc.senseNearbyCloudLocations(type.actionRadiusSquared)) {
 			if (!rc.canSenseLocation(loc) && rc.canAttack(loc)) {
 				while (rc.canAttack(loc)) {
