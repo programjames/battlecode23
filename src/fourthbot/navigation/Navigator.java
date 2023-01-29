@@ -420,12 +420,14 @@ public class Navigator {
 		}
 
 		Direction direction = wallDirection;
-		MapLocation wallPlace = robot.pos.add(direction);
-		if (rc.canSenseLocation(wallPlace) && rc.sensePassability(wallPlace)) {
+		if (rc.canMove(direction)) {
 			// Our wall disappeared!
 			wallDirection = null;
 			wallLocation = null;
-			return fuzzyMoveTo(destination, 4);
+			rc.move(direction);
+			lastMoveDirection = direction;
+			robot.pos = rc.getLocation();
+			return true;
 		}
 
 		if (rotateRight) {
