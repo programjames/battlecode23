@@ -227,7 +227,18 @@ public class Minimap implements Module {
 		int index = getChunkIndex(enemy.location);
 		if ((chunks[index] & ENEMY_BIT) == 0) {
 			chunks[index] |= ENEMY_BIT;
-			updateTimes[index / 4] = rc.getRoundNum() / 8;
+			updateTimes[index / 4] = 1 + rc.getRoundNum() / 8;
+		}
+	}
+
+	public void markEnemyLocation(MapLocation location) {
+		/*
+		 * Mark an enemy on the minimap
+		 */
+		int index = getChunkIndex(location);
+		if ((chunks[index] & ENEMY_BIT) == 0) {
+			chunks[index] |= ENEMY_BIT;
+			updateTimes[index / 4] = 1 + rc.getRoundNum() / 8;
 		}
 	}
 
@@ -238,7 +249,7 @@ public class Minimap implements Module {
 		int index = getChunkIndex(well.getMapLocation());
 		if ((chunks[index] & WELL_BIT) == 0) {
 			chunks[index] |= WELL_BIT;
-			updateTimes[index / 4] = rc.getRoundNum() / 8;
+			updateTimes[index / 4] = 1 + rc.getRoundNum() / 8;
 		}
 	}
 
@@ -258,7 +269,7 @@ public class Minimap implements Module {
 		if ((chunks[index] & ISLAND_BITS) != updateBits) {
 			chunks[index] &= 0b0011;
 			chunks[index] |= updateBits;
-			updateTimes[index / 4] = rc.getRoundNum() / 8;
+			updateTimes[index / 4] = 1 + rc.getRoundNum() / 8;
 		}
 	}
 
@@ -269,7 +280,7 @@ public class Minimap implements Module {
 		int index = getChunkIndex(location);
 		if ((chunks[index] & ENEMY_BIT) != 0) {
 			chunks[index] &= 0b1110;
-			updateTimes[index / 4] = rc.getRoundNum() / 8;
+			updateTimes[index / 4] = 1 + rc.getRoundNum() / 8;
 		}
 	}
 
@@ -281,7 +292,7 @@ public class Minimap implements Module {
 		 */
 		if (chunks[chunkIndex] != value) {
 			chunks[chunkIndex] = value;
-			updateTimes[chunkIndex / 4] = rc.getRoundNum() / 8;
+			updateTimes[chunkIndex / 4] = 1 + rc.getRoundNum() / 8;
 		}
 	}
 

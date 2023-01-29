@@ -100,26 +100,22 @@ public abstract class Robot {
 		// This isn't critical, and probably most relevant at the end of the turn so we
 		// put it in endTurn
 
-		if (Clock.getBytecodesLeft() > 1500) { // so we don't run out of bytecode
+		if (Clock.getBytecodesLeft() > 2000) { // so we don't run out of bytecode
 			WellInfo[] nearbyWells = rc.senseNearbyWells();
 			for (WellInfo well : nearbyWells) {
 				minimap.markWell(well);
 			}
 
-			if (rc.canWriteSharedArray(0, 0)) {
-				// If we can write, then push our updates to the shared array
-				minimap.push();
-				// rc.setIndicatorString("Just pushed to minimap!");
-			} // else {
-				// rc.setIndicatorString("Can't push to minimap!");
-				// }
-		}
-		if (Clock.getBytecodesLeft() > 1500) {
 			int[] islands = rc.senseNearbyIslands();
 			for(int island : islands) {
 				Team islandTeam = rc.senseTeamOccupyingIsland(island);
 				MapLocation islandLoc = rc.senseNearbyIslandLocations(island)[0];
 				minimap.markIsland(islandLoc, islandTeam, myTeam);
+			}
+
+			if (rc.canWriteSharedArray(0, 0)) {
+				// If we can write, then push our updates to the shared array
+				minimap.push();
 			}
 		}
 	}

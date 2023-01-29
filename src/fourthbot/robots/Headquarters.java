@@ -29,6 +29,14 @@ public class Headquarters extends Building {
 	private int manaToSave = 0;
 
 	@Override
+	public void setup() {
+		super.setup();
+
+		// Get launchers to move to opposite side of the map at the beginning of the game.
+		minimap.markEnemyLocation(new MapLocation(mapWidth - pos.x, mapHeight - pos.y));
+	}
+
+	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
 		adIncome = DECAY_RATE * adIncome + (1 - DECAY_RATE) * (rc.getResourceAmount(ResourceType.ADAMANTIUM) - ad);
@@ -45,7 +53,7 @@ public class Headquarters extends Building {
 
 	@Override
 	public void runTurn() throws GameActionException {
-		// if (rc.getRoundNum() > 50) {
+		// if (rc.getRoundNum() > 300) {
 		// rc.resign();
 		// }
 
