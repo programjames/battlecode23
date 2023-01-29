@@ -1,5 +1,0 @@
-Which indices of the shared array refer to what?
-
-1. The first 18 integers store information on when the minimap has been updated
-2. The next 36 integers store the minimap
-3. The next 8 integers store jobs the HQs want executed.

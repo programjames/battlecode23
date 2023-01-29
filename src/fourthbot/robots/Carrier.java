@@ -55,27 +55,33 @@ public class Carrier extends Unit {
 		anchor = rc.getAnchor();
 
 		// See if we should move wells to get mana instead of adamantium.
+		// Should move to mana wells more at the beginning of the game.
 		if (myWellLocation != null && rc.canSenseLocation(myWellLocation)) {
 			WellInfo myWell = rc.senseWell(myWellLocation);
 			if (myWell != null && myWell.getResourceType() == ResourceType.ADAMANTIUM) {
 				// See how many friendly carriers are around our well.
 				int numCarriers = 0;
 				for (RobotInfo r : rc.senseNearbyRobots(myWellLocation, 4, myTeam)) {
-					if (r.type == RobotType.CARRIER) numCarriers++;
+					if (r.type == RobotType.CARRIER)
+						numCarriers++;
 				}
-				if (numCarriers >= 5) {
+				if (numCarriers > rc.getRoundNum() / 20) {
 					// See if there are mana/elixir wells we can switch to.
-					for (WellInfo well : rc.senseNearbyWells()) {
-						if (well.getResourceType() != ResourceType.ADAMANTIUM) {
-							myWellLocation = well.getMapLocation();
-							break;
+					findWell: {
+						for (WellInfo well : rc.senseNearbyWells()) {
+							if (well.getResourceType() != ResourceType.ADAMANTIUM) {
+								wellToAvoid = myWellLocation;
+								myWellLocation = well.getMapLocation();
+								break findWell;
+							}
 						}
-					}
-					// Otherwise, move to minimap other well.
-					int myChunk = minimap.getChunkIndex(pos);
-					int chunk = MinimapInfo.nearestWellChunkOther(myChunk, minimap.getChunks());
-					if (chunk != -1) {
-						myWellLocation = Minimap.getChunkCenter(chunk);
+						// Otherwise, move to minimap other well.
+						int myChunk = Minimap.getChunkIndex(pos);
+						int chunk = MinimapInfo.nearestWellChunkOther(myChunk, minimap.getChunks());
+						if (chunk != -1) {
+							wellToAvoid = myWellLocation;
+							myWellLocation = Minimap.getChunkCenter(chunk);
+						}
 					}
 				}
 			}
@@ -98,7 +104,8 @@ public class Carrier extends Unit {
 				int chunk = -1;
 				int bits = tasklist.getNextTaskBits(Task.ATTACK);
 				if (bits != -1) {
-					int roundsLeft = tasklist.getTaskRound(bits) - rc.getRoundNum(); // Number of rounds before convergence.
+					int roundsLeft = tasklist.getTaskRound(bits) - rc.getRoundNum(); // Number of rounds before
+																						// convergence.
 					chunk = tasklist.getTaskChunk(bits);
 					MapLocation dest = Minimap.getChunkCenter(chunk);
 					if (Math.pow(roundsLeft / 2, 2) >= pos.distanceSquaredTo(dest)) { // Magic constants, you can try to
@@ -111,7 +118,7 @@ public class Carrier extends Unit {
 						bits = -1; // Task is too far to deal with.
 					}
 				}
-	
+
 				if (bits == -1) {
 					chunk = MinimapInfo.nearestEnemyChunk(myChunk, minimap.getChunks());
 					if (chunk == -1) {
@@ -214,17 +221,21 @@ public class Carrier extends Unit {
 					case ATTACK:
 						attack();
 						// encircle(navigator);
-						while (pickupFromNearbyWell());
+						while (pickupFromNearbyWell())
+							;
 						retreat(navigator);
-						while (pickupFromNearbyWell());
+						while (pickupFromNearbyWell())
+							;
 						attack();
 						break;
 
 					case RETREAT:
 						attack();
-						while (pickupFromNearbyWell());
+						while (pickupFromNearbyWell())
+							;
 						retreat(navigator);
-						while (pickupFromNearbyWell());
+						while (pickupFromNearbyWell())
+							;
 						attack();
 						break;
 
