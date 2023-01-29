@@ -404,13 +404,19 @@ public class Navigator {
 				robot.pos = rc.getLocation();
 				return true;
 			}
+			
+			MapLocation placeToMove = robot.pos.add(directionToMove);
+			if (!rc.canSenseLocation(placeToMove) || !rc.sensePassability(placeToMove)) {
+				// uh oh, we hit a wall
+				wallDirection = directionToMove;
+				wallLocation = robot.pos.add(directionToMove);
+				wallIsTemporary = rc.canSenseRobotAtLocation(wallLocation);
 
-			// uh oh, we hit a wall
-			wallDirection = directionToMove;
-			wallLocation = robot.pos.add(directionToMove);
-			wallIsTemporary = rc.canSenseRobotAtLocation(wallLocation);
-
-			rotateRight = clockwiseOrNot(robot.pos, wallLocation, destination);
+				rotateRight = clockwiseOrNot(robot.pos, wallLocation, destination);
+			} else {
+				// Otherwise, we're up against robots, so fuzzy move
+				return fuzzyMoveTo(destination);
+			}
 		}
 
 		Direction direction = wallDirection;
