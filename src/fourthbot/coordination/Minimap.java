@@ -311,12 +311,39 @@ public class Minimap implements Module {
 				// We have extra info on some chunks
 				writeOut(left);
 				update |= updateTimes[left] << 8;
+			} else {
+				update |= remoteUpdateTimes[left];
 			}
 			if (updateTimes[right] > remoteUpdateTimes[right]) {
 				// We have extra info on some chunks
 				writeOut(right);
 				update |= updateTimes[right];
+			} else {
+				update |= remoteUpdateTimes[right];
 			}
+			if (update > 0) {
+				System.out.println(String.format("%d %d %d %d", i, left, right, update));
+				rc.writeSharedArray(i, update);
+			}
+		}
+	}
+	
+	public void pushIgnoreTimes() throws GameActionException {
+		if (!rc.canWriteSharedArray(0, 0)) {
+			// debug statement
+			//System.out.println("Tried writing to the shared array when unable to");
+			return; // We can't write so do nothing
+		}
+		for (int i = 0; i < 18; i++) {
+			int left = 2 * i;
+			int right = left + 1;
+			int update = 0;
+			writeOut(left);
+			update |= updateTimes[left] << 8;
+		
+			writeOut(right);
+			update |= updateTimes[right];
+			
 			if (update > 0) {
 				rc.writeSharedArray(i, update);
 			}

@@ -23,6 +23,8 @@ public class Launcher extends Unit {
 	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
+		// Draw the minimap
+		
 		navigator.needToPrepareMove = true;
 
 		if (noDangerousEnemies) {

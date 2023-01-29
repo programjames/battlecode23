@@ -32,15 +32,19 @@ public class Headquarters extends Building {
 	@Override
 	public void setup() {
 		super.setup();
-
-		// Get launchers to move to opposite side of the map at the beginning of the
-		// game.
-		minimap.markEnemyLocation(new MapLocation(mapWidth - pos.x, mapHeight - pos.y));
 	}
 
 	@Override
 	public void beginTurn() throws GameActionException {
 		super.beginTurn();
+
+		if (rc.getRoundNum() == 1){
+			// Get launchers to move to opposite side of the map at the beginning of the
+			// game.
+			minimap.markEnemyLocation(new MapLocation(mapWidth / 2, mapHeight / 2));
+			minimap.markEnemyLocation(new MapLocation(mapWidth - 1 - pos.x, mapHeight - 1 - pos.y));
+			// minimap.pushIgnoreTimes();
+		}
 
 		ANCHOR_INCOME_AD *= ANCHOR_INCOME_DECAY_RATE;
 		ANCHOR_INCOME_MN *= ANCHOR_INCOME_DECAY_RATE;
@@ -82,7 +86,7 @@ public class Headquarters extends Building {
 
 		// for (int x = 2; x < mapWidth; x += 5) {
 		// for (int y = 2; y < mapHeight; y += 5) {
-		// int chunk = minimap.getChunk(minimap.getChunkIndex(x, y));
+		// int chunk = minimap.getChunk(Minimap.getChunkIndex(x, y));
 		// if ((chunk & Minimap.ISLAND_BITS) != 0) {
 		// rc.setIndicatorLine(new MapLocation(x - 2, y - 2), new MapLocation(x + 2, y -
 		// 2), 255, 255, 255);
