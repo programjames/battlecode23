@@ -30,7 +30,7 @@ public class Launcher extends Unit {
 			if (mode != Mode.HEAL || rc.getHealth() == type.health) {
 				mode = Mode.FIND_ENEMY;
 			}
-		} else if (threatLevel > 2 * allyStrength) {
+		} else if (threatLevel > 0) {
 			mode = Mode.RETREAT;
 		} else {
 			mode = Mode.ATTACK;
@@ -117,9 +117,18 @@ public class Launcher extends Unit {
 
 					case ATTACK:
 						attack();
-						// encircle(navigator);
-						retreat(navigator);
-						attack();
+						// Move towards center of enemies.
+						int centerX = 0, centerY = 0;
+						for (RobotInfo r : enemies) {
+							centerX += r.location.x;
+							centerY += r.location.y;
+						}
+						if (enemies.length > 0) {
+							MapLocation center = new MapLocation(Math.round(centerX / (float)enemies.length), Math.round(centerY / (float)enemies.length));
+							navigator.setDestination(center);
+							navigator.move();
+							attack();
+						}
 						break;
 
 					case RETREAT:

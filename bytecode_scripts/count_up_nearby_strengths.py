@@ -42,9 +42,6 @@ def count_up_enemies():
             break;
         }}
         switch (r.type) {{
-            case CARRIER:
-                threatLevel += 1;
-                break;
             case AMPLIFIER:
                 break;
             case BOOSTER:
