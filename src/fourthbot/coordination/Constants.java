@@ -11,4 +11,6 @@ public final class Constants {
 														// should attack if they are at or above this
 	public static final int CAPTURE_ISLAND_ROUND = 300; // Don't worry about capturing islands before then.
 	public static final int UPGRADE_ROUND = 500; // Don't try upgrading wells until then.
+
+	public static final int CARRY_LIMIT = 39; // limit of how many resource carriers should carry
 }

@@ -189,7 +189,7 @@ public class Carrier extends Unit {
 			default:
 				switch (job) {
 					case UPGRADE_WELL:
-						if (totalCarryWeight >= 40) {
+						if (totalCarryWeight >= Constants.CARRY_LIMIT) {
 							while (depositToNearbyWell() | pickupFromNearbyWell() | depositToNearbyHQ())
 								;
 						} else {
@@ -198,7 +198,7 @@ public class Carrier extends Unit {
 						}
 						break;
 					default:
-						if (totalCarryWeight >= 40) {
+						if (totalCarryWeight >= Constants.CARRY_LIMIT) {
 							while (pickupFromNearbyWell() | depositToNearbyHQ())
 								;
 						} else {
@@ -287,7 +287,7 @@ public class Carrier extends Unit {
 			default:
 				switch (job) {
 					case UPGRADE_WELL:
-						if (totalCarryWeight >= 40) {
+						if (totalCarryWeight >= Constants.CARRY_LIMIT) {
 							while (depositToNearbyWell() | pickupFromNearbyWell() | depositToNearbyHQ())
 								;
 						} else {
@@ -296,7 +296,7 @@ public class Carrier extends Unit {
 						}
 						break;
 					default:
-						if (totalCarryWeight >= 40) {
+						if (totalCarryWeight >= Constants.CARRY_LIMIT) {
 							while (pickupFromNearbyWell() | depositToNearbyHQ())
 								;
 						} else {
@@ -698,8 +698,9 @@ public class Carrier extends Unit {
 		if (!rc.isActionReady())
 			return false; // can't take actions
 
-		if (totalCarryWeight >= 40)
+		if (totalCarryWeight >= Constants.CARRY_LIMIT) {
 			return false; // already full
+		}
 
 		WellInfo[] nearbyWells = rc.senseNearbyWells(pos, 2); // get adjacent wells
 		if (nearbyWells.length == 0)
@@ -723,7 +724,7 @@ public class Carrier extends Unit {
 		}
 
 		// Pick up as much as we can
-		int amountToCollect = Math.min(40 - totalCarryWeight, bestWell.getRate());
+		int amountToCollect = Math.min(Constants.CARRY_LIMIT - totalCarryWeight, bestWell.getRate());
 		MapLocation wellLocation = bestWell.getMapLocation();
 
 		rc.collectResource(wellLocation, amountToCollect);
@@ -953,7 +954,7 @@ public class Carrier extends Unit {
 					case FIND_RESOURCES:
 					case GOTO_RESOURCES:
 					case DRAW_RESOURCES_FROM_WELL:
-						if (totalCarryWeight >= 40 || (totalCarryWeight >= 25 && rc.getRoundNum() < 100)) {
+						if (totalCarryWeight >= Constants.CARRY_LIMIT || (totalCarryWeight >= 21 && rc.getRoundNum() < 100)) {
 							mode = Mode.GOTO_HQ;
 						} else {
 							mode = nearMyWell() ? Mode.DRAW_RESOURCES_FROM_WELL : Mode.GOTO_RESOURCES;
@@ -1018,7 +1019,7 @@ public class Carrier extends Unit {
 								break;
 							}
 						}
-						if (totalCarryWeight >= 40) {
+						if (totalCarryWeight >= Constants.CARRY_LIMIT) {
 							// Switch wells to go to
 							MapLocation temp = myWellLocation;
 							myWellLocation = wellToUpgrade;
