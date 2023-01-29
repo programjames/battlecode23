@@ -415,7 +415,7 @@ public class Navigator {
 				rotateRight = clockwiseOrNot(robot.pos, wallLocation, destination);
 			} else {
 				// Otherwise, we're up against robots, so fuzzy move
-				return fuzzyMoveTo(destination);
+				return fuzzyMoveTo(destination, 4);
 			}
 		}
 
