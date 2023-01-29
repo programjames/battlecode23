@@ -51,6 +51,18 @@ public class Navigator {
 		velX = 0;
 		velY = 0;
 	}
+	
+	public void setDestinationPreserveBugNav(MapLocation destination) {
+		// We're already moving there
+		if (destination == this.destination) return;
+
+		this.destination = destination;
+
+		accX = 0;
+		accY = 0;
+		velX = 0;
+		velY = 0;
+	}
 
 	public void updateVelocityDelta() throws GameActionException {
 		int x = robot.pos.x;

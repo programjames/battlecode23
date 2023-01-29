@@ -97,7 +97,7 @@ public class Launcher extends Unit {
 				if (chunk == -1) {
 					navigator.setDestination(new MapLocation(mapWidth / 2, mapHeight / 2));
 				} else {
-					navigator.setDestination(Minimap.getChunkCenter(chunk));
+					navigator.setDestinationPreserveBugNav(Minimap.getChunkCenter(chunk));
 				}
 			}
 		}
