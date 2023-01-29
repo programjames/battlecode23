@@ -222,7 +222,7 @@ public class Headquarters extends Building {
 		 * as possible for added protection)
 		 */
 		
-		return HqBuilder.buildTowards(rc, buildType, pos, location);
+		return HqBuilder.bfs(rc, buildType, location);
 	}
 
 	public MapLocation getRandomWell() {
