@@ -55,8 +55,8 @@ public class Carrier extends Unit {
 		anchor = rc.getAnchor();
 
 		// See if we should move wells to get mana instead of adamantium.
-		// Should move to mana wells more at the beginning of the game.
-		if (myWellLocation != null && rc.canSenseLocation(myWellLocation)) {
+		// Should move to mana wells more at the beginning of the game on small maps.
+		if (myWellLocation != null && rc.canSenseLocation(myWellLocation) && Math.max(Math.abs(pos.x - mapWidth/2), Math.abs(pos.y - mapHeight/2)) <= 15) {
 			WellInfo myWell = rc.senseWell(myWellLocation);
 			if (myWell != null && myWell.getResourceType() == ResourceType.ADAMANTIUM) {
 				// See how many friendly carriers are around our well.

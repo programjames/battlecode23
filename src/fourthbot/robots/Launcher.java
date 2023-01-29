@@ -125,8 +125,7 @@ public class Launcher extends Unit {
 						}
 						if (enemies.length > 0) {
 							MapLocation center = new MapLocation(Math.round(centerX / (float)enemies.length), Math.round(centerY / (float)enemies.length));
-							navigator.setDestination(center);
-							navigator.move();
+							navigator.move(center);
 							attack();
 						}
 						break;
