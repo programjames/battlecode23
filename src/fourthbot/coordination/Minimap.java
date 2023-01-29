@@ -322,7 +322,6 @@ public class Minimap implements Module {
 				update |= remoteUpdateTimes[right];
 			}
 			if (update > 0) {
-				System.out.println(String.format("%d %d %d %d", i, left, right, update));
 				rc.writeSharedArray(i, update);
 			}
 		}
