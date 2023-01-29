@@ -415,7 +415,7 @@ public class Navigator {
 			}
 			
 			MapLocation placeToMove = robot.pos.add(directionToMove);
-			if (!rc.canSenseLocation(placeToMove) || !rc.sensePassability(placeToMove) || rc.senseMapInfo(placeToMove).getCurrentDirection() == directionToMove.opposite()) {
+			if (!rc.canSenseLocation(placeToMove) || !rc.sensePassability(placeToMove)) {
 				// uh oh, we hit a wall
 				wallDirection = directionToMove;
 				wallLocation = robot.pos.add(directionToMove);
@@ -429,7 +429,7 @@ public class Navigator {
 		}
 
 		Direction direction = wallDirection;
-		if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+		if (rc.canMove(direction)) {
 			// Our wall disappeared!
 			wallDirection = null;
 			wallLocation = null;
@@ -441,7 +441,7 @@ public class Navigator {
 
 		if (rotateRight) {
 			direction = wallDirection.rotateRight();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.rotateLeft().rotateLeft();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -449,21 +449,21 @@ public class Navigator {
 				return true;
 			}
 			direction = direction.rotateRight();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				rc.move(direction);
 				lastMoveDirection = direction;
 				robot.pos = rc.getLocation();
 				return true;
 			}
 			direction = direction.rotateRight();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				rc.move(direction);
 				lastMoveDirection = direction;
 				robot.pos = rc.getLocation();
 				return true;
 			}
 			direction = direction.rotateRight();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.rotateRight().rotateRight();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -471,7 +471,7 @@ public class Navigator {
 				return true;
 			}
 			direction = direction.rotateRight();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.rotateRight().rotateRight();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -479,7 +479,7 @@ public class Navigator {
 				return true;
 			}
 			direction = direction.rotateRight();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.opposite();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -487,7 +487,7 @@ public class Navigator {
 				return true;
 			}
 			direction = direction.rotateRight();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.opposite();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -497,7 +497,7 @@ public class Navigator {
 			return false;
 		} else {
 			direction = wallDirection.rotateLeft();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.rotateRight().rotateRight();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -505,21 +505,21 @@ public class Navigator {
 				return true;
 			}
 			direction = direction.rotateLeft();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				rc.move(direction);
 				lastMoveDirection = direction;
 				robot.pos = rc.getLocation();
 				return true;
 			}
 			direction = direction.rotateLeft();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				rc.move(direction);
 				lastMoveDirection = direction;
 				robot.pos = rc.getLocation();
 				return true;
 			}
 			direction = direction.rotateLeft();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.rotateLeft().rotateLeft();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -527,7 +527,7 @@ public class Navigator {
 				return true;
 			}
 			direction = direction.rotateLeft();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.rotateLeft().rotateLeft();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -535,7 +535,7 @@ public class Navigator {
 				return true;
 			}
 			direction = direction.rotateLeft();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.opposite();
 				rc.move(direction);
 				lastMoveDirection = direction;
@@ -543,7 +543,7 @@ public class Navigator {
 				return true;
 			}
 			direction = direction.rotateLeft();
-			if (rc.canMove(direction) && rc.senseMapInfo(robot.pos.add(direction)).getCurrentDirection() != direction.opposite()) {
+			if (rc.canMove(direction)) {
 				wallDirection = wallDirection.opposite();
 				rc.move(direction);
 				lastMoveDirection = direction;
