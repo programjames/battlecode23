@@ -112,11 +112,11 @@ public class Navigator {
 
 	public void prepareMove(MapLocation destination) throws GameActionException {
 		robot.pos = rc.getLocation();
-		if (robot.pos == lastMovePosition) {
-			// We're stuck on a current
-			currentlyBugging = true;
-			wallDirection = lastMoveDirection;
-		}
+		// if (robot.pos == lastMovePosition) {
+		// 	// We're stuck on a current
+		// 	currentlyBugging = true;
+		// 	wallDirection = lastMoveDirection;
+		// }
 		int distToDest = robot.pos.distanceSquaredTo(destination);
 		// Uncomment if you want Boid'ing.
 		// switch(robot.type) {
